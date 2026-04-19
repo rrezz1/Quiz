@@ -1,0 +1,282 @@
+[
+  {
+    "id": 1,
+    "level": "easy",
+    "question": "What does SELECT * FROM employees; return?",
+    "code": null,
+    "options": [
+      "All columns from the employees table",
+      "Only the first column",
+      "Only distinct rows",
+      "All tables in the database"
+    ],
+    "answer": 0,
+    "explanation": "SELECT * retrieves all columns from the specified table."
+  },
+  {
+    "id": 2,
+    "level": "easy",
+    "question": "Which clause is used to filter rows in a query?",
+    "code": null,
+    "options": [
+      "ORDER BY",
+      "GROUP BY",
+      "WHERE",
+      "HAVING"
+    ],
+    "answer": 2,
+    "explanation": "WHERE filters individual rows before any grouping occurs."
+  },
+  {
+    "id": 3,
+    "level": "easy",
+    "question": "What is the correct SQL keyword to remove duplicate rows from results?",
+    "code": null,
+    "options": [
+      "UNIQUE",
+      "DISTINCT",
+      "NODUPE",
+      "FILTER"
+    ],
+    "answer": 1,
+    "explanation": "SELECT DISTINCT removes duplicate rows from the result set."
+  },
+  {
+    "id": 4,
+    "level": "easy",
+    "question": "Which SQL statement is used to insert a new row into a table?",
+    "code": null,
+    "options": [
+      "ADD INTO",
+      "PUSH INTO",
+      "INSERT INTO",
+      "CREATE INTO"
+    ],
+    "answer": 2,
+    "explanation": "INSERT INTO table_name VALUES (...) adds a new row."
+  },
+  {
+    "id": 5,
+    "level": "easy",
+    "question": "What does NULL mean in SQL?",
+    "code": null,
+    "options": [
+      "Zero",
+      "Empty string",
+      "Unknown / missing value",
+      "False"
+    ],
+    "answer": 2,
+    "explanation": "NULL represents an unknown or missing value — it is not zero or empty string."
+  },
+  {
+    "id": 6,
+    "level": "easy",
+    "question": "Which aggregate function returns the number of rows?",
+    "code": null,
+    "options": [
+      "SUM()",
+      "MAX()",
+      "COUNT()",
+      "AVG()"
+    ],
+    "answer": 2,
+    "explanation": "COUNT() returns the number of rows matching the query."
+  },
+  {
+    "id": 7,
+    "level": "easy",
+    "question": "Which clause sorts query results?",
+    "code": null,
+    "options": [
+      "SORT BY",
+      "ORDER BY",
+      "ARRANGE BY",
+      "GROUP BY"
+    ],
+    "answer": 1,
+    "explanation": "ORDER BY sorts results — ASC (default) or DESC."
+  },
+  {
+    "id": 8,
+    "level": "easy",
+    "question": "What SQL keyword is used to update existing data?",
+    "code": null,
+    "options": [
+      "MODIFY",
+      "ALTER",
+      "CHANGE",
+      "UPDATE"
+    ],
+    "answer": 3,
+    "explanation": "UPDATE table SET col = value WHERE condition;"
+  },
+  {
+    "id": 9,
+    "level": "easy",
+    "question": "Which command deletes all rows from a table but keeps its structure?",
+    "code": null,
+    "options": [
+      "DROP TABLE",
+      "DELETE FROM",
+      "TRUNCATE TABLE",
+      "REMOVE TABLE"
+    ],
+    "answer": 2,
+    "explanation": "TRUNCATE removes all rows quickly and keeps the table schema intact."
+  },
+  {
+    "id": 10,
+    "level": "easy",
+    "question": "Which operator checks for a value within a list?",
+    "code": null,
+    "options": [
+      "BETWEEN",
+      "LIKE",
+      "IN",
+      "EXISTS"
+    ],
+    "answer": 2,
+    "explanation": "IN (val1, val2, ...) checks membership in a list of values."
+  },
+  {
+    "id": 11,
+    "level": "mid",
+    "question": "What is the difference between WHERE and HAVING?",
+    "code": null,
+    "options": [
+      "No difference",
+      "WHERE filters before grouping; HAVING filters after grouping",
+      "HAVING filters before grouping; WHERE filters after grouping",
+      "WHERE only works with JOINs"
+    ],
+    "answer": 1,
+    "explanation": "WHERE filters rows before GROUP BY; HAVING filters aggregated groups."
+  },
+  {
+    "id": 12,
+    "level": "mid",
+    "question": "What will this query return?",
+    "code": "SELECT department, COUNT(*) AS total\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5;",
+    "options": [
+      "All departments",
+      "Departments with more than 5 employees",
+      "Employees with more than 5 records",
+      "Nothing — syntax error"
+    ],
+    "answer": 1,
+    "explanation": "GROUP BY + HAVING COUNT(*) > 5 returns only departments that have more than 5 employees."
+  },
+  {
+    "id": 13,
+    "level": "mid",
+    "question": "Which JOIN returns all rows from both tables, filling NULLs where there is no match?",
+    "code": null,
+    "options": [
+      "INNER JOIN",
+      "LEFT JOIN",
+      "RIGHT JOIN",
+      "FULL OUTER JOIN"
+    ],
+    "answer": 3,
+    "explanation": "FULL OUTER JOIN returns all rows from both sides, with NULLs for non-matching rows."
+  },
+  {
+    "id": 14,
+    "level": "mid",
+    "question": "What does this return if a matching row doesn't exist in table B?",
+    "code": "SELECT a.id, b.name\nFROM a LEFT JOIN b ON a.id = b.id;",
+    "options": [
+      "The row is skipped",
+      "NULL for b.name",
+      "An error",
+      "An empty string"
+    ],
+    "answer": 1,
+    "explanation": "LEFT JOIN keeps all rows from the left table; b.name is NULL when no match exists in b."
+  },
+  {
+    "id": 15,
+    "level": "mid",
+    "question": "What is a PRIMARY KEY?",
+    "code": null,
+    "options": [
+      "Any indexed column",
+      "A column that links two tables",
+      "A column (or set) that uniquely identifies each row and cannot be NULL",
+      "A column that allows duplicate values"
+    ],
+    "answer": 2,
+    "explanation": "A PRIMARY KEY must be unique and NOT NULL — it uniquely identifies every row."
+  },
+  {
+    "id": 16,
+    "level": "mid",
+    "question": "Which of these correctly uses a subquery?",
+    "code": null,
+    "options": [
+      "SELECT * FROM (SELECT id FROM orders) AS sub;",
+      "SELECT * FROM SELECT id FROM orders;",
+      "SELECT id FROM * WHERE orders;",
+      "SELECT SUBQUERY(id) FROM orders;"
+    ],
+    "answer": 0,
+    "explanation": "A subquery in the FROM clause must be aliased (AS sub)."
+  },
+  {
+    "id": 17,
+    "level": "mid",
+    "question": "What does COALESCE(a, b, c) return?",
+    "code": null,
+    "options": [
+      "The sum of a, b, c",
+      "The average",
+      "The first non-NULL value among a, b, c",
+      "Always returns c"
+    ],
+    "answer": 2,
+    "explanation": "COALESCE returns the first non-NULL value from its list of arguments."
+  },
+  {
+    "id": 18,
+    "level": "mid",
+    "question": "What is the result of this query?",
+    "code": "SELECT name\nFROM products\nWHERE price BETWEEN 10 AND 50;",
+    "options": [
+      "Products with price > 10 and < 50",
+      "Products with price >= 10 and <= 50",
+      "Products with price = 10 or price = 50",
+      "A syntax error"
+    ],
+    "answer": 1,
+    "explanation": "BETWEEN is inclusive — it includes both boundary values (10 and 50)."
+  },
+  {
+    "id": 19,
+    "level": "mid",
+    "question": "Which window function assigns a unique sequential number to rows within a partition?",
+    "code": null,
+    "options": [
+      "COUNT()",
+      "RANK()",
+      "ROW_NUMBER()",
+      "DENSE_RANK()"
+    ],
+    "answer": 2,
+    "explanation": "ROW_NUMBER() assigns a unique sequential integer with no gaps or ties within the partition."
+  },
+  {
+    "id": 20,
+    "level": "mid",
+    "question": "What does the FOREIGN KEY constraint enforce?",
+    "code": null,
+    "options": [
+      "Unique values in the column",
+      "That values exist in a referenced table (referential integrity)",
+      "NOT NULL values",
+      "Indexed lookups"
+    ],
+    "answer": 1,
+    "explanation": "A FOREIGN KEY ensures the value exists in the referenced parent table, enforcing referential integrity."
+  }
+]
