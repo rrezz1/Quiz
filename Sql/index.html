@@ -6,476 +6,126 @@
 <title>SQL Quest — Test Your SQL Skills</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #0a0e1a;
-    --surface: #111827;
-    --surface2: #1a2236;
-    --border: #1e2d45;
-    --accent: #00d4ff;
-    --accent2: #7c3aed;
-    --easy: #10b981;
-    --mid: #f59e0b;
-    --hard: #ef4444;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Sora', sans-serif;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Background grid */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ─── SCREENS ─── */
-  .screen { display: none; position: relative; z-index: 1; }
-  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 1rem; }
-
-  /* ─── HOME ─── */
-  #home {
-    text-align: center;
-    gap: 2rem;
-  }
-  .logo {
-    font-family: var(--mono);
-    font-size: clamp(2.5rem, 8vw, 5rem);
-    font-weight: 700;
-    letter-spacing: -2px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-    animation: fadeDown 0.6s ease both;
-  }
-  .tagline {
-    font-size: 1rem;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    font-weight: 300;
-    animation: fadeDown 0.7s 0.1s ease both;
-  }
-  .stats-row {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    animation: fadeDown 0.7s 0.2s ease both;
-  }
-  .stat-pill {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 0.4rem 1.2rem;
-    font-family: var(--mono);
-    font-size: 0.8rem;
-  }
-  .stat-pill span { color: var(--accent); }
-
-  .name-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    width: 100%;
-    max-width: 360px;
-    animation: fadeDown 0.7s 0.3s ease both;
-  }
-  .name-section label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; text-align: left; }
-  .name-input {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 1rem;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .name-input:focus { border-color: var(--accent); }
-  .name-input::placeholder { color: var(--muted); }
-
-  .btn-start {
-    background: linear-gradient(135deg, var(--accent), #0099cc);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 0.9rem 3rem;
-    font-family: var(--mono);
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    transition: transform 0.15s, box-shadow 0.15s;
-    animation: fadeDown 0.7s 0.4s ease both;
-    width: 100%;
-    max-width: 360px;
-  }
-  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,212,255,0.3); }
-  .btn-start:active { transform: scale(0.98); }
-
-  .leaderboard-preview {
-    width: 100%;
-    max-width: 440px;
-    animation: fadeDown 0.7s 0.5s ease both;
-  }
-  .lb-title {
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.75rem;
-  }
-  .lb-table {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .lb-row {
-    display: grid;
-    grid-template-columns: 36px 1fr auto auto;
-    gap: 0.75rem;
-    align-items: center;
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.85rem;
-  }
-  .lb-row:last-child { border-bottom: none; }
-  .lb-row.header { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--mono); }
-  .rank { font-family: var(--mono); color: var(--muted); font-size: 0.8rem; }
-  .rank.gold { color: #fbbf24; }
-  .rank.silver { color: #94a3b8; }
-  .rank.bronze { color: #b45309; }
-  .lb-score { font-family: var(--mono); color: var(--accent); font-size: 0.9rem; }
-  .lb-time { font-family: var(--mono); color: var(--muted); font-size: 0.8rem; }
-  .empty-lb { padding: 1.5rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
-
-  /* ─── QUIZ ─── */
-  #quiz { justify-content: flex-start; padding: 1.5rem 1rem 3rem; }
-  .quiz-inner { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 1.25rem; }
-
-  .quiz-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-  .q-counter { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
-  .timer-wrap { display: flex; align-items: center; gap: 0.5rem; }
-  .timer-icon { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite; }
-  .timer-display {
-    font-family: var(--mono);
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--accent);
-    min-width: 2.5rem;
-    text-align: right;
-    transition: color 0.3s;
-  }
-  .timer-display.warn { color: var(--mid); }
-  .timer-display.danger { color: var(--hard); animation: shake 0.3s infinite; }
-
-  .progress-track {
-    height: 3px;
-    background: var(--surface2);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
-
-  .level-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0.25rem 0.7rem;
-    border-radius: 4px;
-  }
-  .level-badge.easy { background: rgba(16,185,129,0.15); color: var(--easy); border: 1px solid rgba(16,185,129,0.3); }
-  .level-badge.mid { background: rgba(245,158,11,0.15); color: var(--mid); border: 1px solid rgba(245,158,11,0.3); }
-  .level-badge.hard { background: rgba(239,68,68,0.15); color: var(--hard); border: 1px solid rgba(239,68,68,0.3); }
-
-  .q-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .q-text {
-    font-size: 1.05rem;
-    line-height: 1.6;
-    font-weight: 400;
-  }
-  .q-code {
-    background: #070d1a;
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 6px;
-    padding: 1rem 1.25rem;
-    font-family: var(--mono);
-    font-size: 0.82rem;
-    color: #a5f3fc;
-    white-space: pre;
-    overflow-x: auto;
-    line-height: 1.7;
-  }
-
-  .options { display: flex; flex-direction: column; gap: 0.6rem; }
-  .opt {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.8rem 1rem;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, transform 0.1s;
-    font-size: 0.92rem;
-    text-align: left;
-    width: 100%;
-    color: var(--text);
-    font-family: var(--sans);
-  }
-  .opt:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,212,255,0.05); transform: translateX(3px); }
-  .opt:disabled { cursor: default; }
-  .opt.correct { border-color: var(--easy); background: rgba(16,185,129,0.1); color: #6ee7b7; }
-  .opt.wrong { border-color: var(--hard); background: rgba(239,68,68,0.1); color: #fca5a5; }
-  .opt-key {
-    font-family: var(--mono);
-    font-size: 0.72rem;
-    font-weight: 700;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--muted);
-    transition: background 0.15s, color 0.15s;
-  }
-  .opt.correct .opt-key { background: var(--easy); color: #fff; border-color: var(--easy); }
-  .opt.wrong .opt-key { background: var(--hard); color: #fff; border-color: var(--hard); }
-
-  .feedback-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.9rem 1.1rem;
-    font-size: 0.85rem;
-    line-height: 1.6;
-    color: var(--muted);
-    display: none;
-  }
-  .feedback-box.show { display: block; animation: fadeIn 0.3s ease; }
-  .feedback-box strong { color: var(--text); }
-
-  .btn-next {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.8rem 1.5rem;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    align-self: flex-end;
-    display: none;
-  }
-  .btn-next.show { display: block; animation: fadeIn 0.3s ease; }
-  .btn-next:hover { border-color: var(--accent); background: rgba(0,212,255,0.08); }
-
-  .score-live {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-family: var(--mono);
-    font-size: 0.8rem;
-  }
-  .score-live span { color: var(--muted); }
-  .score-live strong { color: var(--easy); }
-
-  /* ─── RESULTS ─── */
-  #results { text-align: center; gap: 1.5rem; }
-  .result-inner { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 1.5rem; align-items: center; }
-
-  .big-score {
-    font-family: var(--mono);
-    font-size: clamp(4rem, 15vw, 7rem);
-    font-weight: 700;
-    line-height: 1;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
-  }
-  .result-label { color: var(--muted); font-size: 0.9rem; }
-  .result-grade {
-    font-family: var(--mono);
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 0.4rem 1.5rem;
-    border-radius: 999px;
-    margin-top: -0.5rem;
-  }
-
-  .breakdown {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem;
-    width: 100%;
-    display: flex;
-    gap: 0;
-    justify-content: space-around;
-  }
-  .breakdown-item { text-align: center; }
-  .breakdown-item .num { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
-  .breakdown-item .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem; }
-  .breakdown-item.easy .num { color: var(--easy); }
-  .breakdown-item.mid .num { color: var(--mid); }
-  .breakdown-item.hard .num { color: var(--hard); }
-  .breakdown-item.time .num { color: var(--accent); }
-
-  .name-entry {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    width: 100%;
-  }
-  .name-entry label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; text-align: left; font-family: var(--mono); }
-
-  .result-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; width: 100%; }
-  .btn-save {
-    background: linear-gradient(135deg, var(--accent), #0099cc);
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 0.75rem 2rem;
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-    flex: 1;
-    min-width: 140px;
-  }
-  .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,212,255,0.3); }
-  .btn-retry {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.75rem 2rem;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    flex: 1;
-    min-width: 140px;
-  }
-  .btn-retry:hover { border-color: var(--accent); }
-
-  /* ─── ANIMATIONS ─── */
-  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-2px);} 75%{transform:translateX(2px);} }
-  @keyframes pop { from{transform:scale(0.5);opacity:0;} to{transform:scale(1);opacity:1;} }
-
-  /* ─── RESPONSIVE ─── */
-  @media(max-width:480px) {
-    .breakdown { gap: 0.5rem; }
-    .breakdown-item .num { font-size: 1.1rem; }
-    .stats-row { gap: 0.75rem; }
-  }
+  :root{--bg:#0a0e1a;--surface:#111827;--surface2:#1a2236;--border:#1e2d45;--accent:#00d4ff;--accent2:#7c3aed;--easy:#10b981;--mid:#f59e0b;--hard:#ef4444;--text:#e2e8f0;--muted:#64748b;--mono:'Space Mono',monospace;--sans:'Sora',sans-serif;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{font-size:16px;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .screen{display:none;position:relative;z-index:1;}
+  .screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1rem;}
+  /* HOME */
+  #home{text-align:center;gap:2rem;}
+  .logo{font-family:var(--mono);font-size:clamp(2.5rem,8vw,5rem);font-weight:700;letter-spacing:-2px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;animation:fadeDown .6s ease both;}
+  .tagline{font-size:1rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;font-weight:300;animation:fadeDown .7s .1s ease both;}
+  .stats-row{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;animation:fadeDown .7s .2s ease both;}
+  .stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:.4rem 1.2rem;font-family:var(--mono);font-size:.8rem;}
+  .stat-pill span{color:var(--accent);}
+  .btn-start{background:linear-gradient(135deg,var(--accent),#0099cc);color:#000;border:none;border-radius:8px;padding:.9rem 3rem;font-family:var(--mono);font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.05em;transition:transform .15s,box-shadow .15s;animation:fadeDown .7s .3s ease both;width:100%;max-width:360px;}
+  .btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,212,255,.3);}
+  .btn-start:active{transform:scale(.98);}
+  .leaderboard-preview{width:100%;max-width:440px;animation:fadeDown .7s .4s ease both;}
+  .lb-title{font-family:var(--mono);font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;margin-bottom:.75rem;}
+  .lb-table{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .lb-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:.75rem;align-items:center;padding:.65rem 1rem;border-bottom:1px solid var(--border);font-size:.85rem;}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-row.header{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);}
+  .rank{font-family:var(--mono);color:var(--muted);font-size:.8rem;}
+  .rank.gold{color:#fbbf24;}.rank.silver{color:#94a3b8;}.rank.bronze{color:#b45309;}
+  .lb-score{font-family:var(--mono);color:var(--accent);font-size:.9rem;}
+  .lb-time{font-family:var(--mono);color:var(--muted);font-size:.8rem;}
+  .empty-lb{padding:1.5rem;text-align:center;color:var(--muted);font-size:.85rem;}
+  /* QUIZ */
+  #quiz{justify-content:flex-start;padding:1.5rem 1rem 3rem;}
+  .quiz-inner{width:100%;max-width:680px;display:flex;flex-direction:column;gap:1.25rem;}
+  .quiz-topbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+  .q-counter{font-family:var(--mono);font-size:.8rem;color:var(--muted);}
+  .timer-wrap{display:flex;align-items:center;gap:.5rem;}
+  .timer-icon{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite;}
+  .timer-display{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--accent);min-width:2.5rem;text-align:right;transition:color .3s;}
+  .timer-display.warn{color:var(--mid);}
+  .timer-display.danger{color:var(--hard);animation:shake .3s infinite;}
+  .progress-track{height:3px;background:var(--surface2);border-radius:99px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px;transition:width .4s ease;}
+  .level-badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:.25rem .7rem;border-radius:4px;}
+  .level-badge.easy{background:rgba(16,185,129,.15);color:var(--easy);border:1px solid rgba(16,185,129,.3);}
+  .level-badge.mid{background:rgba(245,158,11,.15);color:var(--mid);border:1px solid rgba(245,158,11,.3);}
+  .level-badge.hard{background:rgba(239,68,68,.15);color:var(--hard);border:1px solid rgba(239,68,68,.3);}
+  .q-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;}
+  .q-text{font-size:1.05rem;line-height:1.6;}
+  .q-code{background:#070d1a;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:6px;padding:1rem 1.25rem;font-family:var(--mono);font-size:.82rem;color:#a5f3fc;white-space:pre;overflow-x:auto;line-height:1.7;}
+  .options{display:flex;flex-direction:column;gap:.6rem;}
+  .opt{display:flex;align-items:center;gap:.9rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.8rem 1rem;cursor:pointer;transition:border-color .15s,background .15s,transform .1s;font-size:.92rem;text-align:left;width:100%;color:var(--text);font-family:var(--sans);}
+  .opt:hover:not(:disabled){border-color:var(--accent);background:rgba(0,212,255,.05);transform:translateX(3px);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{border-color:var(--easy);background:rgba(16,185,129,.1);color:#6ee7b7;}
+  .opt.wrong{border-color:var(--hard);background:rgba(239,68,68,.1);color:#fca5a5;}
+  .opt-key{font-family:var(--mono);font-size:.72rem;font-weight:700;background:var(--surface);border:1px solid var(--border);border-radius:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);}
+  .opt.correct .opt-key{background:var(--easy);color:#fff;border-color:var(--easy);}
+  .opt.wrong .opt-key{background:var(--hard);color:#fff;border-color:var(--hard);}
+  .feedback-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem;font-size:.85rem;line-height:1.6;color:var(--muted);display:none;}
+  .feedback-box.show{display:block;animation:fadeIn .3s ease;}
+  .feedback-box strong{color:var(--text);}
+  .btn-next{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.8rem 1.5rem;color:var(--text);font-family:var(--mono);font-size:.85rem;cursor:pointer;transition:border-color .2s,background .2s;align-self:flex-end;display:none;}
+  .btn-next.show{display:block;animation:fadeIn .3s ease;}
+  .btn-next:hover{border-color:var(--accent);background:rgba(0,212,255,.08);}
+  .score-live{display:flex;align-items:center;gap:1rem;font-family:var(--mono);font-size:.8rem;}
+  .score-live span{color:var(--muted);}.score-live strong{color:var(--easy);}
+  /* RESULTS */
+  #results{text-align:center;gap:1.5rem;}
+  .result-inner{width:100%;max-width:500px;display:flex;flex-direction:column;gap:1.5rem;align-items:center;}
+  .big-score{font-family:var(--mono);font-size:clamp(3.5rem,12vw,6rem);font-weight:700;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:pop .5s cubic-bezier(.175,.885,.32,1.275) both;}
+  .result-label{color:var(--muted);font-size:.9rem;}
+  .result-grade{font-family:var(--mono);font-size:1rem;font-weight:700;padding:.4rem 1.5rem;border-radius:999px;}
+  .breakdown{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;width:100%;display:flex;justify-content:space-around;}
+  .breakdown-item{text-align:center;}
+  .breakdown-item .num{font-family:var(--mono);font-size:1.4rem;font-weight:700;}
+  .breakdown-item .lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:.25rem;}
+  .breakdown-item.easy .num{color:var(--easy);}.breakdown-item.mid .num{color:var(--mid);}.breakdown-item.hard .num{color:var(--hard);}.breakdown-item.time .num{color:var(--accent);}
+  .result-actions{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;width:100%;}
+  .btn-save{background:linear-gradient(135deg,var(--accent),#0099cc);color:#000;border:none;border-radius:8px;padding:.75rem 2rem;font-family:var(--mono);font-size:.85rem;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s;flex:1;min-width:140px;}
+  .btn-save:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,212,255,.3);}
+  .btn-retry{background:transparent;border:1px solid var(--border);border-radius:8px;padding:.75rem 2rem;color:var(--text);font-family:var(--mono);font-size:.85rem;cursor:pointer;transition:border-color .2s;flex:1;min-width:140px;}
+  .btn-retry:hover{border-color:var(--accent);}
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+  @keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  @media(max-width:480px){.breakdown{gap:.5rem}.breakdown-item .num{font-size:1rem}.stats-row{gap:.75rem}}
 </style>
 </head>
 <body>
 
-<!-- HOME SCREEN -->
+<!-- HOME -->
 <div id="home" class="screen active">
   <div class="logo">SQL<br>QUEST</div>
   <div class="tagline">Test Your Database Knowledge</div>
-
   <div class="stats-row">
-    <div class="stat-pill"><span>30</span> Questions</div>
+    <div class="stat-pill"><span>60</span> Questions</div>
     <div class="stat-pill"><span>3</span> Levels</div>
     <div class="stat-pill"><span>20s</span> Per Question</div>
   </div>
-
-  <div class="name-section">
-    <label for="player-name">Your name</label>
-    <input id="player-name" class="name-input" type="text" placeholder="e.g. John" maxlength="24"/>
-  </div>
-
   <button class="btn-start" onclick="startGame()">START GAME →</button>
-
   <div class="leaderboard-preview">
     <div class="lb-title">// Leaderboard</div>
     <div class="lb-table">
-      <div class="lb-row header">
-        <div>#</div><div>Player</div><div>Score</div><div>Time</div>
-      </div>
+      <div class="lb-row header"><div>#</div><div>Player</div><div>Score</div><div>Time</div></div>
       <div id="lb-home-rows"><div class="empty-lb">No scores yet. Be the first!</div></div>
     </div>
   </div>
 </div>
 
-<!-- QUIZ SCREEN -->
+<!-- QUIZ -->
 <div id="quiz" class="screen">
   <div class="quiz-inner">
     <div class="quiz-topbar">
-      <div class="q-counter" id="q-counter">1 / 30</div>
+      <div class="q-counter" id="q-counter">1 / 60</div>
       <div class="score-live"><span>Score</span> <strong id="live-score">0</strong></div>
-      <div class="timer-wrap">
-        <div class="timer-icon"></div>
-        <div class="timer-display" id="timer">20</div>
-      </div>
+      <div class="timer-wrap"><div class="timer-icon"></div><div class="timer-display" id="timer">20</div></div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
     <div class="q-card">
-      <div style="display:flex;align-items:center;gap:0.75rem;">
-        <div class="level-badge" id="level-badge">Easy</div>
-      </div>
+      <div><div class="level-badge" id="level-badge">Easy</div></div>
       <div class="q-text" id="q-text"></div>
       <div class="q-code" id="q-code" style="display:none;"></div>
       <div class="options" id="options"></div>
@@ -485,22 +135,18 @@
   </div>
 </div>
 
-<!-- RESULTS SCREEN -->
+<!-- RESULTS -->
 <div id="results" class="screen">
   <div class="result-inner">
-    <div style="color:var(--muted);font-size:0.85rem;font-family:var(--mono);">// GAME OVER</div>
-    <div class="big-score" id="final-score">0/30</div>
+    <div style="color:var(--muted);font-size:.85rem;font-family:var(--mono);">// GAME OVER</div>
+    <div class="big-score" id="final-score">0/60</div>
     <div class="result-grade" id="result-grade"></div>
     <div class="result-label" id="result-msg"></div>
     <div class="breakdown">
-      <div class="breakdown-item easy"><div class="num" id="b-easy">0/10</div><div class="lbl">Easy</div></div>
-      <div class="breakdown-item mid"><div class="num" id="b-mid">0/10</div><div class="lbl">Mid</div></div>
-      <div class="breakdown-item hard"><div class="num" id="b-hard">0/10</div><div class="lbl">Hard</div></div>
+      <div class="breakdown-item easy"><div class="num" id="b-easy">0/20</div><div class="lbl">Easy</div></div>
+      <div class="breakdown-item mid"><div class="num" id="b-mid">0/20</div><div class="lbl">Mid</div></div>
+      <div class="breakdown-item hard"><div class="num" id="b-hard">0/20</div><div class="lbl">Hard</div></div>
       <div class="breakdown-item time"><div class="num" id="b-time">0s</div><div class="lbl">Time</div></div>
-    </div>
-    <div class="name-entry">
-      <label>Save to leaderboard as</label>
-      <input id="save-name" class="name-input" type="text" placeholder="Your name" maxlength="24"/>
     </div>
     <div class="result-actions">
       <button class="btn-save" onclick="saveScore()">SAVE SCORE</button>
@@ -510,212 +156,182 @@
 </div>
 
 <script>
-const QUESTIONS = [
-  // ── EASY (1-10) ──
-  {level:"easy",q:"What does SELECT * FROM employees; return?",code:null,opts:["All columns from the employees table","Only the first column","Only distinct rows","All tables in the database"],ans:0,exp:"SELECT * retrieves every column from the specified table."},
-  {level:"easy",q:"Which clause filters rows before they are returned?",code:null,opts:["ORDER BY","GROUP BY","WHERE","HAVING"],ans:2,exp:"WHERE filters individual rows before any grouping occurs."},
-  {level:"easy",q:"Which keyword removes duplicate rows from a result set?",code:null,opts:["UNIQUE","DISTINCT","NODUPE","FILTER"],ans:1,exp:"SELECT DISTINCT eliminates duplicate rows from the result."},
-  {level:"easy",q:"Which SQL statement adds a new row to a table?",code:null,opts:["ADD INTO","PUSH INTO","INSERT INTO","CREATE INTO"],ans:2,exp:"INSERT INTO table_name VALUES (...) inserts a new row."},
-  {level:"easy",q:"What does NULL represent in SQL?",code:null,opts:["Zero","Empty string","Unknown / missing value","False"],ans:2,exp:"NULL means the value is unknown or missing — not zero or empty."},
-  {level:"easy",q:"Which function returns the total number of rows?",code:null,opts:["SUM()","MAX()","COUNT()","AVG()"],ans:2,exp:"COUNT() counts the rows that match the query condition."},
-  {level:"easy",q:"Which clause is used to sort results?",code:null,opts:["SORT BY","ORDER BY","ARRANGE BY","GROUP BY"],ans:1,exp:"ORDER BY sorts results ascending (ASC) or descending (DESC)."},
-  {level:"easy",q:"Which command removes all rows but keeps the table structure?",code:null,opts:["DROP TABLE","DELETE FROM","TRUNCATE TABLE","REMOVE TABLE"],ans:2,exp:"TRUNCATE deletes all rows quickly and leaves the schema intact."},
-  {level:"easy",q:"Which operator checks membership in a list of values?",code:null,opts:["BETWEEN","LIKE","IN","EXISTS"],ans:2,exp:"IN (val1, val2, ...) checks if a value matches any item in the list."},
-  {level:"easy",q:"Which SQL command modifies existing data in a table?",code:null,opts:["MODIFY","ALTER","CHANGE","UPDATE"],ans:3,exp:"UPDATE table SET col = value WHERE condition; changes existing rows."},
+const Q=[
+  // ── EASY 1-20 ──
+  {l:"easy",q:"What does SELECT * FROM employees; return?",c:null,o:["All columns from the employees table","Only the first column","Only distinct rows","All tables in the database"],a:0,e:"SELECT * retrieves every column from the specified table."},
+  {l:"easy",q:"Which clause filters rows before they are returned?",c:null,o:["ORDER BY","GROUP BY","WHERE","HAVING"],a:2,e:"WHERE filters individual rows before any grouping occurs."},
+  {l:"easy",q:"Which keyword removes duplicate rows from a result set?",c:null,o:["UNIQUE","DISTINCT","NODUPE","FILTER"],a:1,e:"SELECT DISTINCT eliminates duplicate rows from the result."},
+  {l:"easy",q:"Which SQL statement adds a new row to a table?",c:null,o:["ADD INTO","PUSH INTO","INSERT INTO","CREATE INTO"],a:2,e:"INSERT INTO table_name VALUES (...) inserts a new row."},
+  {l:"easy",q:"What does NULL represent in SQL?",c:null,o:["Zero","Empty string","Unknown / missing value","False"],a:2,e:"NULL means the value is unknown or missing — not zero or empty string."},
+  {l:"easy",q:"Which function returns the total number of rows?",c:null,o:["SUM()","MAX()","COUNT()","AVG()"],a:2,e:"COUNT() counts the rows that match the query condition."},
+  {l:"easy",q:"Which clause sorts query results?",c:null,o:["SORT BY","ORDER BY","ARRANGE BY","GROUP BY"],a:1,e:"ORDER BY sorts results ascending (ASC, default) or descending (DESC)."},
+  {l:"easy",q:"Which command removes all rows but keeps the table structure?",c:null,o:["DROP TABLE","DELETE FROM","TRUNCATE TABLE","REMOVE TABLE"],a:2,e:"TRUNCATE deletes all rows quickly and leaves the schema intact."},
+  {l:"easy",q:"Which operator checks membership in a list of values?",c:null,o:["BETWEEN","LIKE","IN","EXISTS"],a:2,e:"IN (val1, val2, ...) checks if a value matches any item in the list."},
+  {l:"easy",q:"Which SQL keyword modifies existing rows in a table?",c:null,o:["MODIFY","ALTER","CHANGE","UPDATE"],a:3,e:"UPDATE table SET col = value WHERE condition; changes existing rows."},
+  {l:"easy",q:"Which SQL keyword permanently removes a table and all its data?",c:null,o:["DELETE","TRUNCATE","DROP","REMOVE"],a:2,e:"DROP TABLE removes the table definition and all its data permanently."},
+  {l:"easy",q:"What does the LIKE operator do?",c:null,o:["Compares two numbers","Matches a pattern in a string","Checks for NULL","Sorts rows"],a:1,e:"LIKE performs pattern matching using % (any characters) and _ (single character)."},
+  {l:"easy",q:"Which clause groups rows that share the same value?",c:null,o:["ORDER BY","DISTINCT","GROUP BY","PARTITION BY"],a:2,e:"GROUP BY groups rows sharing the same values so aggregate functions can be applied per group."},
+  {l:"easy",q:"What is the correct syntax to create a new table?",c:null,o:["MAKE TABLE t (id INT);","CREATE TABLE t (id INT);","BUILD TABLE t (id INT);","NEW TABLE t (id INT);"],a:1,e:"CREATE TABLE table_name (column definitions) is the standard DDL syntax."},
+  {l:"easy",q:"Which aggregate function returns the highest value?",c:null,o:["TOP()","HIGHEST()","MAX()","UPPER()"],a:2,e:"MAX() returns the maximum (highest) value in the specified column."},
+  {l:"easy",q:"How do you add a new column to an existing table?",c:null,o:["UPDATE TABLE t ADD col INT;","ALTER TABLE t ADD col INT;","MODIFY TABLE t ADD col INT;","INSERT COLUMN col INTO t;"],a:1,e:"ALTER TABLE t ADD col INT; adds a new column to an existing table."},
+  {l:"easy",q:"Which constraint ensures a column cannot contain NULL?",c:null,o:["UNIQUE","NOT NULL","DEFAULT","CHECK"],a:1,e:"NOT NULL forces every row to have a value in that column — NULLs are rejected."},
+  {l:"easy",q:"What does AVG() compute?",c:null,o:["The first value","The sum","The arithmetic mean","The row count"],a:2,e:"AVG() calculates the arithmetic mean of all non-NULL values in the column."},
+  {l:"easy",q:"Which SQL command retrieves data from a database?",c:null,o:["GET","FETCH","SELECT","READ"],a:2,e:"SELECT is the DML statement used to query and retrieve data."},
+  {l:"easy",q:"How do you correctly check for NULL in a WHERE clause?",c:null,o:["= NULL","!= NULL","IS NULL","== NULL"],a:2,e:"IS NULL (and IS NOT NULL) are correct — '= NULL' always evaluates to UNKNOWN."},
 
-  // ── MID (11-20) ──
-  {level:"mid",q:"What is the key difference between WHERE and HAVING?",code:null,opts:["No difference","WHERE filters before grouping; HAVING filters after","HAVING filters before grouping; WHERE filters after","WHERE only works with JOINs"],ans:1,exp:"WHERE filters individual rows before GROUP BY; HAVING filters aggregated group results."},
-  {level:"mid",q:"What will this query return?",code:"SELECT department, COUNT(*) AS total\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5;",opts:["All departments","Departments with more than 5 employees","Employees with > 5 records","Syntax error"],ans:1,exp:"GROUP BY + HAVING COUNT(*) > 5 returns only departments containing more than 5 employees."},
-  {level:"mid",q:"Which JOIN returns all rows from both tables, with NULLs for no matches?",code:null,opts:["INNER JOIN","LEFT JOIN","RIGHT JOIN","FULL OUTER JOIN"],ans:3,exp:"FULL OUTER JOIN includes all rows from both sides and fills NULLs where no match exists."},
-  {level:"mid",q:"What does this query return when no match exists in table B?",code:"SELECT a.id, b.name\nFROM a LEFT JOIN b ON a.id = b.id;",opts:["Row is skipped","NULL for b.name","An error","An empty string"],ans:1,exp:"LEFT JOIN keeps every row from the left table; b.name is NULL when no matching row exists in b."},
-  {level:"mid",q:"What is a PRIMARY KEY?",code:null,opts:["Any indexed column","A column linking two tables","A column that uniquely identifies each row and cannot be NULL","A column allowing duplicate values"],ans:2,exp:"A PRIMARY KEY must be unique and NOT NULL — it identifies every row unambiguously."},
-  {level:"mid",q:"Which of these correctly uses a subquery in the FROM clause?",code:null,opts:["SELECT * FROM (SELECT id FROM orders) AS sub;","SELECT * FROM SELECT id FROM orders;","SELECT id FROM * WHERE orders;","SELECT SUBQUERY(id) FROM orders;"],ans:0,exp:"A subquery in FROM must be wrapped in parentheses and given an alias (AS sub)."},
-  {level:"mid",q:"What does COALESCE(a, b, c) return?",code:null,opts:["Sum of a, b, c","Average of a, b, c","First non-NULL value among a, b, c","Always returns c"],ans:2,exp:"COALESCE evaluates arguments left-to-right and returns the first non-NULL value."},
-  {level:"mid",q:"Is BETWEEN inclusive or exclusive of its boundary values?",code:"SELECT name FROM products\nWHERE price BETWEEN 10 AND 50;",opts:["Exclusive — price > 10 and < 50","Inclusive — price >= 10 and <= 50","Includes 10 but not 50","Includes 50 but not 10"],ans:1,exp:"BETWEEN is fully inclusive — both boundary values (10 and 50) are included."},
-  {level:"mid",q:"Which window function assigns unique sequential integers with no ties?",code:null,opts:["COUNT()","RANK()","ROW_NUMBER()","DENSE_RANK()"],ans:2,exp:"ROW_NUMBER() assigns a unique sequential number to each row within the partition — no gaps, no ties."},
-  {level:"mid",q:"What does a FOREIGN KEY constraint enforce?",code:null,opts:["Unique values","That values exist in a referenced parent table","NOT NULL values","Indexed lookups"],ans:1,exp:"A FOREIGN KEY ensures referential integrity — the value must exist in the referenced table."},
+  // ── MID 21-40 ──
+  {l:"mid",q:"What is the key difference between WHERE and HAVING?",c:null,o:["No difference","WHERE filters before grouping; HAVING filters after","HAVING filters before; WHERE filters after","WHERE only works with JOINs"],a:1,e:"WHERE filters individual rows before GROUP BY; HAVING filters the aggregated group results."},
+  {l:"mid",q:"What will this query return?",c:"SELECT department, COUNT(*) AS total\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5;",o:["All departments","Departments with more than 5 employees","Employees with > 5 records","Syntax error"],a:1,e:"HAVING COUNT(*) > 5 filters after aggregation — only departments with more than 5 employees appear."},
+  {l:"mid",q:"Which JOIN returns all rows from both tables, NULLs where no match?",c:null,o:["INNER JOIN","LEFT JOIN","RIGHT JOIN","FULL OUTER JOIN"],a:3,e:"FULL OUTER JOIN includes all rows from both sides, filling NULLs where no match exists."},
+  {l:"mid",q:"What does LEFT JOIN return when no match exists in table B?",c:"SELECT a.id, b.name\nFROM a LEFT JOIN b ON a.id = b.id;",o:["Row is skipped","NULL for b.name","An error","An empty string"],a:1,e:"LEFT JOIN keeps every row from the left table; b.name is NULL when no matching row exists in b."},
+  {l:"mid",q:"What is a PRIMARY KEY?",c:null,o:["Any indexed column","A column linking two tables","A column that uniquely identifies each row and cannot be NULL","A column allowing duplicates"],a:2,e:"A PRIMARY KEY must be unique and NOT NULL — it identifies every row unambiguously."},
+  {l:"mid",q:"Which correctly uses a subquery in the FROM clause?",c:null,o:["SELECT * FROM (SELECT id FROM orders) AS sub;","SELECT * FROM SELECT id FROM orders;","SELECT id FROM * WHERE orders;","SELECT SUBQUERY(id) FROM orders;"],a:0,e:"A subquery in FROM must be wrapped in parentheses and given an alias (AS sub)."},
+  {l:"mid",q:"What does COALESCE(a, b, c) return?",c:null,o:["Sum of a, b, c","Average of a, b, c","First non-NULL value among a, b, c","Always returns c"],a:2,e:"COALESCE returns the first non-NULL value from its argument list."},
+  {l:"mid",q:"Is BETWEEN inclusive or exclusive of its boundary values?",c:"SELECT name FROM products\nWHERE price BETWEEN 10 AND 50;",o:["Exclusive: price > 10 and < 50","Inclusive: price >= 10 and <= 50","Includes 10 but not 50","Includes 50 but not 10"],a:1,e:"BETWEEN is fully inclusive — both boundary values (10 and 50) are included."},
+  {l:"mid",q:"Which window function assigns unique sequential integers with no ties?",c:null,o:["COUNT()","RANK()","ROW_NUMBER()","DENSE_RANK()"],a:2,e:"ROW_NUMBER() assigns a unique sequential integer to each row — no gaps, no ties."},
+  {l:"mid",q:"What does a FOREIGN KEY constraint enforce?",c:null,o:["Unique values","Values must exist in a referenced parent table","NOT NULL values","Faster lookups"],a:1,e:"A FOREIGN KEY ensures referential integrity — the value must exist in the referenced table."},
+  {l:"mid",q:"What is a self-join?",c:null,o:["Joining a table to itself","Joining two identical tables","A join with no ON condition","A join returning all columns"],a:0,e:"A self-join joins a table to itself using aliases, useful for hierarchical or comparative queries."},
+  {l:"mid",q:"What does the UNION operator do?",c:null,o:["Joins tables by columns","Combines two SELECT results and removes duplicates","Combines results keeping all duplicates","Intersects two result sets"],a:1,e:"UNION combines rows from two SELECT statements and removes duplicate rows. Use UNION ALL to keep duplicates."},
+  {l:"mid",q:"What does this window expression compute?",c:"SELECT name, salary,\n  salary - AVG(salary) OVER () AS diff\nFROM employees;",o:["Salary rank","Difference between each salary and the overall average","Running total","Salary as a percentage"],a:1,e:"AVG(salary) OVER () computes the grand average across all rows; subtracting gives each salary's deviation from the mean."},
+  {l:"mid",q:"Which statement removes specific rows from a table?",c:null,o:["TRUNCATE","DROP","DELETE FROM ... WHERE ...","REMOVE"],a:2,e:"DELETE FROM table WHERE condition; removes only the matching rows."},
+  {l:"mid",q:"What is the purpose of an INDEX in SQL?",c:null,o:["Enforce uniqueness","Speed up retrieval by reducing full table scans","Link two tables","Store aggregated values"],a:1,e:"An index lets the engine find rows faster without scanning every row."},
+  {l:"mid",q:"What does INNER JOIN return?",c:null,o:["All rows from the left table","All rows from both tables","Only rows where the ON condition matches in both tables","All rows with NULLs filled in"],a:2,e:"INNER JOIN returns only the rows where the join condition is satisfied in both tables."},
+  {l:"mid",q:"Which SQL clause limits the number of rows returned?",c:null,o:["TOP / LIMIT","REDUCE","SHRINK","FILTER"],a:0,e:"LIMIT (MySQL/PostgreSQL) or TOP (SQL Server) restricts how many rows are returned."},
+  {l:"mid",q:"What does the CASE expression do in SQL?",c:null,o:["Creates a new table","Provides if-else logic inside a query","Defines a stored procedure","Groups rows by condition"],a:1,e:"CASE WHEN ... THEN ... ELSE ... END works like an if-else statement inside a query."},
+  {l:"mid",q:"What does COUNT(DISTINCT col) return?",c:null,o:["Total rows","Number of NULL values","Number of unique non-NULL values in col","Sum of distinct values"],a:2,e:"COUNT(DISTINCT col) counts only the unique, non-NULL values in the specified column."},
+  {l:"mid",q:"What is a VIEW in SQL?",c:null,o:["A physical copy of a table","A saved SELECT query acting as a virtual table","A type of index","A stored procedure"],a:1,e:"A VIEW is a named, saved SELECT query. It behaves like a table but does not physically store data (unless materialized)."},
 
-  // ── HARD (21-30) ──
-  {level:"hard",q:"What is the output of this query?",code:"SELECT 1 UNION ALL SELECT 1\nUNION SELECT 1;",opts:["Three rows of 1","Two rows of 1","One row of 1","An error"],ans:1,exp:"UNION ALL keeps duplicates (adds both 1s), then UNION deduplicates — resulting in two rows being merged into one, giving two total rows."},
-  {level:"hard",q:"What does this CTE query return?",code:"WITH ranked AS (\n  SELECT name, salary,\n    RANK() OVER (ORDER BY salary DESC) AS rk\n  FROM employees\n)\nSELECT name FROM ranked WHERE rk = 1;",opts:["Employee with median salary","All employees","Employee(s) with the highest salary","Nothing — CTEs cannot use window functions"],ans:2,exp:"The CTE ranks employees by salary DESC; filtering rk = 1 returns the top earner(s) — RANK allows ties."},
-  {level:"hard",q:"What is the difference between RANK() and DENSE_RANK()?",code:null,opts:["No difference","RANK() skips numbers after ties; DENSE_RANK() does not","DENSE_RANK() skips numbers after ties; RANK() does not","RANK() only works with ORDER BY DESC"],ans:1,exp:"RANK() leaves gaps after ties (1,1,3); DENSE_RANK() never skips numbers (1,1,2)."},
-  {level:"hard",q:"Which isolation level prevents dirty reads but allows non-repeatable reads?",code:null,opts:["READ UNCOMMITTED","READ COMMITTED","REPEATABLE READ","SERIALIZABLE"],ans:1,exp:"READ COMMITTED prevents dirty reads but allows non-repeatable reads — another transaction can modify data between your reads."},
-  {level:"hard",q:"What does this query return?",code:"SELECT * FROM orders\nWHERE customer_id NOT IN (\n  SELECT customer_id FROM vip_customers\n  WHERE customer_id IS NULL\n);",opts:["All non-VIP orders","All orders","No rows","Only NULL rows"],ans:2,exp:"If the subquery returns any NULL, NOT IN evaluates to UNKNOWN for every row — no rows pass the filter. Always use NOT EXISTS or filter NULLs from the subquery."},
-  {level:"hard",q:"What is an index covering query?",code:null,opts:["A query that uses SELECT *","A query satisfied entirely from the index without touching the table","A query with a WHERE on an indexed column","A query using EXPLAIN"],ans:1,exp:"A covering index contains all columns needed by the query — the engine never reads the main table, making it very fast."},
-  {level:"hard",q:"What does EXPLAIN (or EXPLAIN ANALYZE) show?",code:null,opts:["The SQL syntax errors","The query execution plan chosen by the optimizer","The table indexes","The row count only"],ans:1,exp:"EXPLAIN shows the optimizer's execution plan — scan types, join strategies, estimated costs, and row counts."},
-  {level:"hard",q:"What is a deadlock in a database context?",code:null,opts:["A query that takes too long","Two transactions each waiting for a lock held by the other","A broken index","A query with no WHERE clause"],ans:1,exp:"A deadlock occurs when two or more transactions hold locks and each waits for the other's lock — neither can proceed. The database detects and kills one to resolve it."},
-  {level:"hard",q:"Which SQL clause is evaluated LAST in the logical query processing order?",code:null,opts:["WHERE","GROUP BY","SELECT","ORDER BY / LIMIT"],ans:3,exp:"Logical order: FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT. ORDER BY/LIMIT is processed last."},
-  {level:"hard",q:"What is the purpose of a materialized view?",code:null,opts:["An alias for a table","A stored, precomputed result of a query refreshed on demand","A temporary table deleted on session end","A read-only table"],ans:1,exp:"A materialized view persists the query result physically. Unlike regular views (run on every access), it is refreshed explicitly — trading freshness for speed."}
+  // ── HARD 41-60 ──
+  {l:"hard",q:"What is the net result of this query?",c:"SELECT 1 UNION ALL SELECT 1 UNION SELECT 1;",o:["Three rows of 1","Two rows of 1","One row of 1","Syntax error"],a:2,e:"UNION ALL SELECT 1 gives 2 rows; the outer UNION SELECT 1 deduplicates — final result is 1 row."},
+  {l:"hard",q:"What does this CTE return?",c:"WITH ranked AS (\n  SELECT name, salary,\n    RANK() OVER (ORDER BY salary DESC) AS rk\n  FROM employees\n)\nSELECT name FROM ranked WHERE rk = 1;",o:["Employee with median salary","All employees","Employee(s) with the highest salary","Error — CTEs cannot use window functions"],a:2,e:"The CTE ranks by salary DESC; rk = 1 selects the top earner(s). RANK allows ties so multiple employees may appear."},
+  {l:"hard",q:"What is the difference between RANK() and DENSE_RANK()?",c:null,o:["No difference","RANK() skips numbers after ties; DENSE_RANK() does not","DENSE_RANK() skips numbers after ties; RANK() does not","RANK() only works with DESC"],a:1,e:"RANK(): 1,1,3 (gap after tie). DENSE_RANK(): 1,1,2 (no gap). Both assign the same rank to tied rows."},
+  {l:"hard",q:"Which isolation level prevents dirty reads but allows non-repeatable reads?",c:null,o:["READ UNCOMMITTED","READ COMMITTED","REPEATABLE READ","SERIALIZABLE"],a:1,e:"READ COMMITTED prevents dirty reads but another transaction can modify rows between your reads (non-repeatable reads)."},
+  {l:"hard",q:"What does this NOT IN query return when the subquery contains a NULL?",c:"SELECT * FROM orders\nWHERE customer_id NOT IN (\n  SELECT customer_id FROM vip_customers\n);",o:["All non-VIP orders","All orders","No rows","Only NULL rows"],a:2,e:"If the subquery returns any NULL, NOT IN evaluates to UNKNOWN for every row — no rows pass. Use NOT EXISTS instead."},
+  {l:"hard",q:"What is a covering index?",c:null,o:["An index on SELECT *","A query satisfied entirely from the index without reading the table","An index on a WHERE column only","An index created with EXPLAIN"],a:1,e:"A covering index includes all columns the query needs — the engine never reads the base table."},
+  {l:"hard",q:"What does EXPLAIN / EXPLAIN ANALYZE show?",c:null,o:["SQL syntax errors","The optimizer's query execution plan","All table indexes","Row count only"],a:1,e:"EXPLAIN shows the execution plan — join types, scan methods, estimated costs, and row counts."},
+  {l:"hard",q:"What is a deadlock?",c:null,o:["A slow query","Two transactions each waiting for the other's lock","A broken index","A missing WHERE clause"],a:1,e:"A deadlock: two transactions each hold a lock the other needs. Neither can proceed — the DB rolls back one to resolve it."},
+  {l:"hard",q:"Which SQL clause is evaluated LAST in logical query processing order?",c:null,o:["WHERE","GROUP BY","SELECT","ORDER BY / LIMIT"],a:3,e:"Logical order: FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT."},
+  {l:"hard",q:"What is a materialized view?",c:null,o:["An alias for a table","A physically stored, precomputed query result refreshed on demand","A temp table deleted at session end","A read-only base table"],a:1,e:"A materialized view stores query results on disk and must be refreshed explicitly — trading freshness for speed."},
+  {l:"hard",q:"What does this window frame compute?",c:"SELECT name, salary,\n  SUM(salary) OVER (\n    ORDER BY hire_date\n    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n  ) AS running_total\nFROM employees;",o:["Grand total","Salary rank","Running (cumulative) total of salary ordered by hire date","Average salary per group"],a:2,e:"ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW sums all rows from the first to the current — a classic running total."},
+  {l:"hard",q:"What is the key difference between TRUNCATE and DELETE?",c:null,o:["No difference","TRUNCATE logs each row; DELETE does not","DELETE is faster and DDL; TRUNCATE is DML","TRUNCATE is DDL, minimal logging, no WHERE, usually not rollback-safe; DELETE is DML, logs rows, supports WHERE"],a:3,e:"TRUNCATE: DDL, minimal logging, no WHERE, fast. DELETE: DML, logs each row, supports WHERE, fully transactional."},
+  {l:"hard",q:"What problem does the N+1 query problem describe?",c:null,o:["A query returning N+1 columns","One query fetches N records, then N queries fetch related data per record","A JOIN producing N+1 duplicates","Using LIMIT N+1 for pagination"],a:1,e:"N+1: 1 query loads a list, then N queries run per item. Fix it with a JOIN or eager loading."},
+  {l:"hard",q:"What does this filtered aggregate compute?",c:"SELECT customer_id,\n  COUNT(*) FILTER (WHERE status = 'paid') AS paid_count\nFROM orders\nGROUP BY customer_id;",o:["Counts all orders per customer","Counts only 'paid' orders per customer","Deletes unpaid orders","Returns customers with no paid orders"],a:1,e:"FILTER (WHERE ...) is a PostgreSQL extension — only rows matching the condition are included in the aggregate."},
+  {l:"hard",q:"What is the purpose of a SAVEPOINT in a transaction?",c:null,o:["Ends the transaction","Creates a named rollback point within a transaction","Commits partial data","Locks a table"],a:1,e:"SAVEPOINT name; marks a point you can ROLLBACK TO without undoing the entire transaction."},
+  {l:"hard",q:"Which isolation level prevents phantom reads?",c:null,o:["READ UNCOMMITTED","READ COMMITTED","REPEATABLE READ","SERIALIZABLE"],a:3,e:"SERIALIZABLE prevents phantom reads — no new rows matching a query's condition can be inserted by other transactions during the read."},
+  {l:"hard",q:"What does LATERAL allow in SQL?",c:null,o:["Horizontal partitioning","A subquery in FROM to reference columns from preceding tables in the same FROM clause","Cross-database joins","Parallel query execution"],a:1,e:"LATERAL allows a subquery in FROM to reference columns from tables listed earlier in the same FROM clause."},
+  {l:"hard",q:"What does this return if salary has no NULLs?",c:"SELECT COUNT(*), COUNT(salary), COUNT(1)\nFROM employees;",o:["Three different values","COUNT(*) and COUNT(1) match; COUNT(salary) may differ when NULLs exist","All three always differ","COUNT(*) returns 0"],a:1,e:"COUNT(*) and COUNT(1) count all rows. COUNT(salary) skips NULLs — equal to the others only when no NULLs exist."},
+  {l:"hard",q:"What is a clustered index?",c:null,o:["An index stored in a separate file","An index that physically orders the table rows on disk by the index key","An index covering all columns","An index used only for JOINs"],a:1,e:"A clustered index determines the physical row order on disk. A table can have only one (typically the PRIMARY KEY)."},
+  {l:"hard",q:"What does this recursive CTE produce?",c:"WITH RECURSIVE nums AS (\n  SELECT 1 AS n\n  UNION ALL\n  SELECT n + 1 FROM nums WHERE n < 5\n)\nSELECT n FROM nums;",o:["Syntax error","Numbers 1 through 5","An infinite loop","A single row: 5"],a:1,e:"The anchor seeds with 1; the recursive member adds 1 each step until n < 5 fails — producing 1, 2, 3, 4, 5."}
 ];
 
-// ── STATE ──
-let current = 0, score = 0, timerVal = 0, timerInterval = null, startTime = 0;
-let breakdown = {easy:0, mid:0, hard:0};
-let totalTime = 0;
+let cur=0,score=0,tick=0,iv=null,t0=0,bd={easy:0,mid:0,hard:0},elapsed=0;
 
-// ── LEADERBOARD ──
-function getBoard() {
-  try { return JSON.parse(localStorage.getItem('sqlquest_lb') || '[]'); } catch { return []; }
-}
-function saveBoard(arr) {
-  try { localStorage.setItem('sqlquest_lb', JSON.stringify(arr)); } catch {}
-}
-function renderHomeBoard() {
-  const rows = getBoard();
-  const el = document.getElementById('lb-home-rows');
-  if (!rows.length) { el.innerHTML = '<div class="empty-lb">No scores yet. Be the first!</div>'; return; }
-  const medals = ['gold','silver','bronze'];
-  el.innerHTML = rows.slice(0,8).map((r,i) => `
-    <div class="lb-row">
-      <div class="rank ${medals[i]||''}">${i===0?'▲':i===1?'▲':i===2?'▲':''}${i+1}</div>
-      <div>${escHtml(r.name)}</div>
-      <div class="lb-score">${r.score}/30</div>
-      <div class="lb-time">${r.time}s</div>
-    </div>`).join('');
-}
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function getBoard(){try{return JSON.parse(localStorage.getItem('sqlquest_lb60')||'[]');}catch{return[];}}
+function saveBoard(a){try{localStorage.setItem('sqlquest_lb60',JSON.stringify(a));}catch{}}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-// ── GAME ──
-function startGame() {
-  current = 0; score = 0; breakdown = {easy:0,mid:0,hard:0}; totalTime = 0;
-  startTime = Date.now();
-  document.getElementById('live-score').textContent = '0';
-  show('quiz');
-  renderQ();
+function renderLB(){
+  const rows=getBoard(),el=document.getElementById('lb-home-rows');
+  if(!rows.length){el.innerHTML='<div class="empty-lb">No scores yet. Be the first!</div>';return;}
+  const m=['gold','silver','bronze'];
+  el.innerHTML=rows.slice(0,8).map((r,i)=>`<div class="lb-row"><div class="rank ${m[i]||''}">${i+1}</div><div>${esc(r.name)}</div><div class="lb-score">${r.score}/60</div><div class="lb-time">${r.time}s</div></div>`).join('');
 }
 
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function startGame(){
+  cur=0;score=0;bd={easy:0,mid:0,hard:0};elapsed=0;t0=Date.now();
+  document.getElementById('live-score').textContent='0';
+  show('quiz');renderQ();
 }
 
-function renderQ() {
-  if (current >= QUESTIONS.length) { endGame(); return; }
-  const q = QUESTIONS[current];
-  const pct = (current / QUESTIONS.length) * 100;
-
-  document.getElementById('q-counter').textContent = `${current+1} / ${QUESTIONS.length}`;
-  document.getElementById('progress-fill').style.width = pct + '%';
-
-  const badge = document.getElementById('level-badge');
-  badge.textContent = q.level.charAt(0).toUpperCase() + q.level.slice(1);
-  badge.className = 'level-badge ' + q.level;
-
-  document.getElementById('q-text').textContent = q.q;
-  const codeEl = document.getElementById('q-code');
-  if (q.code) { codeEl.style.display='block'; codeEl.textContent = q.code; }
-  else { codeEl.style.display='none'; }
-
-  const optsEl = document.getElementById('options');
-  optsEl.innerHTML = q.opts.map((o,i) => `
-    <button class="opt" onclick="choose(${i})">
-      <span class="opt-key">${String.fromCharCode(65+i)}</span>
-      <span>${escHtml(o)}</span>
-    </button>`).join('');
-
-  document.getElementById('feedback-box').className = 'feedback-box';
-  document.getElementById('feedback-box').innerHTML = '';
-  const nb = document.getElementById('btn-next');
-  nb.className = 'btn-next';
-
-  startTimer();
+function renderQ(){
+  if(cur>=Q.length){endGame();return;}
+  const q=Q[cur];
+  document.getElementById('q-counter').textContent=`${cur+1} / ${Q.length}`;
+  document.getElementById('progress-fill').style.width=((cur/Q.length)*100)+'%';
+  const b=document.getElementById('level-badge');
+  b.textContent=q.l.charAt(0).toUpperCase()+q.l.slice(1);
+  b.className='level-badge '+q.l;
+  document.getElementById('q-text').textContent=q.q;
+  const ce=document.getElementById('q-code');
+  if(q.c){ce.style.display='block';ce.textContent=q.c;}else{ce.style.display='none';}
+  document.getElementById('options').innerHTML=q.o.map((o,i)=>`<button class="opt" onclick="pick(${i})"><span class="opt-key">${String.fromCharCode(65+i)}</span><span>${esc(o)}</span></button>`).join('');
+  document.getElementById('feedback-box').className='feedback-box';
+  document.getElementById('feedback-box').innerHTML='';
+  document.getElementById('btn-next').className='btn-next';
+  startTick();
 }
 
-function startTimer() {
-  clearInterval(timerInterval);
-  timerVal = 20;
-  const el = document.getElementById('timer');
-  el.textContent = timerVal;
-  el.className = 'timer-display';
-  timerInterval = setInterval(() => {
-    timerVal--;
-    el.textContent = timerVal;
-    if (timerVal <= 5) el.className = 'timer-display danger';
-    else if (timerVal <= 10) el.className = 'timer-display warn';
-    if (timerVal <= 0) { clearInterval(timerInterval); timeOut(); }
-  }, 1000);
+function startTick(){
+  clearInterval(iv);tick=20;
+  const el=document.getElementById('timer');
+  el.textContent=tick;el.className='timer-display';
+  iv=setInterval(()=>{
+    tick--;el.textContent=tick;
+    if(tick<=5)el.className='timer-display danger';
+    else if(tick<=10)el.className='timer-display warn';
+    if(tick<=0){clearInterval(iv);timeOut();}
+  },1000);
 }
 
-function timeOut() {
-  const q = QUESTIONS[current];
-  const opts = document.querySelectorAll('.opt');
-  opts.forEach((o,i) => { o.disabled=true; if(i===q.ans) o.classList.add('correct'); });
-  const fb = document.getElementById('feedback-box');
-  fb.innerHTML = `<strong>Time's up!</strong> The answer was <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;
+function timeOut(){
+  const q=Q[cur];
+  document.querySelectorAll('.opt').forEach((o,i)=>{o.disabled=true;if(i===q.a)o.classList.add('correct');});
+  const fb=document.getElementById('feedback-box');
+  fb.innerHTML=`<strong>Time's up!</strong> The answer was <strong>${esc(q.o[q.a])}</strong>. ${esc(q.e)}`;
   fb.classList.add('show');
   document.getElementById('btn-next').classList.add('show');
 }
 
-function choose(idx) {
-  clearInterval(timerInterval);
-  const q = QUESTIONS[current];
-  const opts = document.querySelectorAll('.opt');
-  opts.forEach(o => o.disabled = true);
-  const isCorrect = idx === q.ans;
-  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
-  if (!isCorrect) opts[q.ans].classList.add('correct');
-  if (isCorrect) {
-    score++;
-    breakdown[q.level]++;
-    document.getElementById('live-score').textContent = score;
-  }
-  const fb = document.getElementById('feedback-box');
-  fb.innerHTML = isCorrect
-    ? `<strong>Correct!</strong> ${q.exp}`
-    : `<strong>Incorrect.</strong> The right answer is <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;
+function pick(idx){
+  clearInterval(iv);
+  const q=Q[cur],opts=document.querySelectorAll('.opt');
+  opts.forEach(o=>o.disabled=true);
+  const ok=idx===q.a;
+  opts[idx].classList.add(ok?'correct':'wrong');
+  if(!ok)opts[q.a].classList.add('correct');
+  if(ok){score++;bd[q.l]++;document.getElementById('live-score').textContent=score;}
+  const fb=document.getElementById('feedback-box');
+  fb.innerHTML=ok?`<strong>Correct!</strong> ${esc(q.e)}`:`<strong>Incorrect.</strong> The right answer is <strong>${esc(q.o[q.a])}</strong>. ${esc(q.e)}`;
   fb.classList.add('show');
   document.getElementById('btn-next').classList.add('show');
 }
 
-function nextQ() { current++; renderQ(); }
+function nextQ(){cur++;renderQ();}
 
-function endGame() {
-  clearInterval(timerInterval);
-  totalTime = Math.round((Date.now() - startTime) / 1000);
-  const pct = Math.round((score / 30) * 100);
-
-  document.getElementById('final-score').textContent = `${score}/30`;
-  document.getElementById('b-easy').textContent = `${breakdown.easy}/10`;
-  document.getElementById('b-mid').textContent = `${breakdown.mid}/10`;
-  document.getElementById('b-hard').textContent = `${breakdown.hard}/10`;
-  document.getElementById('b-time').textContent = `${totalTime}s`;
-
-  let grade, msg, gColor;
-  if (pct >= 90) { grade='S RANK'; msg='Outstanding — SQL master.'; gColor='linear-gradient(135deg,var(--accent),var(--accent2))'; }
-  else if (pct >= 75) { grade='A RANK'; msg='Great work — solid SQL knowledge!'; gColor='linear-gradient(135deg,var(--easy),#059669)'; }
-  else if (pct >= 55) { grade='B RANK'; msg='Good effort — review the tricky ones.'; gColor='linear-gradient(135deg,var(--mid),#d97706)'; }
-  else { grade='C RANK'; msg='Keep practising — SQL takes time!'; gColor='linear-gradient(135deg,var(--hard),#b91c1c)'; }
-
-  const gradeEl = document.getElementById('result-grade');
-  gradeEl.textContent = grade;
-  gradeEl.style.background = gColor;
-  gradeEl.style.webkitBackgroundClip = 'text';
-  gradeEl.style.webkitTextFillColor = 'transparent';
-  gradeEl.style.backgroundClip = 'text';
-  document.getElementById('result-msg').textContent = msg;
-
-  const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
-  document.getElementById('save-name').value = playerName;
-
+function endGame(){
+  clearInterval(iv);
+  elapsed=Math.round((Date.now()-t0)/1000);
+  const pct=Math.round((score/60)*100);
+  document.getElementById('final-score').textContent=`${score}/60`;
+  document.getElementById('b-easy').textContent=`${bd.easy}/20`;
+  document.getElementById('b-mid').textContent=`${bd.mid}/20`;
+  document.getElementById('b-hard').textContent=`${bd.hard}/20`;
+  document.getElementById('b-time').textContent=`${elapsed}s`;
+  let grade,msg,gc;
+  if(pct>=90){grade='S RANK';msg='Outstanding — SQL master.';gc='linear-gradient(135deg,var(--accent),var(--accent2))';}
+  else if(pct>=75){grade='A RANK';msg='Great work — solid SQL knowledge!';gc='linear-gradient(135deg,var(--easy),#059669)';}
+  else if(pct>=55){grade='B RANK';msg='Good effort — review the tricky ones.';gc='linear-gradient(135deg,var(--mid),#d97706)';}
+  else{grade='C RANK';msg='Keep practising — SQL takes time!';gc='linear-gradient(135deg,var(--hard),#b91c1c)';}
+  const ge=document.getElementById('result-grade');
+  ge.textContent=grade;ge.style.background=gc;
+  ge.style.webkitBackgroundClip='text';ge.style.webkitTextFillColor='transparent';ge.style.backgroundClip='text';
+  document.getElementById('result-msg').textContent=msg;
   show('results');
 }
 
-function saveScore() {
-  const name = document.getElementById('save-name').value.trim() || 'Anonymous';
-  const board = getBoard();
-  board.push({ name, score, time: totalTime });
-  board.sort((a,b) => b.score - a.score || a.time - b.time);
-  saveBoard(board.slice(0, 20));
+function saveScore(){
+  const name=(prompt('Enter your name for the leaderboard:','Player')||'Anonymous').slice(0,24);
+  const board=getBoard();
+  board.push({name,score,time:elapsed});
+  board.sort((a,b)=>b.score-a.score||a.time-b.time);
+  saveBoard(board.slice(0,20));
   alert('Score saved! 🏆');
 }
 
-function goHome() {
-  show('home');
-  renderHomeBoard();
-}
-
-// Init
-renderHomeBoard();
+function goHome(){show('home');renderLB();}
+renderLB();
 </script>
 </body>
 </html>
