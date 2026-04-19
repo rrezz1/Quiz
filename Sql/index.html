@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SQL Quest — Test Your SQL Skills</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e2d45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --easy: #10b981;
+    --mid: #f59e0b;
+    --hard: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 1rem; }
+
+  /* ─── HOME ─── */
+  #home {
+    text-align: center;
+    gap: 2rem;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 700;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    animation: fadeDown 0.6s ease both;
+  }
+  .tagline {
+    font-size: 1rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 300;
+    animation: fadeDown 0.7s 0.1s ease both;
+  }
+  .stats-row {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeDown 0.7s 0.2s ease both;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+  }
+  .stat-pill span { color: var(--accent); }
+
+  .name-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 360px;
+    animation: fadeDown 0.7s 0.3s ease both;
+  }
+  .name-section label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; text-align: left; }
+  .name-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 1rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: var(--accent); }
+  .name-input::placeholder { color: var(--muted); }
+
+  .btn-start {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 0.9rem 3rem;
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: fadeDown 0.7s 0.4s ease both;
+    width: 100%;
+    max-width: 360px;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,212,255,0.3); }
+  .btn-start:active { transform: scale(0.98); }
+
+  .leaderboard-preview {
+    width: 100%;
+    max-width: 440px;
+    animation: fadeDown 0.7s 0.5s ease both;
+  }
+  .lb-title {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+  }
+  .lb-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row.header { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--mono); }
+  .rank { font-family: var(--mono); color: var(--muted); font-size: 0.8rem; }
+  .rank.gold { color: #fbbf24; }
+  .rank.silver { color: #94a3b8; }
+  .rank.bronze { color: #b45309; }
+  .lb-score { font-family: var(--mono); color: var(--accent); font-size: 0.9rem; }
+  .lb-time { font-family: var(--mono); color: var(--muted); font-size: 0.8rem; }
+  .empty-lb { padding: 1.5rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+
+  /* ─── QUIZ ─── */
+  #quiz { justify-content: flex-start; padding: 1.5rem 1rem 3rem; }
+  .quiz-inner { width: 100%; max-width: 680px; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .quiz-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .q-counter { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+  .timer-wrap { display: flex; align-items: center; gap: 0.5rem; }
+  .timer-icon { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite; }
+  .timer-display {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 2.5rem;
+    text-align: right;
+    transition: color 0.3s;
+  }
+  .timer-display.warn { color: var(--mid); }
+  .timer-display.danger { color: var(--hard); animation: shake 0.3s infinite; }
+
+  .progress-track {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.7rem;
+    border-radius: 4px;
+  }
+  .level-badge.easy { background: rgba(16,185,129,0.15); color: var(--easy); border: 1px solid rgba(16,185,129,0.3); }
+  .level-badge.mid { background: rgba(245,158,11,0.15); color: var(--mid); border: 1px solid rgba(245,158,11,0.3); }
+  .level-badge.hard { background: rgba(239,68,68,0.15); color: var(--hard); border: 1px solid rgba(239,68,68,0.3); }
+
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .q-text {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .q-code {
+    background: #070d1a;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: #a5f3fc;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    font-size: 0.92rem;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    font-family: var(--sans);
+  }
+  .opt:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,212,255,0.05); transform: translateX(3px); }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: var(--easy); background: rgba(16,185,129,0.1); color: #6ee7b7; }
+  .opt.wrong { border-color: var(--hard); background: rgba(239,68,68,0.1); color: #fca5a5; }
+  .opt-key {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+  }
+  .opt.correct .opt-key { background: var(--easy); color: #fff; border-color: var(--easy); }
+  .opt.wrong .opt-key { background: var(--hard); color: #fff; border-color: var(--hard); }
+
+  .feedback-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--muted);
+    display: none;
+  }
+  .feedback-box.show { display: block; animation: fadeIn 0.3s ease; }
+  .feedback-box strong { color: var(--text); }
+
+  .btn-next {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    align-self: flex-end;
+    display: none;
+  }
+  .btn-next.show { display: block; animation: fadeIn 0.3s ease; }
+  .btn-next:hover { border-color: var(--accent); background: rgba(0,212,255,0.08); }
+
+  .score-live {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+  }
+  .score-live span { color: var(--muted); }
+  .score-live strong { color: var(--easy); }
+
+  /* ─── RESULTS ─── */
+  #results { text-align: center; gap: 1.5rem; }
+  .result-inner { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 1.5rem; align-items: center; }
+
+  .big-score {
+    font-family: var(--mono);
+    font-size: clamp(4rem, 15vw, 7rem);
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+  .result-label { color: var(--muted); font-size: 0.9rem; }
+  .result-grade {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 0.4rem 1.5rem;
+    border-radius: 999px;
+    margin-top: -0.5rem;
+  }
+
+  .breakdown {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    width: 100%;
+    display: flex;
+    gap: 0;
+    justify-content: space-around;
+  }
+  .breakdown-item { text-align: center; }
+  .breakdown-item .num { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
+  .breakdown-item .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem; }
+  .breakdown-item.easy .num { color: var(--easy); }
+  .breakdown-item.mid .num { color: var(--mid); }
+  .breakdown-item.hard .num { color: var(--hard); }
+  .breakdown-item.time .num { color: var(--accent); }
+
+  .name-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+  }
+  .name-entry label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; text-align: left; font-family: var(--mono); }
+
+  .result-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; width: 100%; }
+  .btn-save {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    flex: 1;
+    min-width: 140px;
+  }
+  .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,212,255,0.3); }
+  .btn-retry {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    flex: 1;
+    min-width: 140px;
+  }
+  .btn-retry:hover { border-color: var(--accent); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-2px);} 75%{transform:translateX(2px);} }
+  @keyframes pop { from{transform:scale(0.5);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+  /* ─── RESPONSIVE ─── */
+  @media(max-width:480px) {
+    .breakdown { gap: 0.5rem; }
+    .breakdown-item .num { font-size: 1.1rem; }
+    .stats-row { gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="home" class="screen active">
+  <div class="logo">SQL<br>QUEST</div>
+  <div class="tagline">Test Your Database Knowledge</div>
+
+  <div class="stats-row">
+    <div class="stat-pill"><span>30</span> Questions</div>
+    <div class="stat-pill"><span>3</span> Levels</div>
+    <div class="stat-pill"><span>20s</span> Per Question</div>
+  </div>
+
+  <div class="name-section">
+    <label for="player-name">Your name</label>
+    <input id="player-name" class="name-input" type="text" placeholder="e.g. John" maxlength="24"/>
+  </div>
+
+  <button class="btn-start" onclick="startGame()">START GAME →</button>
+
+  <div class="leaderboard-preview">
+    <div class="lb-title">// Leaderboard</div>
+    <div class="lb-table">
+      <div class="lb-row header">
+        <div>#</div><div>Player</div><div>Score</div><div>Time</div>
+      </div>
+      <div id="lb-home-rows"><div class="empty-lb">No scores yet. Be the first!</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz" class="screen">
+  <div class="quiz-inner">
+    <div class="quiz-topbar">
+      <div class="q-counter" id="q-counter">1 / 30</div>
+      <div class="score-live"><span>Score</span> <strong id="live-score">0</strong></div>
+      <div class="timer-wrap">
+        <div class="timer-icon"></div>
+        <div class="timer-display" id="timer">20</div>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="q-card">
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <div class="level-badge" id="level-badge">Easy</div>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-code" id="q-code" style="display:none;"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback-box" id="feedback-box"></div>
+      <button class="btn-next" id="btn-next" onclick="nextQ()">NEXT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="results" class="screen">
+  <div class="result-inner">
+    <div style="color:var(--muted);font-size:0.85rem;font-family:var(--mono);">// GAME OVER</div>
+    <div class="big-score" id="final-score">0/30</div>
+    <div class="result-grade" id="result-grade"></div>
+    <div class="result-label" id="result-msg"></div>
+    <div class="breakdown">
+      <div class="breakdown-item easy"><div class="num" id="b-easy">0/10</div><div class="lbl">Easy</div></div>
+      <div class="breakdown-item mid"><div class="num" id="b-mid">0/10</div><div class="lbl">Mid</div></div>
+      <div class="breakdown-item hard"><div class="num" id="b-hard">0/10</div><div class="lbl">Hard</div></div>
+      <div class="breakdown-item time"><div class="num" id="b-time">0s</div><div class="lbl">Time</div></div>
+    </div>
+    <div class="name-entry">
+      <label>Save to leaderboard as</label>
+      <input id="save-name" class="name-input" type="text" placeholder="Your name" maxlength="24"/>
+    </div>
+    <div class="result-actions">
+      <button class="btn-save" onclick="saveScore()">SAVE SCORE</button>
+      <button class="btn-retry" onclick="goHome()">← HOME</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // ── EASY (1-10) ──
+  {level:"easy",q:"What does SELECT * FROM employees; return?",code:null,opts:["All columns from the employees table","Only the first column","Only distinct rows","All tables in the database"],ans:0,exp:"SELECT * retrieves every column from the specified table."},
+  {level:"easy",q:"Which clause filters rows before they are returned?",code:null,opts:["ORDER BY","GROUP BY","WHERE","HAVING"],ans:2,exp:"WHERE filters individual rows before any grouping occurs."},
+  {level:"easy",q:"Which keyword removes duplicate rows from a result set?",code:null,opts:["UNIQUE","DISTINCT","NODUPE","FILTER"],ans:1,exp:"SELECT DISTINCT eliminates duplicate rows from the result."},
+  {level:"easy",q:"Which SQL statement adds a new row to a table?",code:null,opts:["ADD INTO","PUSH INTO","INSERT INTO","CREATE INTO"],ans:2,exp:"INSERT INTO table_name VALUES (...) inserts a new row."},
+  {level:"easy",q:"What does NULL represent in SQL?",code:null,opts:["Zero","Empty string","Unknown / missing value","False"],ans:2,exp:"NULL means the value is unknown or missing — not zero or empty."},
+  {level:"easy",q:"Which function returns the total number of rows?",code:null,opts:["SUM()","MAX()","COUNT()","AVG()"],ans:2,exp:"COUNT() counts the rows that match the query condition."},
+  {level:"easy",q:"Which clause is used to sort results?",code:null,opts:["SORT BY","ORDER BY","ARRANGE BY","GROUP BY"],ans:1,exp:"ORDER BY sorts results ascending (ASC) or descending (DESC)."},
+  {level:"easy",q:"Which command removes all rows but keeps the table structure?",code:null,opts:["DROP TABLE","DELETE FROM","TRUNCATE TABLE","REMOVE TABLE"],ans:2,exp:"TRUNCATE deletes all rows quickly and leaves the schema intact."},
+  {level:"easy",q:"Which operator checks membership in a list of values?",code:null,opts:["BETWEEN","LIKE","IN","EXISTS"],ans:2,exp:"IN (val1, val2, ...) checks if a value matches any item in the list."},
+  {level:"easy",q:"Which SQL command modifies existing data in a table?",code:null,opts:["MODIFY","ALTER","CHANGE","UPDATE"],ans:3,exp:"UPDATE table SET col = value WHERE condition; changes existing rows."},
+
+  // ── MID (11-20) ──
+  {level:"mid",q:"What is the key difference between WHERE and HAVING?",code:null,opts:["No difference","WHERE filters before grouping; HAVING filters after","HAVING filters before grouping; WHERE filters after","WHERE only works with JOINs"],ans:1,exp:"WHERE filters individual rows before GROUP BY; HAVING filters aggregated group results."},
+  {level:"mid",q:"What will this query return?",code:"SELECT department, COUNT(*) AS total\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5;",opts:["All departments","Departments with more than 5 employees","Employees with > 5 records","Syntax error"],ans:1,exp:"GROUP BY + HAVING COUNT(*) > 5 returns only departments containing more than 5 employees."},
+  {level:"mid",q:"Which JOIN returns all rows from both tables, with NULLs for no matches?",code:null,opts:["INNER JOIN","LEFT JOIN","RIGHT JOIN","FULL OUTER JOIN"],ans:3,exp:"FULL OUTER JOIN includes all rows from both sides and fills NULLs where no match exists."},
+  {level:"mid",q:"What does this query return when no match exists in table B?",code:"SELECT a.id, b.name\nFROM a LEFT JOIN b ON a.id = b.id;",opts:["Row is skipped","NULL for b.name","An error","An empty string"],ans:1,exp:"LEFT JOIN keeps every row from the left table; b.name is NULL when no matching row exists in b."},
+  {level:"mid",q:"What is a PRIMARY KEY?",code:null,opts:["Any indexed column","A column linking two tables","A column that uniquely identifies each row and cannot be NULL","A column allowing duplicate values"],ans:2,exp:"A PRIMARY KEY must be unique and NOT NULL — it identifies every row unambiguously."},
+  {level:"mid",q:"Which of these correctly uses a subquery in the FROM clause?",code:null,opts:["SELECT * FROM (SELECT id FROM orders) AS sub;","SELECT * FROM SELECT id FROM orders;","SELECT id FROM * WHERE orders;","SELECT SUBQUERY(id) FROM orders;"],ans:0,exp:"A subquery in FROM must be wrapped in parentheses and given an alias (AS sub)."},
+  {level:"mid",q:"What does COALESCE(a, b, c) return?",code:null,opts:["Sum of a, b, c","Average of a, b, c","First non-NULL value among a, b, c","Always returns c"],ans:2,exp:"COALESCE evaluates arguments left-to-right and returns the first non-NULL value."},
+  {level:"mid",q:"Is BETWEEN inclusive or exclusive of its boundary values?",code:"SELECT name FROM products\nWHERE price BETWEEN 10 AND 50;",opts:["Exclusive — price > 10 and < 50","Inclusive — price >= 10 and <= 50","Includes 10 but not 50","Includes 50 but not 10"],ans:1,exp:"BETWEEN is fully inclusive — both boundary values (10 and 50) are included."},
+  {level:"mid",q:"Which window function assigns unique sequential integers with no ties?",code:null,opts:["COUNT()","RANK()","ROW_NUMBER()","DENSE_RANK()"],ans:2,exp:"ROW_NUMBER() assigns a unique sequential number to each row within the partition — no gaps, no ties."},
+  {level:"mid",q:"What does a FOREIGN KEY constraint enforce?",code:null,opts:["Unique values","That values exist in a referenced parent table","NOT NULL values","Indexed lookups"],ans:1,exp:"A FOREIGN KEY ensures referential integrity — the value must exist in the referenced table."},
+
+  // ── HARD (21-30) ──
+  {level:"hard",q:"What is the output of this query?",code:"SELECT 1 UNION ALL SELECT 1\nUNION SELECT 1;",opts:["Three rows of 1","Two rows of 1","One row of 1","An error"],ans:1,exp:"UNION ALL keeps duplicates (adds both 1s), then UNION deduplicates — resulting in two rows being merged into one, giving two total rows."},
+  {level:"hard",q:"What does this CTE query return?",code:"WITH ranked AS (\n  SELECT name, salary,\n    RANK() OVER (ORDER BY salary DESC) AS rk\n  FROM employees\n)\nSELECT name FROM ranked WHERE rk = 1;",opts:["Employee with median salary","All employees","Employee(s) with the highest salary","Nothing — CTEs cannot use window functions"],ans:2,exp:"The CTE ranks employees by salary DESC; filtering rk = 1 returns the top earner(s) — RANK allows ties."},
+  {level:"hard",q:"What is the difference between RANK() and DENSE_RANK()?",code:null,opts:["No difference","RANK() skips numbers after ties; DENSE_RANK() does not","DENSE_RANK() skips numbers after ties; RANK() does not","RANK() only works with ORDER BY DESC"],ans:1,exp:"RANK() leaves gaps after ties (1,1,3); DENSE_RANK() never skips numbers (1,1,2)."},
+  {level:"hard",q:"Which isolation level prevents dirty reads but allows non-repeatable reads?",code:null,opts:["READ UNCOMMITTED","READ COMMITTED","REPEATABLE READ","SERIALIZABLE"],ans:1,exp:"READ COMMITTED prevents dirty reads but allows non-repeatable reads — another transaction can modify data between your reads."},
+  {level:"hard",q:"What does this query return?",code:"SELECT * FROM orders\nWHERE customer_id NOT IN (\n  SELECT customer_id FROM vip_customers\n  WHERE customer_id IS NULL\n);",opts:["All non-VIP orders","All orders","No rows","Only NULL rows"],ans:2,exp:"If the subquery returns any NULL, NOT IN evaluates to UNKNOWN for every row — no rows pass the filter. Always use NOT EXISTS or filter NULLs from the subquery."},
+  {level:"hard",q:"What is an index covering query?",code:null,opts:["A query that uses SELECT *","A query satisfied entirely from the index without touching the table","A query with a WHERE on an indexed column","A query using EXPLAIN"],ans:1,exp:"A covering index contains all columns needed by the query — the engine never reads the main table, making it very fast."},
+  {level:"hard",q:"What does EXPLAIN (or EXPLAIN ANALYZE) show?",code:null,opts:["The SQL syntax errors","The query execution plan chosen by the optimizer","The table indexes","The row count only"],ans:1,exp:"EXPLAIN shows the optimizer's execution plan — scan types, join strategies, estimated costs, and row counts."},
+  {level:"hard",q:"What is a deadlock in a database context?",code:null,opts:["A query that takes too long","Two transactions each waiting for a lock held by the other","A broken index","A query with no WHERE clause"],ans:1,exp:"A deadlock occurs when two or more transactions hold locks and each waits for the other's lock — neither can proceed. The database detects and kills one to resolve it."},
+  {level:"hard",q:"Which SQL clause is evaluated LAST in the logical query processing order?",code:null,opts:["WHERE","GROUP BY","SELECT","ORDER BY / LIMIT"],ans:3,exp:"Logical order: FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT. ORDER BY/LIMIT is processed last."},
+  {level:"hard",q:"What is the purpose of a materialized view?",code:null,opts:["An alias for a table","A stored, precomputed result of a query refreshed on demand","A temporary table deleted on session end","A read-only table"],ans:1,exp:"A materialized view persists the query result physically. Unlike regular views (run on every access), it is refreshed explicitly — trading freshness for speed."}
+];
+
+// ── STATE ──
+let current = 0, score = 0, timerVal = 0, timerInterval = null, startTime = 0;
+let breakdown = {easy:0, mid:0, hard:0};
+let totalTime = 0;
+
+// ── LEADERBOARD ──
+function getBoard() {
+  try { return JSON.parse(localStorage.getItem('sqlquest_lb') || '[]'); } catch { return []; }
+}
+function saveBoard(arr) {
+  try { localStorage.setItem('sqlquest_lb', JSON.stringify(arr)); } catch {}
+}
+function renderHomeBoard() {
+  const rows = getBoard();
+  const el = document.getElementById('lb-home-rows');
+  if (!rows.length) { el.innerHTML = '<div class="empty-lb">No scores yet. Be the first!</div>'; return; }
+  const medals = ['gold','silver','bronze'];
+  el.innerHTML = rows.slice(0,8).map((r,i) => `
+    <div class="lb-row">
+      <div class="rank ${medals[i]||''}">${i===0?'▲':i===1?'▲':i===2?'▲':''}${i+1}</div>
+      <div>${escHtml(r.name)}</div>
+      <div class="lb-score">${r.score}/30</div>
+      <div class="lb-time">${r.time}s</div>
+    </div>`).join('');
+}
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── GAME ──
+function startGame() {
+  current = 0; score = 0; breakdown = {easy:0,mid:0,hard:0}; totalTime = 0;
+  startTime = Date.now();
+  document.getElementById('live-score').textContent = '0';
+  show('quiz');
+  renderQ();
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQ() {
+  if (current >= QUESTIONS.length) { endGame(); return; }
+  const q = QUESTIONS[current];
+  const pct = (current / QUESTIONS.length) * 100;
+
+  document.getElementById('q-counter').textContent = `${current+1} / ${QUESTIONS.length}`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const badge = document.getElementById('level-badge');
+  badge.textContent = q.level.charAt(0).toUpperCase() + q.level.slice(1);
+  badge.className = 'level-badge ' + q.level;
+
+  document.getElementById('q-text').textContent = q.q;
+  const codeEl = document.getElementById('q-code');
+  if (q.code) { codeEl.style.display='block'; codeEl.textContent = q.code; }
+  else { codeEl.style.display='none'; }
+
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = q.opts.map((o,i) => `
+    <button class="opt" onclick="choose(${i})">
+      <span class="opt-key">${String.fromCharCode(65+i)}</span>
+      <span>${escHtml(o)}</span>
+    </button>`).join('');
+
+  document.getElementById('feedback-box').className = 'feedback-box';
+  document.getElementById('feedback-box').innerHTML = '';
+  const nb = document.getElementById('btn-next');
+  nb.className = 'btn-next';
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerVal = 20;
+  const el = document.getElementById('timer');
+  el.textContent = timerVal;
+  el.className = 'timer-display';
+  timerInterval = setInterval(() => {
+    timerVal--;
+    el.textContent = timerVal;
+    if (timerVal <= 5) el.className = 'timer-display danger';
+    else if (timerVal <= 10) el.className = 'timer-display warn';
+    if (timerVal <= 0) { clearInterval(timerInterval); timeOut(); }
+  }, 1000);
+}
+
+function timeOut() {
+  const q = QUESTIONS[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((o,i) => { o.disabled=true; if(i===q.ans) o.classList.add('correct'); });
+  const fb = document.getElementById('feedback-box');
+  fb.innerHTML = `<strong>Time's up!</strong> The answer was <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;
+  fb.classList.add('show');
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function choose(idx) {
+  clearInterval(timerInterval);
+  const q = QUESTIONS[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.disabled = true);
+  const isCorrect = idx === q.ans;
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) opts[q.ans].classList.add('correct');
+  if (isCorrect) {
+    score++;
+    breakdown[q.level]++;
+    document.getElementById('live-score').textContent = score;
+  }
+  const fb = document.getElementById('feedback-box');
+  fb.innerHTML = isCorrect
+    ? `<strong>Correct!</strong> ${q.exp}`
+    : `<strong>Incorrect.</strong> The right answer is <strong>${q.opts[q.ans]}</strong>. ${q.exp}`;
+  fb.classList.add('show');
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function nextQ() { current++; renderQ(); }
+
+function endGame() {
+  clearInterval(timerInterval);
+  totalTime = Math.round((Date.now() - startTime) / 1000);
+  const pct = Math.round((score / 30) * 100);
+
+  document.getElementById('final-score').textContent = `${score}/30`;
+  document.getElementById('b-easy').textContent = `${breakdown.easy}/10`;
+  document.getElementById('b-mid').textContent = `${breakdown.mid}/10`;
+  document.getElementById('b-hard').textContent = `${breakdown.hard}/10`;
+  document.getElementById('b-time').textContent = `${totalTime}s`;
+
+  let grade, msg, gColor;
+  if (pct >= 90) { grade='S RANK'; msg='Outstanding — SQL master.'; gColor='linear-gradient(135deg,var(--accent),var(--accent2))'; }
+  else if (pct >= 75) { grade='A RANK'; msg='Great work — solid SQL knowledge!'; gColor='linear-gradient(135deg,var(--easy),#059669)'; }
+  else if (pct >= 55) { grade='B RANK'; msg='Good effort — review the tricky ones.'; gColor='linear-gradient(135deg,var(--mid),#d97706)'; }
+  else { grade='C RANK'; msg='Keep practising — SQL takes time!'; gColor='linear-gradient(135deg,var(--hard),#b91c1c)'; }
+
+  const gradeEl = document.getElementById('result-grade');
+  gradeEl.textContent = grade;
+  gradeEl.style.background = gColor;
+  gradeEl.style.webkitBackgroundClip = 'text';
+  gradeEl.style.webkitTextFillColor = 'transparent';
+  gradeEl.style.backgroundClip = 'text';
+  document.getElementById('result-msg').textContent = msg;
+
+  const playerName = document.getElementById('player-name').value.trim() || 'Anonymous';
+  document.getElementById('save-name').value = playerName;
+
+  show('results');
+}
+
+function saveScore() {
+  const name = document.getElementById('save-name').value.trim() || 'Anonymous';
+  const board = getBoard();
+  board.push({ name, score, time: totalTime });
+  board.sort((a,b) => b.score - a.score || a.time - b.time);
+  saveBoard(board.slice(0, 20));
+  alert('Score saved! 🏆');
+}
+
+function goHome() {
+  show('home');
+  renderHomeBoard();
+}
+
+// Init
+renderHomeBoard();
+</script>
+</body>
+</html>
