@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Mëso — Nga Fillimi deri te Avancuar</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f14;
+    --bg2: #151720;
+    --bg3: #1c1e2b;
+    --bg4: #252838;
+    --accent: #6c8ef0;
+    --accent2: #a78bfa;
+    --green: #4ade80;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --teal: #2dd4bf;
+    --text: #e8eaf6;
+    --muted: #8890b0;
+    --border: rgba(108,142,240,0.18);
+    --code-bg: #101218;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0e0f14 0%, #151a2e 50%, #0e1320 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3.5rem 2rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(108,142,240,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-tag {
+    display: inline-block;
+    background: rgba(108,142,240,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(108,142,240,0.3);
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+  }
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+  header p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 520px;
+    margin: 0 auto 2rem;
+    font-weight: 300;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .nav-tab {
+    padding: 7px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 400;
+  }
+  .nav-tab:hover { color: var(--text); border-color: rgba(108,142,240,0.4); }
+  .nav-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* MAIN */
+  .container { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* PROGRESS BAR */
+  .progress-banner {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg4);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  /* LESSON CARD */
+  .lesson-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.8rem 2rem;
+    margin-bottom: 1.4rem;
+    transition: border-color 0.2s;
+  }
+  .lesson-card:hover { border-color: rgba(108,142,240,0.35); }
+  .lesson-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .lesson-num {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    background: rgba(108,142,240,0.15);
+    border: 1px solid rgba(108,142,240,0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .lesson-num.done {
+    background: rgba(74,222,128,0.15);
+    border-color: rgba(74,222,128,0.3);
+    color: var(--green);
+  }
+  .lesson-title {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .lesson-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-weight: 500;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .badge-easy { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+  .badge-mid { background: rgba(251,191,36,0.12); color: var(--amber); border: 1px solid rgba(251,191,36,0.25); }
+  .badge-hard { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 1rem 0;
+    position: relative;
+  }
+  .code-block .kw { color: #c792ea; }
+  .code-block .fn { color: #82aaff; }
+  .code-block .str { color: #c3e88d; }
+  .code-block .num { color: #f78c6c; }
+  .code-block .cm { color: #546e7a; font-style: italic; }
+  .code-block .tbl { color: #ffcb6b; }
+  .copy-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { color: var(--text); }
+
+  /* EXPANDABLE */
+  .expand-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 0.8rem;
+    transition: all 0.2s;
+  }
+  .expand-btn:hover { color: var(--text); border-color: rgba(108,142,240,0.4); }
+  .expandable { display: none; margin-top: 1rem; }
+  .expandable.open { display: block; }
+
+  /* EXPLANATION STEPS */
+  .steps { display: flex; flex-direction: column; gap: 10px; margin: 1rem 0; }
+  .step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: var(--bg3);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .step-icon { font-size: 16px; min-width: 20px; }
+  .step-text { font-size: 14px; line-height: 1.6; color: var(--text); }
+  .step-text strong { color: var(--accent); font-weight: 500; }
+
+  /* QUIZ SECTION */
+  .quiz-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .quiz-q {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+  }
+  .quiz-q code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg4);
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-size: 0.88em;
+    color: var(--teal);
+  }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn {
+    background: var(--bg3);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 11px 16px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: rgba(108,142,240,0.45);
+    background: var(--bg4);
+  }
+  .option-btn.correct { border-color: var(--green); background: rgba(74,222,128,0.08); color: var(--green); }
+  .option-btn.wrong { border-color: var(--red); background: rgba(248,113,113,0.08); color: var(--red); }
+  .option-btn:disabled { cursor: default; }
+  .quiz-feedback {
+    margin-top: 1rem;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: var(--green); }
+  .quiz-feedback.bad { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); color: var(--red); }
+  .next-btn {
+    margin-top: 1rem;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    font-weight: 500;
+    display: none;
+    transition: opacity 0.2s;
+  }
+  .next-btn:hover { opacity: 0.88; }
+  .next-btn.show { display: inline-block; }
+
+  /* SQL SANDBOX */
+  .sandbox {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .sandbox-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sandbox-title { font-size: 13px; font-weight: 500; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .run-btn {
+    background: var(--green);
+    border: none;
+    color: #0a1a0f;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.2s;
+  }
+  .run-btn:hover { opacity: 0.85; }
+  .sandbox-editor {
+    width: 100%;
+    background: var(--code-bg);
+    border: none;
+    color: var(--teal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 1.2rem 1.4rem;
+    resize: vertical;
+    min-height: 110px;
+    outline: none;
+    line-height: 1.8;
+  }
+  .sandbox-result {
+    border-top: 1px solid var(--border);
+    padding: 1rem 1.4rem;
+    min-height: 60px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .result-table th {
+    background: var(--bg3);
+    padding: 7px 14px;
+    text-align: left;
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-table td {
+    padding: 7px 14px;
+    color: var(--text);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .result-table tr:last-child td { border-bottom: none; }
+  .result-error { color: var(--red); font-size: 13px; }
+  .result-ok { color: var(--green); font-size: 13px; }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .section-desc { color: var(--muted); font-size: 14px; margin-bottom: 2rem; }
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-bottom: 2rem;
+  }
+  .cheat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+  }
+  .cheat-kw {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent2);
+    margin-bottom: 6px;
+  }
+  .cheat-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+  /* SCORE */
+  .score-display {
+    text-align: center;
+    padding: 2rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+  }
+  .score-num {
+    font-family: 'Fraunces', serif;
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .score-label { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    header { padding: 2.5rem 1.2rem 2rem; }
+    .container { padding: 1.5rem 1rem 3rem; }
+    .lesson-card { padding: 1.3rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">SQL Interactive</div>
+  <h1>Mëso SQL<br><em style="font-style: italic; font-weight: 300;">Nga zero deri te pro</em></h1>
+  <p>Mëso SQL me shembuj realë, ushtrime interaktive dhe sandbox ku mund të provosh vetë.</p>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('easy')">🟢 Fillestare</button>
+    <button class="nav-tab" onclick="showSection('mid')">🟡 Mesme</button>
+    <button class="nav-tab" onclick="showSection('hard')">🔴 Avancuar</button>
+    <button class="nav-tab" onclick="showSection('sandbox')">⚡ Sandbox</button>
+    <button class="nav-tab" onclick="showSection('quiz')">🧠 Kuiz</button>
+    <button class="nav-tab" onclick="showSection('cheatsheet')">📋 Cheat Sheet</button>
+  </nav>
+</header>
+
+<div class="container">
+
+  <!-- PROGRESS -->
+  <div class="progress-banner">
+    <div style="font-size:13px;color:var(--muted);white-space:nowrap;">Progresi juaj</div>
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <div class="progress-label" id="prog-label">0 / 20 pikë</div>
+  </div>
+
+  <!-- ===================== EASY ===================== -->
+  <div class="section active" id="s-easy">
+    <div class="section-title">SQL Fillestare</div>
+    <div class="section-desc">Konceptet bazë — SELECT, WHERE, ORDER BY, dhe të tjera.</div>
+
+    <!-- LESSON 1 -->
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num" id="ln1">01</div>
+        <div>
+          <div class="lesson-title">SELECT — Merr të dhënat</div>
+          <div class="lesson-sub">Komanda bazë për të lexuar të dhëna nga tabela</div>
+        </div>
+        <span class="badge badge-easy">Fillestare</span>
+      </div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:0.5rem;">
+        <strong style="color:var(--text)">SELECT</strong> është komanda e parë që çdo programues SQL mëson. Ajo "zgjedh" kolona nga tabela.
+      </p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Merr të gjitha kolonat nga tabela</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">punonjësit</span>;
+
+<span class="cm">-- Merr vetëm kolonat specifike</span>
+<span class="kw">SELECT</span> emri, mbiemri, rroga
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>;
+      </div>
+      <button class="expand-btn" onclick="toggleExpand(this)">▶ Shiko shpjegimin</button>
+      <div class="expandable">
+        <div class="steps">
+          <div class="step"><div class="step-icon">1</div><div class="step-text"><strong>SELECT *</strong> — ylli (*) do të thotë "të gjitha kolonat". Shpejt por jo eficiente për tabela të mëdha.</div></div>
+          <div class="step"><div class="step-icon">2</div><div class="step-text"><strong>SELECT emri, rroga</strong> — specifiko kolonat që dëshiron. Kjo është praktika e mirë.</div></div>
+          <div class="step"><div class="step-icon">3</div><div class="step-text"><strong>FROM tabela</strong> — tregon nga cila tabelë merren të dhënat. Gjithmonë pas SELECT.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LESSON 2 -->
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num" id="ln2">02</div>
+        <div>
+          <div class="lesson-title">WHERE — Filtro të dhënat</div>
+          <div class="lesson-sub">Kthehu vetëm rreshtat që plotësojnë kushtin</div>
+        </div>
+        <span class="badge badge-easy">Fillestare</span>
+      </div>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:0.5rem;">
+        <strong style="color:var(--text)">WHERE</strong> filtron rreshtat. Vetëm rreshtat që plotësojnë kushtin kthehen.
+      </p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="kw">SELECT</span> emri, rroga
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">WHERE</span> rroga <span class="num">> 50000</span>;
+
+<span class="cm">-- Tekst me thonjëza</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">WHERE</span> departamenti = <span class="str">'IT'</span>;
+
+<span class="cm">-- Kombinim me AND / OR</span>
+<span class="kw">WHERE</span> rroga <span class="num">> 40000</span> <span class="kw">AND</span> departamenti = <span class="str">'HR'</span>;
+      </div>
+      <button class="expand-btn" onclick="toggleExpand(this)">▶ Shiko shpjegimin</button>
+      <div class="expandable">
+        <div class="steps">
+          <div class="step"><div class="step-icon">●</div><div class="step-text">Operatorë krahasimi: <strong>= > < >= <= !=</strong></div></div>
+          <div class="step"><div class="step-icon">●</div><div class="step-text"><strong>AND</strong> — të dyja kushtet duhet të jenë të vërteta</div></div>
+          <div class="step"><div class="step-icon">●</div><div class="step-text"><strong>OR</strong> — të paktën njëri kusht duhet të jetë i vërtetë</div></div>
+          <div class="step"><div class="step-icon">●</div><div class="step-text">Tekstet shkruhen me <strong>thonjëza të vetme</strong> ' ' — jo dyfishe</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LESSON 3 -->
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num" id="ln3">03</div>
+        <div>
+          <div class="lesson-title">ORDER BY — Rendito</div>
+          <div class="lesson-sub">Rendit rezultatet sipas kolonës</div>
+        </div>
+        <span class="badge badge-easy">Fillestare</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Nga më i vogli tek më i madhi (default)</span>
+<span class="kw">SELECT</span> emri, rroga <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">ORDER BY</span> rroga <span class="kw">ASC</span>;
+
+<span class="cm">-- Nga më i madhi tek më i vogli</span>
+<span class="kw">SELECT</span> emri, rroga <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">ORDER BY</span> rroga <span class="kw">DESC</span>;
+
+<span class="cm">-- Rendito sipas shumë kolonave</span>
+<span class="kw">ORDER BY</span> departamenti <span class="kw">ASC</span>, rroga <span class="kw">DESC</span>;
+      </div>
+    </div>
+
+    <!-- LESSON 4 -->
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num" id="ln4">04</div>
+        <div>
+          <div class="lesson-title">LIMIT & DISTINCT</div>
+          <div class="lesson-sub">Kufizo numrin e rreshtave dhe largo duplikatet</div>
+        </div>
+        <span class="badge badge-easy">Fillestare</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Merr vetëm 10 rreshtat e parë</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">punonjësit</span> <span class="kw">LIMIT</span> <span class="num">10</span>;
+
+<span class="cm">-- Shfaq vetëm vlerat unike</span>
+<span class="kw">SELECT DISTINCT</span> departamenti
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>;
+
+<span class="cm">-- Kombinim</span>
+<span class="kw">SELECT DISTINCT</span> qyteti <span class="kw">FROM</span> <span class="tbl">klientët</span>
+<span class="kw">ORDER BY</span> qyteti <span class="kw">LIMIT</span> <span class="num">5</span>;
+      </div>
+    </div>
+
+    <!-- LESSON 5 -->
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num" id="ln5">05</div>
+        <div>
+          <div class="lesson-title">LIKE & IN — Kërko Pattern</div>
+          <div class="lesson-sub">Filtro me pattern teksti dhe lista vlerash</div>
+        </div>
+        <span class="badge badge-easy">Fillestare</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- LIKE: % = çdo karakter, _ = një karakter</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">WHERE</span> emri <span class="kw">LIKE</span> <span class="str">'A%'</span>;     <span class="cm">-- fillon me A</span>
+
+<span class="kw">WHERE</span> emri <span class="kw">LIKE</span> <span class="str">'%ion'</span>;   <span class="cm">-- mbaron me ion</span>
+
+<span class="cm">-- IN: si shumë OR bashkë</span>
+<span class="kw">WHERE</span> departamenti <span class="kw">IN</span> (<span class="str">'IT'</span>, <span class="str">'HR'</span>, <span class="str">'Finance'</span>);
+
+<span class="cm">-- NOT IN: ekskludo</span>
+<span class="kw">WHERE</span> qyteti <span class="kw">NOT IN</span> (<span class="str">'Prishtinë'</span>, <span class="str">'Prizren'</span>);
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MID ===================== -->
+  <div class="section" id="s-mid">
+    <div class="section-title">SQL Mesme</div>
+    <div class="section-desc">JOIN, GROUP BY, funksione agregimi dhe subqueries.</div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">06</div>
+        <div>
+          <div class="lesson-title">COUNT, SUM, AVG — Funksione Agregimi</div>
+          <div class="lesson-sub">Llogarit statistika mbi grupe të dhënash</div>
+        </div>
+        <span class="badge badge-mid">Mesme</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Numëro rreshtat</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_punonjës
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>;
+
+<span class="cm">-- Shuma, mesatarja, min, max</span>
+<span class="kw">SELECT</span>
+  <span class="fn">SUM</span>(rroga)   <span class="kw">AS</span> total_rrogave,
+  <span class="fn">AVG</span>(rroga)   <span class="kw">AS</span> rroga_mesatare,
+  <span class="fn">MIN</span>(rroga)   <span class="kw">AS</span> rroga_min,
+  <span class="fn">MAX</span>(rroga)   <span class="kw">AS</span> rroga_max
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>;
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">07</div>
+        <div>
+          <div class="lesson-title">GROUP BY & HAVING</div>
+          <div class="lesson-sub">Grupe të dhëna dhe filtro grupe</div>
+        </div>
+        <span class="badge badge-mid">Mesme</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Numëro punonjës sipas departamentit</span>
+<span class="kw">SELECT</span> departamenti, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> numri
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">GROUP BY</span> departamenti;
+
+<span class="cm">-- HAVING filtron GRUPE (jo rreshta)</span>
+<span class="kw">SELECT</span> departamenti, <span class="fn">AVG</span>(rroga) <span class="kw">AS</span> avg_rroga
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">GROUP BY</span> departamenti
+<span class="kw">HAVING</span> <span class="fn">AVG</span>(rroga) <span class="num">> 45000</span>
+<span class="kw">ORDER BY</span> avg_rroga <span class="kw">DESC</span>;
+      </div>
+      <button class="expand-btn" onclick="toggleExpand(this)">▶ WHERE vs HAVING</button>
+      <div class="expandable">
+        <div class="steps">
+          <div class="step"><div class="step-icon">⚠</div><div class="step-text"><strong>WHERE</strong> filtron rreshtat PARA GROUP BY</div></div>
+          <div class="step"><div class="step-icon">⚠</div><div class="step-text"><strong>HAVING</strong> filtron grupe PAS GROUP BY — mund të përdorë funksione agregimi</div></div>
+          <div class="step"><div class="step-icon">✓</div><div class="step-text">Rendi i ekzekutimit: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">08</div>
+        <div>
+          <div class="lesson-title">INNER JOIN — Bashko Tabela</div>
+          <div class="lesson-sub">Merr rreshtat me lidhje në të dyja tabelat</div>
+        </div>
+        <span class="badge badge-mid">Mesme</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Tabela: punonjësit (id, emri, dept_id)</span>
+<span class="cm">-- Tabela: departamentet (id, emri_dept)</span>
+
+<span class="kw">SELECT</span>
+  p.emri          <span class="kw">AS</span> punonjësi,
+  d.emri_dept     <span class="kw">AS</span> departamenti
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span> p
+<span class="kw">INNER JOIN</span> <span class="tbl">departamentet</span> d
+  <span class="kw">ON</span> p.dept_id = d.id;
+
+<span class="cm">-- Vetëm punonjësit me departament ekzistues</span>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">09</div>
+        <div>
+          <div class="lesson-title">LEFT JOIN, RIGHT JOIN, FULL JOIN</div>
+          <div class="lesson-sub">Llojet e ndryshme të bashkimit të tabelave</div>
+        </div>
+        <span class="badge badge-mid">Mesme</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- LEFT JOIN: të gjithë nga e majta + matching</span>
+<span class="kw">SELECT</span> p.emri, d.emri_dept
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span> p
+<span class="kw">LEFT JOIN</span> <span class="tbl">departamentet</span> d <span class="kw">ON</span> p.dept_id = d.id;
+<span class="cm">-- Punonjësit pa departament shfaqen me NULL</span>
+
+<span class="cm">-- Gjej punonjësit BEZ departamenti</span>
+<span class="kw">SELECT</span> p.emri
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span> p
+<span class="kw">LEFT JOIN</span> <span class="tbl">departamentet</span> d <span class="kw">ON</span> p.dept_id = d.id
+<span class="kw">WHERE</span> d.id <span class="kw">IS NULL</span>;
+      </div>
+      <button class="expand-btn" onclick="toggleExpand(this)">▶ Diagram JOIN</button>
+      <div class="expandable">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:0.8rem;">
+          <div style="background:var(--bg3);border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:8px;">INNER JOIN</div>
+            <svg width="100" height="60" viewBox="0 0 100 60">
+              <circle cx="35" cy="30" r="25" fill="rgba(108,142,240,0.2)" stroke="rgba(108,142,240,0.5)" stroke-width="1.5"/>
+              <circle cx="65" cy="30" r="25" fill="rgba(167,139,250,0.2)" stroke="rgba(167,139,250,0.5)" stroke-width="1.5"/>
+              <path d="M50,8 a25,25 0 0,1 0,44 a25,25 0 0,1 0,-44" fill="rgba(108,142,240,0.5)"/>
+            </svg>
+            <div style="font-size:11px;color:var(--muted)">Vetëm matching</div>
+          </div>
+          <div style="background:var(--bg3);border-radius:8px;padding:1rem;text-align:center;">
+            <div style="font-size:12px;color:var(--amber);font-weight:600;margin-bottom:8px;">LEFT JOIN</div>
+            <svg width="100" height="60" viewBox="0 0 100 60">
+              <circle cx="35" cy="30" r="25" fill="rgba(251,191,36,0.4)" stroke="rgba(251,191,36,0.6)" stroke-width="1.5"/>
+              <circle cx="65" cy="30" r="25" fill="rgba(167,139,250,0.15)" stroke="rgba(167,139,250,0.4)" stroke-width="1.5"/>
+            </svg>
+            <div style="font-size:11px;color:var(--muted)">E gjithë e majta + matching</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">10</div>
+        <div>
+          <div class="lesson-title">Subqueries — Pyetje brenda Pyetjesh</div>
+          <div class="lesson-sub">Përdor rezultatin e një query si input tjetër</div>
+        </div>
+        <span class="badge badge-mid">Mesme</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Punonjësit me rroga mbi mesatare</span>
+<span class="kw">SELECT</span> emri, rroga
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">WHERE</span> rroga > (
+  <span class="kw">SELECT</span> <span class="fn">AVG</span>(rroga)
+  <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+);
+
+<span class="cm">-- Subquery në FROM (derived table)</span>
+<span class="kw">SELECT</span> dept, avg_rroga
+<span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> departamenti <span class="kw">AS</span> dept,
+         <span class="fn">AVG</span>(rroga) <span class="kw">AS</span> avg_rroga
+  <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+  <span class="kw">GROUP BY</span> departamenti
+) sub
+<span class="kw">WHERE</span> avg_rroga > <span class="num">50000</span>;
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== HARD ===================== -->
+  <div class="section" id="s-hard">
+    <div class="section-title">SQL Avancuar</div>
+    <div class="section-desc">Window functions, CTEs, indekse, transaksione dhe optimizim.</div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">11</div>
+        <div>
+          <div class="lesson-title">CTE — Common Table Expressions</div>
+          <div class="lesson-sub">Queries të lexueshme dhe rekursive me WITH</div>
+        </div>
+        <span class="badge badge-hard">Avancuar</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- CTE bazë</span>
+<span class="kw">WITH</span> punonjës_senior <span class="kw">AS</span> (
+  <span class="kw">SELECT</span> emri, rroga, departamenti
+  <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+  <span class="kw">WHERE</span> vitet_eksperiencë > <span class="num">5</span>
+)
+<span class="kw">SELECT</span> departamenti, <span class="fn">AVG</span>(rroga) <span class="kw">AS</span> avg_senior
+<span class="kw">FROM</span> punonjës_senior
+<span class="kw">GROUP BY</span> departamenti;
+
+<span class="cm">-- Shumë CTE bashkë</span>
+<span class="kw">WITH</span>
+  total <span class="kw">AS</span> (<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) n <span class="kw">FROM</span> <span class="tbl">punonjësit</span>),
+  senior <span class="kw">AS</span> (<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) n <span class="kw">FROM</span> <span class="tbl">punonjësit</span> <span class="kw">WHERE</span> vitet > <span class="num">5</span>)
+<span class="kw">SELECT</span>
+  senior.n * <span class="num">100.0</span> / total.n <span class="kw">AS</span> pct_senior
+<span class="kw">FROM</span> total, senior;
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">12</div>
+        <div>
+          <div class="lesson-title">Window Functions — ROW_NUMBER, RANK, LAG</div>
+          <div class="lesson-sub">Llogarit mbi grupe pa i shpërbërë</div>
+        </div>
+        <span class="badge badge-hard">Avancuar</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Renditja brenda çdo departamenti</span>
+<span class="kw">SELECT</span>
+  emri,
+  departamenti,
+  rroga,
+  <span class="fn">RANK</span>() <span class="kw">OVER</span> (
+    <span class="kw">PARTITION BY</span> departamenti
+    <span class="kw">ORDER BY</span> rroga <span class="kw">DESC</span>
+  ) <span class="kw">AS</span> renditja
+<span class="kw">FROM</span> <span class="tbl">punonjësit</span>;
+
+<span class="cm">-- LAG: vlera e rreshtit të mëparshëm</span>
+<span class="kw">SELECT</span>
+  muaji,
+  shitjet,
+  <span class="fn">LAG</span>(shitjet, <span class="num">1</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> muaji) <span class="kw">AS</span> muaji_parë,
+  shitjet - <span class="fn">LAG</span>(shitjet, <span class="num">1</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> muaji) <span class="kw">AS</span> ndryshimi
+<span class="kw">FROM</span> <span class="tbl">shitjet_mujore</span>;
+      </div>
+      <button class="expand-btn" onclick="toggleExpand(this)">▶ Funksionet kryesore</button>
+      <div class="expandable">
+        <div class="steps">
+          <div class="step"><div class="step-icon">→</div><div class="step-text"><strong>ROW_NUMBER()</strong> — numër unik për çdo rresht</div></div>
+          <div class="step"><div class="step-icon">→</div><div class="step-text"><strong>RANK()</strong> — renditje me boshllëqe (1,1,3...)</div></div>
+          <div class="step"><div class="step-icon">→</div><div class="step-text"><strong>DENSE_RANK()</strong> — renditje pa boshllëqe (1,1,2...)</div></div>
+          <div class="step"><div class="step-icon">→</div><div class="step-text"><strong>LAG/LEAD</strong> — vlerat e rreshtave para/pas</div></div>
+          <div class="step"><div class="step-icon">→</div><div class="step-text"><strong>SUM() OVER()</strong> — shumë kumulative</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">13</div>
+        <div>
+          <div class="lesson-title">Indekset — Shpejto Queries</div>
+          <div class="lesson-sub">Optimizo performancën e bazës së të dhënave</div>
+        </div>
+        <span class="badge badge-hard">Avancuar</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Krijo indeks bazë</span>
+<span class="kw">CREATE INDEX</span> idx_rroga
+<span class="kw">ON</span> <span class="tbl">punonjësit</span>(rroga);
+
+<span class="cm">-- Indeks i kombinuar (shumë kolona)</span>
+<span class="kw">CREATE INDEX</span> idx_dept_rroga
+<span class="kw">ON</span> <span class="tbl">punonjësit</span>(departamenti, rroga);
+
+<span class="cm">-- Indeks unik (no duplicates)</span>
+<span class="kw">CREATE UNIQUE INDEX</span> idx_email
+<span class="kw">ON</span> <span class="tbl">punonjësit</span>(email);
+
+<span class="cm">-- Shiko planin e ekzekutimit</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">punonjësit</span>
+<span class="kw">WHERE</span> departamenti = <span class="str">'IT'</span>;
+      </div>
+    </div>
+
+    <div class="lesson-card">
+      <div class="lesson-header">
+        <div class="lesson-num">14</div>
+        <div>
+          <div class="lesson-title">Transaksionet — ACID</div>
+          <div class="lesson-sub">Siguro integritetin e të dhënave</div>
+        </div>
+        <span class="badge badge-hard">Avancuar</span>
+      </div>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Kopjo</button>
+<span class="cm">-- Transaksion: transfero para</span>
+<span class="kw">BEGIN TRANSACTION</span>;
+
+<span class="kw">UPDATE</span> <span class="tbl">llogaritë</span>
+<span class="kw">SET</span> balanca = balanca - <span class="num">1000</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="kw">UPDATE</span> <span class="tbl">llogaritë</span>
+<span class="kw">SET</span> balanca = balanca + <span class="num">1000</span>
+<span class="kw">WHERE</span> id = <span class="num">2</span>;
+
+<span class="cm">-- Nëse gjithçka ok</span>
+<span class="kw">COMMIT</span>;
+
+<span class="cm">-- Nëse ka gabim: anullo gjithçka</span>
+<span class="kw">ROLLBACK</span>;
+      </div>
+      <button class="expand-btn" onclick="toggleExpand(this)">▶ ACID çka do të thotë?</button>
+      <div class="expandable">
+        <div class="steps">
+          <div class="step"><div class="step-icon">A</div><div class="step-text"><strong>Atomicity</strong> — Gjithçka ose asgjë. Nuk ekziston "gjysëm operacioni".</div></div>
+          <div class="step"><div class="step-icon">C</div><div class="step-text"><strong>Consistency</strong> — Baza mbetet në gjendje të vlefshme para dhe pas transaksionit.</div></div>
+          <div class="step"><div class="step-icon">I</div><div class="step-text"><strong>Isolation</strong> — Transaksionet paralele nuk ndërhyjnë njëra-tjetrën.</div></div>
+          <div class="step"><div class="step-icon">D</div><div class="step-text"><strong>Durability</strong> — Pas COMMIT, të dhënat ruhen edhe nëse sistemi rrëzohet.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SANDBOX ===================== -->
+  <div class="section" id="s-sandbox">
+    <div class="section-title">⚡ SQL Sandbox</div>
+    <div class="section-desc">Provo SQL direkt në browser. Tabela virtuale janë ngarkuar — shkruaj dhe ekzekuto!</div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.4rem;margin-bottom:1.5rem;font-size:13px;">
+      <div style="color:var(--accent);font-weight:600;margin-bottom:8px;font-family:'JetBrains Mono',monospace;">Tabelat e disponueshme:</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;">
+        <div style="background:var(--bg3);border-radius:7px;padding:10px 12px;">
+          <div style="color:var(--amber);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;margin-bottom:5px;">punonjësit</div>
+          <div style="color:var(--muted);font-size:11px;line-height:1.8;">id, emri, mbiemri<br>departamenti, rroga<br>qyteti, vitet</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:7px;padding:10px 12px;">
+          <div style="color:var(--teal);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;margin-bottom:5px;">departamentet</div>
+          <div style="color:var(--muted);font-size:11px;line-height:1.8;">id, emri<br>buxheti, drejtori</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:7px;padding:10px 12px;">
+          <div style="color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;margin-bottom:5px;">produktet</div>
+          <div style="color:var(--muted);font-size:11px;line-height:1.8;">id, emri, kategoria<br>çmimi, sasia</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1rem;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="expand-btn" onclick="setSandbox('SELECT * FROM punonjësit LIMIT 10;')">📋 Shfaq punonjësit</button>
+      <button class="expand-btn" onclick="setSandbox('SELECT departamenti, COUNT(*) AS numri, AVG(rroga) AS avg_rroga\nFROM punonjësit\nGROUP BY departamenti\nORDER BY avg_rroga DESC;')">📊 Statistika dept.</button>
+      <button class="expand-btn" onclick="setSandbox('SELECT emri, rroga FROM punonjësit\nWHERE rroga > (\n  SELECT AVG(rroga) FROM punonjësit\n)\nORDER BY rroga DESC;')">💰 Mbi mesatare</button>
+      <button class="expand-btn" onclick="setSandbox('SELECT p.emri, p.rroga, d.emri AS departamenti\nFROM punonjësit p\nINNER JOIN departamentet d ON p.departamenti = d.emri\nORDER BY p.rroga DESC;')">🔗 JOIN tabela</button>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-header">
+        <span class="sandbox-title">sql &gt; editor</span>
+        <button class="run-btn" onclick="runSQL()">▶ Ekzekuto</button>
+      </div>
+      <textarea class="sandbox-editor" id="sql-editor" spellcheck="false">SELECT * FROM punonjësit LIMIT 10;</textarea>
+      <div class="sandbox-result" id="sql-result">
+        <span style="color:var(--muted);font-size:13px;">Kliko "Ekzekuto" për të parë rezultatin...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== QUIZ ===================== -->
+  <div class="section" id="s-quiz">
+    <div class="section-title">🧠 Kuiz SQL</div>
+    <div class="section-desc">Testo njohuritë tuaja. 10 pyetje nga të gjitha nivelet.</div>
+
+    <div class="score-display">
+      <div class="score-num" id="score-num">0</div>
+      <div class="score-label">pikë nga <span id="total-q">10</span> pyetje</div>
+      <div style="margin-top:1rem;">
+        <button class="next-btn show" id="restart-btn" onclick="restartQuiz()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);">↺ Rifillo Kuizin</button>
+      </div>
+    </div>
+
+    <div id="quiz-container"></div>
+  </div>
+
+  <!-- ===================== CHEAT SHEET ===================== -->
+  <div class="section" id="s-cheatsheet">
+    <div class="section-title">📋 Cheat Sheet SQL</div>
+    <div class="section-desc">Referencë e shpejtë — të gjitha komandat kryesore në një vend.</div>
+
+    <div class="divider"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem;">🟢 Bazë</div>
+    <div class="cheat-grid">
+      <div class="cheat-card"><div class="cheat-kw">SELECT col FROM tbl</div><div class="cheat-desc">Merr kolonën <em>col</em> nga tabela <em>tbl</em></div></div>
+      <div class="cheat-card"><div class="cheat-kw">WHERE kusht</div><div class="cheat-desc">Filtro rreshtat sipas kushtit</div></div>
+      <div class="cheat-card"><div class="cheat-kw">ORDER BY col DESC</div><div class="cheat-desc">Rendito rezultatet sipas kolonës</div></div>
+      <div class="cheat-card"><div class="cheat-kw">LIMIT n</div><div class="cheat-desc">Kthe vetëm <em>n</em> rreshtat e parë</div></div>
+      <div class="cheat-card"><div class="cheat-kw">DISTINCT</div><div class="cheat-desc">Largo vlerat e dyfishta</div></div>
+      <div class="cheat-card"><div class="cheat-kw">LIKE 'A%'</div><div class="cheat-desc">Kërko me pattern. % = çdo gjë, _ = 1 karakter</div></div>
+      <div class="cheat-card"><div class="cheat-kw">IN (v1, v2)</div><div class="cheat-desc">Kontrollo nëse vlera është në listë</div></div>
+      <div class="cheat-card"><div class="cheat-kw">IS NULL / IS NOT NULL</div><div class="cheat-desc">Kontrollo vlerat null</div></div>
+      <div class="cheat-card"><div class="cheat-kw">BETWEEN a AND b</div><div class="cheat-desc">Vlera ndërmjet <em>a</em> dhe <em>b</em> (inclusive)</div></div>
+    </div>
+
+    <div class="divider"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem;">🟡 Mesme</div>
+    <div class="cheat-grid">
+      <div class="cheat-card"><div class="cheat-kw">COUNT(*)</div><div class="cheat-desc">Numëro rreshtat</div></div>
+      <div class="cheat-card"><div class="cheat-kw">SUM(col)</div><div class="cheat-desc">Shuma e vlerave numerike</div></div>
+      <div class="cheat-card"><div class="cheat-kw">AVG(col)</div><div class="cheat-desc">Mesatarja e vlerave</div></div>
+      <div class="cheat-card"><div class="cheat-kw">MIN(col) / MAX(col)</div><div class="cheat-desc">Vlera minimale dhe maksimale</div></div>
+      <div class="cheat-card"><div class="cheat-kw">GROUP BY col</div><div class="cheat-desc">Grupo rreshtat sipas kolonës</div></div>
+      <div class="cheat-card"><div class="cheat-kw">HAVING kusht</div><div class="cheat-desc">Filtro grupe (pas GROUP BY)</div></div>
+      <div class="cheat-card"><div class="cheat-kw">INNER JOIN ... ON</div><div class="cheat-desc">Bashko tabela — vetëm rreshtat matching</div></div>
+      <div class="cheat-card"><div class="cheat-kw">LEFT JOIN ... ON</div><div class="cheat-desc">Të gjithë nga e majta + matching</div></div>
+      <div class="cheat-card"><div class="cheat-kw">AS alias</div><div class="cheat-desc">Emëro kolonën/tabelën ndryshe</div></div>
+    </div>
+
+    <div class="divider"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem;">🔴 Avancuar</div>
+    <div class="cheat-grid">
+      <div class="cheat-card"><div class="cheat-kw">WITH cte AS (...)</div><div class="cheat-desc">Common Table Expression — queries të lexueshme</div></div>
+      <div class="cheat-card"><div class="cheat-kw">ROW_NUMBER() OVER()</div><div class="cheat-desc">Numëro rreshtat brenda ndarjes</div></div>
+      <div class="cheat-card"><div class="cheat-kw">RANK() OVER()</div><div class="cheat-desc">Renditje me boshllëqe</div></div>
+      <div class="cheat-card"><div class="cheat-kw">LAG(col, n) OVER()</div><div class="cheat-desc">Vlera e <em>n</em> rreshtave më parë</div></div>
+      <div class="cheat-card"><div class="cheat-kw">LEAD(col, n) OVER()</div><div class="cheat-desc">Vlera e <em>n</em> rreshtave pas</div></div>
+      <div class="cheat-card"><div class="cheat-kw">PARTITION BY col</div><div class="cheat-desc">Ndaj window function sipas grupit</div></div>
+      <div class="cheat-card"><div class="cheat-kw">CREATE INDEX ON tbl(col)</div><div class="cheat-desc">Shpejto queries me indeks</div></div>
+      <div class="cheat-card"><div class="cheat-kw">BEGIN / COMMIT / ROLLBACK</div><div class="cheat-desc">Menaxho transaksionet</div></div>
+      <div class="cheat-card"><div class="cheat-kw">EXPLAIN ANALYZE</div><div class="cheat-desc">Shiko planin e ekzekutimit</div></div>
+    </div>
+
+    <div class="divider"></div>
+    <div style="font-size:13px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem;">📐 Rendi i ekzekutimit</div>
+    <div class="code-block">
+<span class="cm">-- SQL ekzekutohet në këtë rend (jo si shkruhet):</span>
+<span class="num">1.</span> <span class="kw">FROM</span>       <span class="cm">-- nga cila tabelë</span>
+<span class="num">2.</span> <span class="kw">JOIN</span>       <span class="cm">-- bashko tabelat</span>
+<span class="num">3.</span> <span class="kw">WHERE</span>      <span class="cm">-- filtro rreshtat</span>
+<span class="num">4.</span> <span class="kw">GROUP BY</span>   <span class="cm">-- grupe</span>
+<span class="num">5.</span> <span class="kw">HAVING</span>     <span class="cm">-- filtro grupe</span>
+<span class="num">6.</span> <span class="kw">SELECT</span>     <span class="cm">-- zgjidh kolonat</span>
+<span class="num">7.</span> <span class="kw">DISTINCT</span>   <span class="cm">-- largo duplikatet</span>
+<span class="num">8.</span> <span class="kw">ORDER BY</span>   <span class="cm">-- rendito</span>
+<span class="num">9.</span> <span class="kw">LIMIT</span>      <span class="cm">-- kufizon rreshtat</span>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script>
+// ===================== NAV =====================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const map = {easy:0,mid:1,hard:2,sandbox:3,quiz:4,cheatsheet:5};
+  tabs[map[id]].classList.add('active');
+}
+
+// ===================== EXPAND =====================
+function toggleExpand(btn) {
+  const exp = btn.nextElementSibling;
+  const open = exp.classList.toggle('open');
+  btn.textContent = open ? '▼ Fshih' : '▶ ' + btn.textContent.replace('▼ Fshih','').replace('▶ ','');
+}
+
+// ===================== COPY =====================
+function copyCode(btn) {
+  const block = btn.parentElement;
+  const text = block.innerText.replace('Kopjo','').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Kopjuar';
+    setTimeout(() => btn.textContent = 'Kopjo', 2000);
+  });
+}
+
+// ===================== PROGRESS =====================
+let score = 0;
+function updateProgress(pts) {
+  score = Math.min(20, score + pts);
+  const pct = (score / 20) * 100;
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = score + ' / 20 pikë';
+}
+
+// ===================== SQL.JS SANDBOX =====================
+let db = null;
+function initDB() {
+  if (typeof initSqlJs === 'undefined') return;
+  initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` }).then(SQL => {
+    db = new SQL.Database();
+    db.run(`
+      CREATE TABLE punonjësit (id INTEGER PRIMARY KEY, emri TEXT, mbiemri TEXT, departamenti TEXT, rroga INTEGER, qyteti TEXT, vitet INTEGER);
+      INSERT INTO punonjësit VALUES
+        (1,'Arben','Hoxha','IT',62000,'Prishtinë',8),
+        (2,'Fjolla','Berisha','HR',45000,'Prizren',3),
+        (3,'Driton','Krasniqi','IT',71000,'Prishtinë',12),
+        (4,'Mimoza','Gashi','Finance',55000,'Gjakovë',6),
+        (5,'Valon','Ahmeti','IT',48000,'Pejë',2),
+        (6,'Lirije','Morina','HR',52000,'Prishtinë',7),
+        (7,'Besnik','Osmani','Finance',68000,'Mitrovicë',10),
+        (8,'Arta','Rrustemi','Marketing',43000,'Prizren',4),
+        (9,'Gentian','Limaj','IT',59000,'Prishtinë',5),
+        (10,'Shpresa','Bajrami','Marketing',38000,'Ferizaj',1),
+        (11,'Kujtim','Dërmaku','Finance',72000,'Prishtinë',15),
+        (12,'Dëshira','Haliti','HR',41000,'Gjakovë',2);
+
+      CREATE TABLE departamentet (id INTEGER, emri TEXT, buxheti INTEGER, drejtori TEXT);
+      INSERT INTO departamentet VALUES
+        (1,'IT',500000,'Artan Kelmendi'),
+        (2,'HR',200000,'Sara Shala'),
+        (3,'Finance',350000,'Mentor Sopi'),
+        (4,'Marketing',180000,'Blerta Rama');
+
+      CREATE TABLE produktet (id INTEGER, emri TEXT, kategoria TEXT, çmimi REAL, sasia INTEGER);
+      INSERT INTO produktet VALUES
+        (1,'Laptop Dell','Elektronikë',899.99,45),
+        (2,'Mouse Logitech','Aksesorë',29.99,120),
+        (3,'Monitor Samsung','Elektronikë',349.00,30),
+        (4,'Tastierë Mekike','Aksesorë',89.99,75),
+        (5,'Kufje Sony','Audio',159.99,60),
+        (6,'Webcam HD','Kamera',79.99,50),
+        (7,'USB Hub','Aksesorë',24.99,200),
+        (8,'SSD 1TB','Ruajtje',119.99,80);
+    `);
+    document.getElementById('sql-result').innerHTML = '<span style="color:var(--green);font-size:13px;">✓ Baza e të dhënave u ngarkua. Shkruaj SQL dhe kliko Ekzekuto!</span>';
+  });
+}
+initDB();
+
+function setSandbox(q) {
+  document.getElementById('sql-editor').value = q;
+  showSection('sandbox');
+}
+
+function runSQL() {
+  const query = document.getElementById('sql-editor').value.trim();
+  const res = document.getElementById('sql-result');
+  if (!db) { res.innerHTML = '<span class="result-error">⚠ Baza nuk u ngarkua ende. Provo pas pak sekondash.</span>'; return; }
+  if (!query) { res.innerHTML = '<span class="result-error">⚠ Shkruaj një query SQL.</span>'; return; }
+  try {
+    const results = db.exec(query);
+    if (!results.length) {
+      res.innerHTML = '<span class="result-ok">✓ Query ekzekutuar me sukses (0 rreshta)</span>';
+      updateProgress(1);
+      return;
+    }
+    const r = results[0];
+    let html = '<table class="result-table"><thead><tr>';
+    r.columns.forEach(c => html += `<th>${c}</th>`);
+    html += '</tr></thead><tbody>';
+    r.values.forEach(row => {
+      html += '<tr>';
+      row.forEach(v => html += `<td>${v === null ? '<em style="color:var(--muted)">NULL</em>' : v}</td>`);
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += `<div style="color:var(--muted);font-size:11px;margin-top:8px;">${r.values.length} rreshta u kthyen</div>`;
+    res.innerHTML = html;
+    updateProgress(1);
+  } catch(e) {
+    res.innerHTML = `<span class="result-error">✗ Gabim SQL: ${e.message}</span>`;
+  }
+}
+
+document.getElementById('sql-editor').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') runSQL();
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = e.target.selectionStart;
+    e.target.value = e.target.value.substring(0, s) + '  ' + e.target.value.substring(e.target.selectionEnd);
+    e.target.selectionStart = e.target.selectionEnd = s + 2;
+  }
+});
+
+// ===================== QUIZ =====================
+const questions = [
+  { q: 'Cila komandë zgjedh të gjitha kolonat nga tabela <code>klientët</code>?', a: 0, opts: ['SELECT * FROM klientët;', 'GET ALL FROM klientët;', 'FETCH klientët;', 'READ * FROM klientët;'], ex: 'SELECT * FROM tabela; — komanda bazë për marrjen e të dhënave.' },
+  { q: 'Si filtrohen punonjësit me rroga mbi 50000?', a: 2, opts: ['SELECT WHERE rroga > 50000;', 'FILTER rroga > 50000 FROM punonjësit;', 'SELECT * FROM punonjësit WHERE rroga > 50000;', 'SELECT * FROM punonjësit HAVING rroga > 50000;'], ex: 'WHERE filtron rreshtat individuale — duhet pas FROM.' },
+  { q: 'Cila funksion llogarit numrin e rreshtave?', a: 1, opts: ['SUM(*)', 'COUNT(*)', 'TOTAL(*)', 'NUMBER(*)'], ex: 'COUNT(*) numëron të gjithë rreshtat, COUNT(col) numëron vlerat jo-null.' },
+  { q: 'Çfarë bën <code>DISTINCT</code> në query?', a: 3, opts: ['Rendit rezultatet', 'Kufizion rreshtat', 'Bashkon tabelat', 'Largon vlerat e dyfishta'], ex: 'SELECT DISTINCT largon rreshtat duplikate nga rezultati.' },
+  { q: 'Cili ORDER BY rendit nga më i madhi tek më i vogli?', a: 0, opts: ['ORDER BY rroga DESC', 'ORDER BY rroga ASC', 'ORDER BY rroga MAX', 'SORT BY rroga -1'], ex: 'DESC = descending (zbritës). ASC = ascending (ngjitës, default).' },
+  { q: 'Çfarë kthen <code>LEFT JOIN</code>?', a: 2, opts: ['Vetëm rreshtat matching', 'Vetëm tabela e djathtë', 'Të gjithë rreshtat nga e majta + matching nga e djathta', 'Produkt kartezian'], ex: 'LEFT JOIN mban të gjithë rreshtat nga tabela e majtë, edhe ata pa match (NULL).' },
+  { q: 'Cila komandë filtron GRUPE (pas GROUP BY)?', a: 1, opts: ['WHERE', 'HAVING', 'FILTER', 'AND'], ex: 'HAVING filtron grupe pas GROUP BY. WHERE filtron rreshtat para GROUP BY.' },
+  { q: 'Çfarë bën <code>WITH cte AS (...)</code>?', a: 3, opts: ['Krijo tabelë të re', 'Hap transaksion', 'Kufizion rezultatin', 'Krijon Common Table Expression (CTE) të ripërdorshme'], ex: 'CTE me WITH e bën kodin SQL shumë më të lexueshëm dhe të organizuar.' },
+  { q: 'Cila window function kthen numër rendor unik për çdo rresht?', a: 0, opts: ['ROW_NUMBER()', 'RANK()', 'DENSE_RANK()', 'COUNT()'], ex: 'ROW_NUMBER() jep 1,2,3,4... pa lidhje me vlerat. RANK() jep boshllëqe kur ka barazim.' },
+  { q: 'Cili është qëllimi kryesor i <code>CREATE INDEX</code>?', a: 2, opts: ['Krijo tabelë të re', 'Shto kolonë', 'Shpejto kërkimet (queries)', 'Fshij rreshta'], ex: 'Indekset ndihmojnë bazën të gjejë të dhënat shpejt pa skanuar të gjithë tabelën.' },
+];
+
+let currentQ = 0, quizScore = 0, answered = [];
+
+function renderQuiz() {
+  const c = document.getElementById('quiz-container');
+  c.innerHTML = '';
+  questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-wrap';
+    div.id = 'qw-' + i;
+    div.innerHTML = `
+      <div class="quiz-q">${i+1}. ${q.q}</div>
+      <div class="options" id="opts-${i}">
+        ${q.opts.map((o,j) => `<button class="option-btn" onclick="answer(${i},${j})">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="fb-${i}"></div>
+      <button class="next-btn" id="next-${i}" onclick="nextQ(${i})">Tjetri →</button>
+    `;
+    c.appendChild(div);
+  });
+  updateScoreDisplay();
+}
+
+function answer(qi, ai) {
+  if (answered.includes(qi)) return;
+  answered.push(qi);
+  const q = questions[qi];
+  const opts = document.querySelectorAll(`#opts-${qi} .option-btn`);
+  opts.forEach((b,j) => {
+    b.disabled = true;
+    if (j === q.a) b.classList.add('correct');
+    else if (j === ai && ai !== q.a) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('fb-' + qi);
+  fb.classList.add('show');
+  if (ai === q.a) {
+    quizScore++;
+    fb.className = 'quiz-feedback show ok';
+    fb.textContent = '✓ Saktë! ' + q.ex;
+    updateProgress(1);
+  } else {
+    fb.className = 'quiz-feedback show bad';
+    fb.textContent = '✗ Jo saktë. ' + q.ex;
+  }
+  document.getElementById('next-' + qi).classList.add('show');
+  updateScoreDisplay();
+}
+
+function nextQ(qi) {
+  const wrap = document.getElementById('qw-' + qi);
+  wrap.style.opacity = '0.5';
+  if (qi < questions.length - 1) {
+    document.getElementById('qw-' + (qi+1)).scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function updateScoreDisplay() {
+  document.getElementById('score-num').textContent = quizScore;
+}
+
+function restartQuiz() {
+  quizScore = 0; answered = [];
+  renderQuiz();
+}
+
+renderQuiz();
+</script>
+</body>
+</html>
