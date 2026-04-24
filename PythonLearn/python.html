@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Praktike — Gati për Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3e;
+    --accent: #7c6aff;
+    --accent2: #ff6a9a;
+    --accent3: #6affd4;
+    --text: #e8e8f0;
+    --muted: #7878a0;
+    --success: #4ade80;
+    --error: #f87171;
+    --warning: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: .4;
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,15,.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .logo {
+    font-size: 1.3rem; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .progress-bar-wrap {
+    display: flex; align-items: center; gap: .8rem;
+  }
+  .progress-label { font-size: .8rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .progress-outer {
+    width: 160px; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden;
+  }
+  .progress-inner {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 99px; transition: width .4s ease;
+  }
+
+  .hero {
+    text-align: center; padding: 4rem 2rem 2rem;
+    position: relative; z-index: 1;
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800; letter-spacing: -2px; line-height: 1.05;
+    margin-bottom: .8rem;
+  }
+  .hero h1 span { background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: var(--muted); font-size: 1rem; max-width: 480px; margin: 0 auto 2rem; }
+
+  /* category nav */
+  .cat-nav {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem;
+    padding: 0 2rem 2rem; position: relative; z-index: 1;
+  }
+  .cat-btn {
+    padding: .45rem 1.1rem; border-radius: 99px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem; cursor: pointer; transition: all .2s;
+  }
+  .cat-btn:hover, .cat-btn.active {
+    background: var(--accent); border-color: var(--accent);
+    color: #fff;
+  }
+
+  main {
+    max-width: 860px; margin: 0 auto; padding: 0 1.5rem 5rem;
+    position: relative; z-index: 1;
+  }
+
+  .section { margin-bottom: 3.5rem; }
+
+  .section-title {
+    display: flex; align-items: center; gap: .8rem;
+    margin-bottom: 1.4rem;
+  }
+  .section-title h2 {
+    font-size: 1.25rem; font-weight: 800; letter-spacing: -.5px;
+  }
+  .section-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: .7rem;
+    padding: .2rem .6rem; border-radius: 99px;
+    background: var(--accent); color: #fff;
+  }
+  .section-line {
+    flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* task card */
+  .task-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 1rem; overflow: hidden;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .task-card:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent)22; }
+  .task-card.done { border-color: var(--success)55; }
+
+  .task-header {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.1rem 1.3rem; cursor: pointer;
+  }
+  .task-num {
+    min-width: 28px; height: 28px; border-radius: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: .75rem;
+    color: var(--muted); flex-shrink: 0; margin-top: 2px;
+  }
+  .task-card.done .task-num {
+    background: var(--success)22; border-color: var(--success)55; color: var(--success);
+  }
+  .task-title-wrap { flex: 1; }
+  .task-title { font-size: .97rem; font-weight: 700; line-height: 1.4; margin-bottom: .2rem; }
+  .task-diff {
+    font-family: 'JetBrains Mono', monospace; font-size: .65rem;
+    padding: .15rem .5rem; border-radius: 99px; display: inline-block;
+  }
+  .diff-easy { background: var(--success)22; color: var(--success); }
+  .diff-med { background: var(--warning)22; color: var(--warning); }
+  .diff-hard { background: var(--error)22; color: var(--error); }
+
+  .task-toggle {
+    width: 28px; height: 28px; border: none; background: transparent;
+    color: var(--muted); font-size: 1rem; cursor: pointer;
+    transition: transform .25s; flex-shrink: 0;
+  }
+  .task-toggle.open { transform: rotate(180deg); }
+
+  .task-body {
+    display: none; padding: 0 1.3rem 1.3rem; border-top: 1px solid var(--border);
+  }
+  .task-body.open { display: block; }
+
+  .task-desc {
+    font-size: .88rem; color: var(--muted); line-height: 1.7; margin: .9rem 0 1rem;
+  }
+
+  /* hint box */
+  .hint-box {
+    background: var(--surface); border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0; padding: .7rem 1rem; margin-bottom: 1rem;
+    font-size: .82rem; color: var(--muted);
+    display: none;
+  }
+  .hint-box.show { display: block; }
+  .hint-box strong { color: var(--accent); display: block; margin-bottom: .3rem; font-size: .75rem; letter-spacing: .05em; }
+
+  /* code editor */
+  .editor-wrap { position: relative; margin-bottom: .8rem; }
+  .editor-label {
+    font-family: 'JetBrains Mono', monospace; font-size: .65rem;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: .4rem; display: block;
+  }
+  textarea.code-editor {
+    width: 100%; min-height: 120px; resize: vertical;
+    background: #0d0d14; border: 1px solid var(--border);
+    border-radius: 10px; color: var(--accent3);
+    font-family: 'JetBrains Mono', monospace; font-size: .83rem;
+    padding: .9rem 1rem; line-height: 1.6;
+    outline: none; transition: border-color .2s;
+    tab-size: 4;
+  }
+  textarea.code-editor:focus { border-color: var(--accent); }
+
+  .task-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-bottom: .8rem; }
+
+  .btn {
+    padding: .45rem 1.1rem; border-radius: 8px; border: none;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .8rem;
+    cursor: pointer; transition: all .18s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #9080ff; }
+  .btn-hint { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+  .btn-hint:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-solution { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+  .btn-solution:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-done { background: var(--success)22; border: 1px solid var(--success)55; color: var(--success); }
+  .btn-done:hover { background: var(--success)44; }
+
+  .output-box {
+    background: #0d0d14; border: 1px solid var(--border);
+    border-radius: 10px; padding: .8rem 1rem; min-height: 40px;
+    font-family: 'JetBrains Mono', monospace; font-size: .8rem;
+    color: var(--text); white-space: pre-wrap; line-height: 1.6;
+    display: none;
+  }
+  .output-box.show { display: block; }
+  .output-box.success { border-color: var(--success)55; color: var(--success); }
+  .output-box.error { border-color: var(--error)55; color: var(--error); }
+
+  .solution-box {
+    background: #0d0d14; border: 1px solid var(--accent2)33;
+    border-radius: 10px; padding: .8rem 1rem; margin-top: .6rem;
+    font-family: 'JetBrains Mono', monospace; font-size: .8rem;
+    color: var(--accent2); white-space: pre-wrap; line-height: 1.6;
+    display: none;
+  }
+  .solution-box.show { display: block; }
+
+  .done-check {
+    display: inline-block; width: 22px; height: 22px;
+    border: 2px solid var(--border); border-radius: 6px;
+    cursor: pointer; vertical-align: middle;
+    transition: all .2s; background: transparent;
+    position: relative; flex-shrink: 0; margin-top: 3px;
+  }
+  .done-check.checked {
+    background: var(--success); border-color: var(--success);
+  }
+  .done-check.checked::after {
+    content: '✓'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; color: #fff; font-weight: 900;
+  }
+
+  footer {
+    text-align: center; padding: 2rem; color: var(--muted);
+    font-size: .8rem; border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+
+  @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+  .section { animation: fadeIn .4s ease both; }
+
+  .empty-msg { color: var(--muted); font-size: .9rem; text-align: center; padding: 2rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🐍 PyPraktike</div>
+  <div class="progress-bar-wrap">
+    <span class="progress-label" id="prog-label">0 / 0</span>
+    <div class="progress-outer"><div class="progress-inner" id="prog-bar" style="width:0%"></div></div>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>Gati për<br><span>Python Assessment</span></h1>
+  <p>Ushtro me detyra praktike nga The Complete Python Bootcamp. Zgjidh kodin, kontrollo, shiko zgjidhjen.</p>
+</div>
+
+<div class="cat-nav" id="cat-nav">
+  <button class="cat-btn active" onclick="filterCat('all', this)">Të gjitha</button>
+  <button class="cat-btn" onclick="filterCat('bazat', this)">Bazat</button>
+  <button class="cat-btn" onclick="filterCat('stringjet', this)">Strings</button>
+  <button class="cat-btn" onclick="filterCat('listat', this)">Lista & Tuples</button>
+  <button class="cat-btn" onclick="filterCat('fjalorët', this)">Dictionaries</button>
+  <button class="cat-btn" onclick="filterCat('kushtet', this)">If/Else</button>
+  <button class="cat-btn" onclick="filterCat('loops', this)">Loops</button>
+  <button class="cat-btn" onclick="filterCat('funksionet', this)">Funksionet</button>
+  <button class="cat-btn" onclick="filterCat('oop', this)">OOP</button>
+  <button class="cat-btn" onclick="filterCat('file_io', this)">File I/O</button>
+  <button class="cat-btn" onclick="filterCat('errors', this)">Errors</button>
+</div>
+
+<main id="main-content"></main>
+
+<footer>Ndërtuar për sukses në assessment — <strong>Ushtro, ushtro, ushtro!</strong> 💪</footer>
+
+<script>
+const tasks = [
+  // ── BAZAT ──────────────────────────────────────────────────
+  {
+    cat: 'bazat', diff: 'easy',
+    title: 'Llogarit shumën e dy numrave',
+    desc: 'Shkruaj kodin që merr dy numra (a=15, b=27) dhe printon shumën e tyre.',
+    hint: 'Përdor operator + dhe funksionin print().',
+    solution: 'a = 15\nb = 27\nprint(a + b)',
+    test: (code) => code.includes('15') && code.includes('27') && code.includes('print')
+  },
+  {
+    cat: 'bazat', diff: 'easy',
+    title: 'Llogarit sipërfaqen e rrethit',
+    desc: 'Shkruaj kodin që llogarit sipërfaqen e një rrethi me rreze r=7. Formula: π × r². Përdor math.pi.',
+    hint: 'import math\nmath.pi * r**2',
+    solution: 'import math\nr = 7\nprint(math.pi * r**2)',
+    test: (code) => code.includes('math') && code.includes('7')
+  },
+  {
+    cat: 'bazat', diff: 'med',
+    title: 'Konverto Celsius në Fahrenheit',
+    desc: 'Shkruaj funksionin celsius_to_f(c) që konverton gradët Celsius në Fahrenheit.\nFormula: F = (C × 9/5) + 32\nTesto me: celsius_to_f(100) → 212.0',
+    hint: 'Kthe vlerën me return, mos printo brenda funksionit.',
+    solution: 'def celsius_to_f(c):\n    return (c * 9/5) + 32\n\nprint(celsius_to_f(100))',
+    test: (code) => code.includes('9/5') || code.includes('9 / 5')
+  },
+  {
+    cat: 'bazat', diff: 'med',
+    title: 'Numri çift apo tek?',
+    desc: 'Shkruaj funksionin is_even(n) që kthen True nëse numri është çift, False nëse është tek.\nTesto me: is_even(4) → True, is_even(7) → False',
+    hint: 'Operatori modulo % është miku yt. n % 2 == 0',
+    solution: 'def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(4))\nprint(is_even(7))',
+    test: (code) => code.includes('%') && (code.includes('== 0') || code.includes('==0'))
+  },
+  {
+    cat: 'bazat', diff: 'hard',
+    title: 'Numri i fjalëve pa split()',
+    desc: 'Shkruaj funksionin count_words(s) që numëron fjalët në një string duke iteruar karakteret (pa përdorur .split()).\nTesto: count_words("hello world foo") → 3',
+    hint: 'Mbaj gjurmë kur kalon nga hapësirë te jo-hapësirë. Llogaris tranzicionet.',
+    solution: 'def count_words(s):\n    count = 0\n    in_word = False\n    for ch in s:\n        if ch != " " and not in_word:\n            count += 1\n            in_word = True\n        elif ch == " ":\n            in_word = False\n    return count\n\nprint(count_words("hello world foo"))',
+    test: (code) => code.includes('def count_words')
+  },
+
+  // ── STRINGS ────────────────────────────────────────────────
+  {
+    cat: 'stringjet', diff: 'easy',
+    title: 'Reverse string',
+    desc: 'Shkruaj funksionin reverse_str(s) që kthen stringun të kthyer mbrapsht.\nTesto: reverse_str("python") → "nohtyp"',
+    hint: 'Slicing: s[::-1]',
+    solution: 'def reverse_str(s):\n    return s[::-1]\n\nprint(reverse_str("python"))',
+    test: (code) => code.includes('[::-1]') || code.includes('reversed')
+  },
+  {
+    cat: 'stringjet', diff: 'easy',
+    title: 'Numëro zanorët',
+    desc: 'Shkruaj funksionin count_vowels(s) që numëron zanorët (a,e,i,o,u) në një string. Ignore case.\nTesto: count_vowels("Hello World") → 3',
+    hint: "Ktheje stringun lowercase dhe kontrollo 'aeiou'.",
+    solution: 'def count_vowels(s):\n    return sum(1 for c in s.lower() if c in "aeiou")\n\nprint(count_vowels("Hello World"))',
+    test: (code) => code.includes('aeiou')
+  },
+  {
+    cat: 'stringjet', diff: 'med',
+    title: 'Palindrome checker',
+    desc: 'Shkruaj funksionin is_palindrome(s) që kontrollon nëse një fjalë lexohet njëlloj si mbrapsht. Ignore hapësirat dhe caps.\nTesto: is_palindrome("racecar") → True, is_palindrome("hello") → False',
+    hint: "Pastro stringun: s.replace(' ','').lower() dhe krahaso me reverse.",
+    solution: "def is_palindrome(s):\n    s = s.replace(' ', '').lower()\n    return s == s[::-1]\n\nprint(is_palindrome('racecar'))\nprint(is_palindrome('hello'))",
+    test: (code) => code.includes('palindrome') || code.includes('[::-1]')
+  },
+  {
+    cat: 'stringjet', diff: 'med',
+    title: 'Fshih fjalëkalimin',
+    desc: 'Shkruaj funksionin mask_password(pw) që fsheh të gjitha karakteret përveç 3 të fundit me "*".\nTesto: mask_password("mysecret123") → "********123"',
+    hint: 'len(pw) - 3 karaktere bëhen *, 3 të fundit mbeten. pw[-3:]',
+    solution: 'def mask_password(pw):\n    return "*" * (len(pw) - 3) + pw[-3:]\n\nprint(mask_password("mysecret123"))',
+    test: (code) => code.includes('-3') || code.includes('[-3')
+  },
+  {
+    cat: 'stringjet', diff: 'hard',
+    title: 'Anagram checker',
+    desc: 'Shkruaj funksionin is_anagram(s1, s2) që kontrollon nëse dy stringje janë anagram i njëri-tjetrit.\nTesto: is_anagram("listen", "silent") → True',
+    hint: 'Sorto të dy stringjet dhe krahaso: sorted(s1) == sorted(s2)',
+    solution: 'def is_anagram(s1, s2):\n    return sorted(s1.lower()) == sorted(s2.lower())\n\nprint(is_anagram("listen", "silent"))\nprint(is_anagram("hello", "world"))',
+    test: (code) => code.includes('sorted') || code.includes('Counter')
+  },
+
+  // ── LISTAT & TUPLES ────────────────────────────────────────
+  {
+    cat: 'listat', diff: 'easy',
+    title: 'Gjej elementin e dytë më të madh',
+    desc: 'Shkruaj funksionin second_largest(lst) që kthen elementin e dytë më të madh nga lista.\nTesto: second_largest([3,1,4,1,5,9,2,6]) → 6',
+    hint: 'Bëje listën unique me set(), sorto, merr indeksin -2.',
+    solution: 'def second_largest(lst):\n    unique = sorted(set(lst))\n    return unique[-2]\n\nprint(second_largest([3,1,4,1,5,9,2,6]))',
+    test: (code) => code.includes('second_largest')
+  },
+  {
+    cat: 'listat', diff: 'easy',
+    title: 'Flatten listë listash',
+    desc: 'Shkruaj funksionin flatten(lst) që shndërron një listë listash në një listë të vetme.\nTesto: flatten([[1,2],[3,4],[5]]) → [1,2,3,4,5]',
+    hint: 'Nested loop ose list comprehension: [x for sub in lst for x in sub]',
+    solution: 'def flatten(lst):\n    return [x for sub in lst for x in sub]\n\nprint(flatten([[1,2],[3,4],[5]]))',
+    test: (code) => code.includes('flatten')
+  },
+  {
+    cat: 'listat', diff: 'med',
+    title: 'Hiq duplikatet – ruaj rendin',
+    desc: 'Shkruaj funksionin remove_dupes(lst) që heq duplikatet por ruan rendin e elementeve.\nTesto: remove_dupes([1,2,2,3,1,4]) → [1,2,3,4]',
+    hint: 'Përdor një set() për të mbajtur gjurmën e elementeve të parë.',
+    solution: 'def remove_dupes(lst):\n    seen = set()\n    result = []\n    for x in lst:\n        if x not in seen:\n            result.append(x)\n            seen.add(x)\n    return result\n\nprint(remove_dupes([1,2,2,3,1,4]))',
+    test: (code) => code.includes('remove_dupes')
+  },
+  {
+    cat: 'listat', diff: 'med',
+    title: 'Chunkify listën',
+    desc: 'Shkruaj funksionin chunk(lst, size) që ndan listën në copa të vogla me madhësi size.\nTesto: chunk([1,2,3,4,5,6,7], 3) → [[1,2,3],[4,5,6],[7]]',
+    hint: 'Përdor range(0, len(lst), size) dhe slicing.',
+    solution: 'def chunk(lst, size):\n    return [lst[i:i+size] for i in range(0, len(lst), size)]\n\nprint(chunk([1,2,3,4,5,6,7], 3))',
+    test: (code) => code.includes('chunk')
+  },
+  {
+    cat: 'listat', diff: 'hard',
+    title: 'Numëro shfaqjet me dict',
+    desc: 'Shkruaj funksionin frequency(lst) që kthen një dictionary me numrin e shfaqjeve të çdo elementi.\nTesto: frequency(["a","b","a","c","b","a"]) → {"a":3,"b":2,"c":1}',
+    hint: 'Inicializo çelësin me 0 nëse nuk ekziston: dict.get(key, 0)',
+    solution: 'def frequency(lst):\n    freq = {}\n    for item in lst:\n        freq[item] = freq.get(item, 0) + 1\n    return freq\n\nprint(frequency(["a","b","a","c","b","a"]))',
+    test: (code) => code.includes('frequency')
+  },
+
+  // ── DICTIONARIES ───────────────────────────────────────────
+  {
+    cat: 'fjalorët', diff: 'easy',
+    title: 'Inverso dictionary',
+    desc: 'Shkruaj funksionin invert_dict(d) që kthen dictionary me çelësat dhe vlerat të ndërruar.\nTesto: invert_dict({"a":1,"b":2}) → {1:"a", 2:"b"}',
+    hint: 'Dict comprehension: {v: k for k, v in d.items()}',
+    solution: 'def invert_dict(d):\n    return {v: k for k, v in d.items()}\n\nprint(invert_dict({"a":1,"b":2}))',
+    test: (code) => code.includes('invert_dict')
+  },
+  {
+    cat: 'fjalorët', diff: 'med',
+    title: 'Mergo dy dictionaries',
+    desc: 'Shkruaj funksionin merge_dicts(d1, d2) që mërgon dy fjalorë. Nëse çelësi egziston në të dyja, shuma e vlerave.\nTesto: merge_dicts({"a":1,"b":2},{"b":3,"c":4}) → {"a":1,"b":5,"c":4}',
+    hint: 'Nis me kopje të d1, pastaj iteroi d2 duke shuar vlerat.',
+    solution: 'def merge_dicts(d1, d2):\n    result = d1.copy()\n    for k, v in d2.items():\n        result[k] = result.get(k, 0) + v\n    return result\n\nprint(merge_dicts({"a":1,"b":2},{"b":3,"c":4}))',
+    test: (code) => code.includes('merge_dicts')
+  },
+  {
+    cat: 'fjalorët', diff: 'hard',
+    title: 'Grupim me kategori',
+    desc: 'Ke listën:\nstudents = [{"name":"Ana","grade":"A"},{"name":"Beni","grade":"B"},{"name":"Cara","grade":"A"}]\nShkruaj funksionin group_by_grade(students) që kthen dict të grupuar sipas notës.\nPritet: {"A":["Ana","Cara"],"B":["Beni"]}',
+    hint: 'Inicializo listën bosh për çdo notë nëse nuk ekziston, pastaj append.',
+    solution: 'students = [{"name":"Ana","grade":"A"},{"name":"Beni","grade":"B"},{"name":"Cara","grade":"A"}]\n\ndef group_by_grade(students):\n    result = {}\n    for s in students:\n        g = s["grade"]\n        if g not in result:\n            result[g] = []\n        result[g].append(s["name"])\n    return result\n\nprint(group_by_grade(students))',
+    test: (code) => code.includes('group_by_grade')
+  },
+
+  // ── IF/ELSE ────────────────────────────────────────────────
+  {
+    cat: 'kushtet', diff: 'easy',
+    title: 'FizzBuzz',
+    desc: 'Shkruaj funksionin fizzbuzz(n) që:\n- kthen "FizzBuzz" nëse n ndahet me 3 dhe 5\n- kthen "Fizz" nëse ndahet vetëm me 3\n- kthen "Buzz" nëse ndahet vetëm me 5\n- kthen numrin si string ndryshe',
+    hint: 'Kontrollo FizzBuzz PARA Fizz dhe Buzz.',
+    solution: 'def fizzbuzz(n):\n    if n % 15 == 0:\n        return "FizzBuzz"\n    elif n % 3 == 0:\n        return "Fizz"\n    elif n % 5 == 0:\n        return "Buzz"\n    else:\n        return str(n)\n\nfor i in range(1, 21):\n    print(fizzbuzz(i))',
+    test: (code) => code.includes('fizzbuzz') || code.includes('FizzBuzz')
+  },
+  {
+    cat: 'kushtet', diff: 'med',
+    title: 'Kalkulatori i BMI',
+    desc: 'Shkruaj funksionin bmi_category(weight_kg, height_m) që llogarit BMI dhe kthen kategorinë:\n- "Underweight" < 18.5\n- "Normal" 18.5–24.9\n- "Overweight" 25–29.9\n- "Obese" ≥ 30',
+    hint: 'BMI = weight / height**2',
+    solution: 'def bmi_category(weight_kg, height_m):\n    bmi = weight_kg / height_m**2\n    if bmi < 18.5:\n        return "Underweight"\n    elif bmi < 25:\n        return "Normal"\n    elif bmi < 30:\n        return "Overweight"\n    else:\n        return "Obese"\n\nprint(bmi_category(70, 1.75))',
+    test: (code) => code.includes('bmi')
+  },
+  {
+    cat: 'kushtet', diff: 'hard',
+    title: 'Vit i brishtë (Leap Year)',
+    desc: 'Shkruaj funksionin is_leap_year(year) që kontrollon nëse viti është i brishtë (366 ditë).\nRregullat:\n1. Ndahet me 4 → i brishtë\n2. Por nëse ndahet me 100 → jo i brishtë\n3. Por nëse ndahet me 400 → i brishtë\nTesto: 2000→True, 1900→False, 2024→True',
+    hint: 'Rendi i kushteve ka rëndësi. Fillo nga rregulli 400, 100, pastaj 4.',
+    solution: 'def is_leap_year(year):\n    return (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\n\nprint(is_leap_year(2000))\nprint(is_leap_year(1900))\nprint(is_leap_year(2024))',
+    test: (code) => code.includes('leap_year') || (code.includes('400') && code.includes('100'))
+  },
+
+  // ── LOOPS ──────────────────────────────────────────────────
+  {
+    cat: 'loops', diff: 'easy',
+    title: 'Tabela e shumëzimit',
+    desc: 'Shkruaj funksionin mult_table(n) që printon tabelën e shumëzimit të numrit n nga 1 deri 10.\nShembull rreshti: "7 x 3 = 21"',
+    hint: 'for i in range(1, 11): print(f"{n} x {i} = {n*i}")',
+    solution: 'def mult_table(n):\n    for i in range(1, 11):\n        print(f"{n} x {i} = {n*i}")\n\nmult_table(7)',
+    test: (code) => code.includes('range') && code.includes('print')
+  },
+  {
+    cat: 'loops', diff: 'med',
+    title: 'Numrat e Fibonacci deri N',
+    desc: 'Shkruaj funksionin fibonacci(n) që kthen listën e numrave Fibonacci deri tek vlera n (jo deri tek indeksi i n-të).\nTesto: fibonacci(50) → [0,1,1,2,3,5,8,13,21,34]',
+    hint: 'Nis me a=0, b=1. Shto a, pastaj a,b = b, a+b',
+    solution: 'def fibonacci(n):\n    result = []\n    a, b = 0, 1\n    while a <= n:\n        result.append(a)\n        a, b = b, a + b\n    return result\n\nprint(fibonacci(50))',
+    test: (code) => code.includes('fibonacci')
+  },
+  {
+    cat: 'loops', diff: 'med',
+    title: 'Numra primorë deri N',
+    desc: 'Shkruaj funksionin primes_up_to(n) që kthen listën e të gjithë numrave primorë deri tek n.\nTesto: primes_up_to(30) → [2,3,5,7,11,13,17,19,23,29]',
+    hint: 'Një numër është primar nëse ndahet vetëm me 1 dhe vetveten. Kontrollo me loop deri tek sqrt(n)+1.',
+    solution: 'def is_prime(n):\n    if n < 2: return False\n    for i in range(2, int(n**0.5)+1):\n        if n % i == 0: return False\n    return True\n\ndef primes_up_to(n):\n    return [x for x in range(2, n+1) if is_prime(x)]\n\nprint(primes_up_to(30))',
+    test: (code) => code.includes('prime')
+  },
+  {
+    cat: 'loops', diff: 'hard',
+    title: 'Trekëndëshi i Pascalit',
+    desc: 'Shkruaj funksionin pascal_triangle(rows) që gjeneron trekëndëshin e Pascalit.\nTesto: pascal_triangle(5):\n[1]\n[1,1]\n[1,2,1]\n[1,3,3,1]\n[1,4,6,4,1]',
+    hint: 'Çdo rresht nis dhe mbaron me 1. Elementet e mesit: elem_i = prev[i-1] + prev[i]',
+    solution: 'def pascal_triangle(rows):\n    triangle = []\n    for i in range(rows):\n        if i == 0:\n            row = [1]\n        else:\n            prev = triangle[-1]\n            row = [1] + [prev[j]+prev[j+1] for j in range(len(prev)-1)] + [1]\n        triangle.append(row)\n    return triangle\n\nfor row in pascal_triangle(5):\n    print(row)',
+    test: (code) => code.includes('pascal')
+  },
+
+  // ── FUNKSIONET ─────────────────────────────────────────────
+  {
+    cat: 'funksionet', diff: 'easy',
+    title: '*args: Shuma e argumenteve',
+    desc: 'Shkruaj funksionin total(*args) që pranon çdo numër argumentesh dhe kthen shumën e tyre.\nTesto: total(1,2,3,4,5) → 15',
+    hint: 'def total(*args): return sum(args)',
+    solution: 'def total(*args):\n    return sum(args)\n\nprint(total(1,2,3,4,5))',
+    test: (code) => code.includes('*args')
+  },
+  {
+    cat: 'funksionet', diff: 'med',
+    title: 'Dekorator – Timer',
+    desc: 'Shkruaj një dekorator timer_decorator që mat kohën e ekzekutimit të çdo funksioni dhe e printon.\nPërdoro time.time(). Testo me një funksion që llogarit shumen e listës.',
+    hint: 'import time\ndef timer(func):\n    def wrapper(*args):\n        start = time.time()\n        result = func(*args)\n        print(f"Took {time.time()-start:.4f}s")\n        return result\n    return wrapper',
+    solution: 'import time\n\ndef timer_decorator(func):\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        end = time.time()\n        print(f"{func.__name__} u ekzekutua në {end-start:.6f} sekonda")\n        return result\n    return wrapper\n\n@timer_decorator\ndef sum_list(lst):\n    return sum(lst)\n\nsum_list(list(range(100000)))',
+    test: (code) => code.includes('decorator') || code.includes('wrapper') || code.includes('@')
+  },
+  {
+    cat: 'funksionet', diff: 'med',
+    title: 'Lambda + sorted',
+    desc: 'Ke listën:\nstudents = [("Ana", 85), ("Beni", 92), ("Cara", 78)]\nSorto sipas notës (vlera e dytë) nga më e lartë te më e ulët duke përdorur lambda.\nPrinto rezultatin.',
+    hint: 'sorted(lst, key=lambda x: x[1], reverse=True)',
+    solution: 'students = [("Ana", 85), ("Beni", 92), ("Cara", 78)]\nsorted_students = sorted(students, key=lambda x: x[1], reverse=True)\nprint(sorted_students)',
+    test: (code) => code.includes('lambda')
+  },
+  {
+    cat: 'funksionet', diff: 'hard',
+    title: 'Memoization manual',
+    desc: 'Implemento funksionin fib_memo(n) duke përdorur memoization (caching) manual me dictionary pa @lru_cache.\nTesto: fib_memo(35) duhet të jetë i shpejtë.',
+    hint: 'Krijo cache = {}. Nëse n in cache: return cache[n]. Pastaj llogarit dhe ruaj.',
+    solution: 'cache = {}\n\ndef fib_memo(n):\n    if n in cache:\n        return cache[n]\n    if n <= 1:\n        return n\n    cache[n] = fib_memo(n-1) + fib_memo(n-2)\n    return cache[n]\n\nprint(fib_memo(35))',
+    test: (code) => code.includes('cache') || code.includes('memo')
+  },
+
+  // ── OOP ────────────────────────────────────────────────────
+  {
+    cat: 'oop', diff: 'easy',
+    title: 'Klasa BankAccount',
+    desc: 'Krijo klasën BankAccount me:\n- __init__(self, owner, balance=0)\n- metodën deposit(amount) – shton shumën\n- metodën withdraw(amount) – tërheq (nëse ka mjete)\n- metodën __str__ që printon owner dhe balancën\nTesto:\nacc = BankAccount("Ana", 100)\nacc.deposit(50)\nacc.withdraw(30)\nprint(acc)',
+    hint: 'Kujdes: withdraw nuk lejon balancën të shkojë negative.',
+    solution: 'class BankAccount:\n    def __init__(self, owner, balance=0):\n        self.owner = owner\n        self.balance = balance\n    \n    def deposit(self, amount):\n        self.balance += amount\n    \n    def withdraw(self, amount):\n        if amount > self.balance:\n            print("Fonde të pamjaftueshme")\n        else:\n            self.balance -= amount\n    \n    def __str__(self):\n        return f"BankAccount({self.owner}, {self.balance}€)"\n\nacc = BankAccount("Ana", 100)\nacc.deposit(50)\nacc.withdraw(30)\nprint(acc)',
+    test: (code) => code.includes('class BankAccount') || code.includes('BankAccount')
+  },
+  {
+    cat: 'oop', diff: 'med',
+    title: 'Trashëgimi: Animal → Dog',
+    desc: 'Krijo:\n1. Klasën bazë Animal me __init__(name) dhe metodën speak() që kthen "...".\n2. Klasën Dog(Animal) që override-on speak() duke kthyer "Woof!"\n3. Klasën Cat(Animal) që kthen "Meow!"\nTesto: Dog("Rex").speak() → "Woof!"',
+    hint: 'Fëmija thërret super().__init__(name). Pastaj override metodën speak.',
+    solution: 'class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return "..."\n\nclass Dog(Animal):\n    def speak(self):\n        return "Woof!"\n\nclass Cat(Animal):\n    def speak(self):\n        return "Meow!"\n\nrex = Dog("Rex")\nprint(rex.speak())\nprint(Cat("Mia").speak())',
+    test: (code) => code.includes('class Dog') || code.includes('class Cat')
+  },
+  {
+    cat: 'oop', diff: 'hard',
+    title: 'Klasa Stack me dunder methods',
+    desc: 'Implemento klasën Stack me:\n- push(item)\n- pop() – hiq dhe kthen elementin e fundit\n- peek() – shiko elementin e fundit pa e hequr\n- __len__ – madhësia\n- __str__ – paraqitje\n- is_empty()\nTesto gjitha metodat.',
+    hint: 'Përdor listën si storage interno: self._data = []',
+    solution: 'class Stack:\n    def __init__(self):\n        self._data = []\n    \n    def push(self, item):\n        self._data.append(item)\n    \n    def pop(self):\n        if self.is_empty():\n            raise IndexError("Stack is empty")\n        return self._data.pop()\n    \n    def peek(self):\n        if self.is_empty():\n            raise IndexError("Stack is empty")\n        return self._data[-1]\n    \n    def is_empty(self):\n        return len(self._data) == 0\n    \n    def __len__(self):\n        return len(self._data)\n    \n    def __str__(self):\n        return str(self._data)\n\ns = Stack()\ns.push(1); s.push(2); s.push(3)\nprint(s)\nprint(len(s))\nprint(s.pop())\nprint(s.peek())',
+    test: (code) => code.includes('class Stack')
+  },
+
+  // ── FILE I/O ───────────────────────────────────────────────
+  {
+    cat: 'file_io', diff: 'easy',
+    title: 'Shkruaj dhe lexo file',
+    desc: 'Shkruaj kodin që:\n1. Krijon file-in "notes.txt" me tekstin "Python është i mrekullueshëm!"\n2. Lexon dhe printon përmbajtjen e tij\nPërdor context manager (with).',
+    hint: "with open('notes.txt', 'w') as f: f.write('...')\nwith open('notes.txt', 'r') as f: print(f.read())",
+    solution: "with open('notes.txt', 'w') as f:\n    f.write('Python është i mrekullueshëm!')\n\nwith open('notes.txt', 'r') as f:\n    content = f.read()\n    print(content)",
+    test: (code) => code.includes('open') && code.includes('with')
+  },
+  {
+    cat: 'file_io', diff: 'med',
+    title: 'Numëro rreshtat e file-it',
+    desc: 'Shkruaj funksionin count_lines(filename) që kthen numrin e rreshtave të një file-i.\nNëse file-i nuk ekziston, kthen -1.',
+    hint: 'Përdor try/except FileNotFoundError. Lexo me readlines().',
+    solution: "def count_lines(filename):\n    try:\n        with open(filename, 'r') as f:\n            return len(f.readlines())\n    except FileNotFoundError:\n        return -1\n\nprint(count_lines('notes.txt'))\nprint(count_lines('missing.txt'))",
+    test: (code) => code.includes('count_lines')
+  },
+
+  // ── ERRORS & EXCEPTIONS ────────────────────────────────────
+  {
+    cat: 'errors', diff: 'easy',
+    title: 'Safe division',
+    desc: 'Shkruaj funksionin safe_divide(a, b) që:\n- Kthen a/b\n- Nëse b==0, kap ZeroDivisionError dhe kthen None\n- Nëse a ose b nuk janë numra, kap TypeError dhe kthen None',
+    hint: 'try:\n    return a/b\nexcept (ZeroDivisionError, TypeError):\n    return None',
+    solution: 'def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        print("Ndarja me zero!")\n        return None\n    except TypeError:\n        print("Tipi jo i saktë!")\n        return None\n\nprint(safe_divide(10, 2))\nprint(safe_divide(10, 0))\nprint(safe_divide("a", 2))',
+    test: (code) => code.includes('safe_divide') || (code.includes('try') && code.includes('except'))
+  },
+  {
+    cat: 'errors', diff: 'med',
+    title: 'Custom Exception',
+    desc: 'Krijo:\n1. Klasën e custom exception NegativeNumberError\n2. Funksionin sqrt_positive(n) që:\n   - Ngre NegativeNumberError nëse n < 0\n   - Kthen math.sqrt(n) ndryshe\nTesto me vlera pozitive dhe negative.',
+    hint: 'class NegativeNumberError(Exception): pass\nraise NegativeNumberError("mesazh")',
+    solution: 'import math\n\nclass NegativeNumberError(Exception):\n    pass\n\ndef sqrt_positive(n):\n    if n < 0:\n        raise NegativeNumberError(f"Nuk mund të llogaritet sqrt e {n}")\n    return math.sqrt(n)\n\ntry:\n    print(sqrt_positive(16))\n    print(sqrt_positive(-4))\nexcept NegativeNumberError as e:\n    print(f"Gabim: {e}")',
+    test: (code) => code.includes('NegativeNumberError') || (code.includes('class') && code.includes('Exception'))
+  },
+  {
+    cat: 'errors', diff: 'hard',
+    title: 'Retry Decorator',
+    desc: 'Shkruaj dekoratorin retry(times) që riprovojë ekzekutimin e funksionit deri times herë nëse hedh exception.\nNëse të gjitha tentativat dështojnë, ngre exception-in e fundit.\nTesto me funksion që dështon 2 herë dhe pastaj funksionon.',
+    hint: 'def retry(times):\n    def decorator(func):\n        def wrapper(*args):\n            for i in range(times): try/except ...',
+    solution: 'def retry(times):\n    def decorator(func):\n        def wrapper(*args, **kwargs):\n            last_error = None\n            for attempt in range(times):\n                try:\n                    return func(*args, **kwargs)\n                except Exception as e:\n                    last_error = e\n                    print(f"Tentativa {attempt+1} dështoi: {e}")\n            raise last_error\n        return wrapper\n    return decorator\n\ncounter = {"n": 0}\n\n@retry(3)\ndef flaky_function():\n    counter["n"] += 1\n    if counter["n"] < 3:\n        raise ValueError("Duke dështuar...")\n    return "Sukses!"\n\nprint(flaky_function())',
+    test: (code) => code.includes('retry') || code.includes('attempt')
+  }
+];
+
+// ── State ──────────────────────────────────────────────────────
+let doneSet = new Set(JSON.parse(localStorage.getItem('py_done') || '[]'));
+let currentCat = 'all';
+
+function saveDone() {
+  localStorage.setItem('py_done', JSON.stringify([...doneSet]));
+}
+
+function updateProgress() {
+  const total = tasks.length;
+  const done = doneSet.size;
+  document.getElementById('prog-label').textContent = `${done} / ${total}`;
+  document.getElementById('prog-bar').style.width = `${(done/total)*100}%`;
+}
+
+// ── Render ─────────────────────────────────────────────────────
+function filterCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+}
+
+function renderAll() {
+  const filtered = currentCat === 'all' ? tasks : tasks.filter(t => t.cat === currentCat);
+
+  // group by cat
+  const groups = {};
+  const catLabels = {
+    bazat:'Bazat të Python',stringjet:'Strings & Text',listat:'Lista & Tuples',
+    fjalorët:'Dictionaries',kushtet:'If / Else',loops:'Loops',
+    funksionet:'Funksionet',oop:'OOP – Klasa',file_io:'File I/O',errors:'Errors & Exceptions'
+  };
+
+  filtered.forEach(t => {
+    if (!groups[t.cat]) groups[t.cat] = [];
+    groups[t.cat].push(t);
+  });
+
+  const main = document.getElementById('main-content');
+  if (filtered.length === 0) {
+    main.innerHTML = '<p class="empty-msg">Nuk ka detyra për këtë kategori.</p>';
+    return;
+  }
+
+  main.innerHTML = Object.entries(groups).map(([cat, catTasks]) => {
+    const globalIdx = catTasks.map(t => tasks.indexOf(t));
+    const tasksHTML = catTasks.map((task, i) => {
+      const gIdx = tasks.indexOf(task);
+      return renderTask(task, gIdx);
+    }).join('');
+
+    return `<div class="section" id="cat-${cat}">
+      <div class="section-title">
+        <h2>${catLabels[cat] || cat}</h2>
+        <span class="section-badge">${catTasks.length} detyra</span>
+        <div class="section-line"></div>
+      </div>
+      ${tasksHTML}
+    </div>`;
+  }).join('');
+}
+
+function diffLabel(diff) {
+  if (diff === 'easy') return '<span class="task-diff diff-easy">● E lehtë</span>';
+  if (diff === 'med') return '<span class="task-diff diff-med">● Mesatare</span>';
+  return '<span class="task-diff diff-hard">● E vështirë</span>';
+}
+
+function renderTask(task, idx) {
+  const done = doneSet.has(idx);
+  return `
+    <div class="task-card ${done ? 'done' : ''}" id="task-${idx}">
+      <div class="task-header" onclick="toggleTask(${idx})">
+        <div class="task-num">${idx+1}</div>
+        <div class="task-title-wrap">
+          <div class="task-title">${task.title}</div>
+          ${diffLabel(task.diff)}
+        </div>
+        <button class="task-toggle" id="toggle-${idx}">▼</button>
+      </div>
+      <div class="task-body" id="body-${idx}">
+        <p class="task-desc">${task.desc.replace(/\n/g,'<br>')}</p>
+
+        <div class="hint-box" id="hint-${idx}">
+          <strong>💡 HINT</strong>${task.hint.replace(/\n/g,'<br>')}
+        </div>
+
+        <div class="editor-wrap">
+          <span class="editor-label">Kodi yt</span>
+          <textarea class="code-editor" id="code-${idx}" placeholder="# Shkruaj kodin këtu...&#10;"></textarea>
+        </div>
+
+        <div class="task-actions">
+          <button class="btn btn-hint" onclick="toggleHint(${idx})">💡 Hint</button>
+          <button class="btn btn-solution" onclick="toggleSolution(${idx})">👁 Zgjidhja</button>
+          <button class="btn ${done ? 'btn-done' : 'btn-primary'}" onclick="markDone(${idx})">${done ? '✓ E bërë' : '✓ Shëno si e bërë'}</button>
+        </div>
+
+        <div class="output-box" id="output-${idx}"></div>
+
+        <div class="solution-box" id="solution-${idx}">
+          <strong style="color:var(--muted);font-size:.65rem;display:block;margin-bottom:.4rem;">ZGJIDHJA ZYRTARE</strong>${task.solution.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleTask(idx) {
+  const body = document.getElementById(`body-${idx}`);
+  const toggle = document.getElementById(`toggle-${idx}`);
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function toggleHint(idx) {
+  document.getElementById(`hint-${idx}`).classList.toggle('show');
+}
+
+function toggleSolution(idx) {
+  document.getElementById(`solution-${idx}`).classList.toggle('show');
+}
+
+function markDone(idx) {
+  if (doneSet.has(idx)) {
+    doneSet.delete(idx);
+  } else {
+    doneSet.add(idx);
+  }
+  saveDone();
+  updateProgress();
+  // re-render just the card
+  const card = document.getElementById(`task-${idx}`);
+  const done = doneSet.has(idx);
+  card.classList.toggle('done', done);
+  const btn = card.querySelector('.task-actions .btn:last-child');
+  btn.textContent = done ? '✓ E bërë' : '✓ Shëno si e bërë';
+  btn.className = `btn ${done ? 'btn-done' : 'btn-primary'}`;
+}
+
+// init
+renderAll();
+updateProgress();
+
+// Tab key in textareas
+document.addEventListener('keydown', e => {
+  if (e.key === 'Tab' && e.target.classList.contains('code-editor')) {
+    e.preventDefault();
+    const start = e.target.selectionStart;
+    const end = e.target.selectionEnd;
+    e.target.value = e.target.value.substring(0, start) + '    ' + e.target.value.substring(end);
+    e.target.selectionStart = e.target.selectionEnd = start + 4;
+  }
+});
+</script>
+</body>
+</html>
