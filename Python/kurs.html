@@ -1,0 +1,1172 @@
+
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baraa Python Bootcamp — Mëso Hap pas Hapi</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c14;
+  --surface: #13131f;
+  --card: #1b1b2a;
+  --border: #272740;
+  --accent: #5b8dee;
+  --accent2: #e05bde;
+  --accent3: #5bedbd;
+  --warn: #f0a04b;
+  --text: #dde0f0;
+  --muted: #6a6a90;
+  --dim: #3a3a58;
+  --success: #5bedd2;
+  --error: #ed5b7b;
+
+  --s1: #5b8dee;   /* foundations */
+  --s2: #e05bde;   /* strings */
+  --s3: #f0a04b;   /* numbers */
+  --s4: #5bedbd;   /* logic */
+  --s5: #ed5b7b;   /* conditions */
+  --s6: #a07cf0;   /* loops */
+  --s7: #5be8ed;   /* data structures */
+  --s8: #f0d65b;   /* functions */
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* noise */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(12,12,20,.92);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  padding:.85rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+}
+.logo{
+  font-family:'DM Serif Display',serif;
+  font-size:1.35rem;letter-spacing:-.5px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.logo span{font-family:'DM Sans',sans-serif;font-weight:300;font-size:.8rem;
+  -webkit-text-fill-color:var(--muted);letter-spacing:0;margin-left:.4rem;}
+
+.hdr-right{display:flex;align-items:center;gap:1.2rem;}
+.overall-prog{
+  display:flex;align-items:center;gap:.6rem;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);
+}
+.prog-pill{
+  width:100px;height:5px;background:var(--border);border-radius:99px;overflow:hidden;
+}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:99px;transition:width .5s ease;}
+
+/* ── SIDEBAR NAV ── */
+.layout{display:flex;min-height:calc(100vh - 57px);position:relative;z-index:1;}
+
+.sidebar{
+  width:240px;flex-shrink:0;
+  position:sticky;top:57px;height:calc(100vh - 57px);
+  overflow-y:auto;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:1.2rem 0;
+}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-track{background:transparent;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+
+.sidebar-label{
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;
+  color:var(--muted);text-transform:uppercase;letter-spacing:.1em;
+  padding:.4rem 1.2rem;margin-bottom:.2rem;
+}
+.nav-item{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.55rem 1.2rem;cursor:pointer;
+  transition:background .15s;border-left:3px solid transparent;
+  font-size:.83rem;font-weight:500;color:var(--muted);
+}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.nav-item.active{color:var(--text);background:rgba(255,255,255,.05);}
+.nav-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.nav-progress{
+  margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--dim);
+}
+.nav-item.done-nav .nav-progress{color:var(--success);}
+
+/* ── MAIN CONTENT ── */
+.content{flex:1;max-width:820px;padding:2rem 2.5rem 6rem;margin:0 auto;}
+
+/* ── SECTION BLOCK ── */
+.section-block{margin-bottom:3.5rem;scroll-margin-top:80px;}
+
+.section-hero{
+  display:flex;align-items:flex-start;gap:1.2rem;
+  margin-bottom:1.8rem;padding-bottom:1.2rem;
+  border-bottom:1px solid var(--border);
+}
+.section-num{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:1.3rem;
+}
+.section-info{flex:1;}
+.section-name{
+  font-family:'DM Serif Display',serif;font-size:1.5rem;
+  letter-spacing:-.5px;margin-bottom:.25rem;
+}
+.section-desc{font-size:.85rem;color:var(--muted);line-height:1.65;max-width:520px;}
+.section-topics{
+  display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem;
+}
+.topic-pill{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  padding:.2rem .6rem;border-radius:99px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);
+}
+
+/* ── LESSON CARD ── */
+.lesson{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;margin-bottom:1rem;overflow:hidden;
+  transition:border-color .2s;
+}
+.lesson:hover{border-color:var(--dim);}
+.lesson.learned{border-color:rgba(91,237,210,.3);}
+
+.lesson-head{
+  display:flex;align-items:flex-start;gap:.9rem;
+  padding:1rem 1.1rem;cursor:pointer;user-select:none;
+}
+.lesson-icon{
+  width:32px;height:32px;border-radius:9px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;
+}
+.lesson-meta{flex:1;}
+.lesson-title{font-size:.92rem;font-weight:700;margin-bottom:.15rem;}
+.lesson-sub{font-size:.75rem;color:var(--muted);}
+
+.lesson-check{
+  width:24px;height:24px;border-radius:7px;flex-shrink:0;
+  border:1.5px solid var(--border);cursor:pointer;
+  transition:all .2s;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;color:transparent;margin-top:2px;
+}
+.lesson-check.checked{background:var(--success);border-color:var(--success);color:#0c1a18;}
+
+.lesson-toggle{
+  width:24px;height:24px;border:none;background:transparent;
+  color:var(--muted);font-size:.8rem;cursor:pointer;
+  transition:transform .25s;flex-shrink:0;margin-top:2px;
+}
+.lesson-toggle.open{transform:rotate(180deg);}
+
+/* ── LESSON BODY ── */
+.lesson-body{display:none;padding:0 1.1rem 1.1rem;border-top:1px solid var(--border);}
+.lesson-body.open{display:block;}
+
+/* concept block */
+.concept{
+  margin:.9rem 0;background:var(--surface);
+  border-radius:10px;padding:1rem 1.1rem;
+  border-left:3px solid var(--dim);
+}
+.concept h4{
+  font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:.6rem;font-weight:700;
+  font-family:'JetBrains Mono',monospace;
+}
+.concept p{font-size:.87rem;color:var(--text);line-height:1.7;}
+.concept ul{padding-left:1.1rem;}
+.concept ul li{font-size:.87rem;color:var(--text);line-height:1.7;margin-bottom:.2rem;}
+
+/* code block */
+.codeblock{
+  background:#09090f;border:1px solid var(--border);
+  border-radius:10px;padding:.85rem 1rem;margin:.7rem 0;
+  font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  color:#c8c8e8;white-space:pre;overflow-x:auto;line-height:1.65;
+}
+.codeblock .kw{color:#7ba4f7;}
+.codeblock .fn{color:#e2a55b;}
+.codeblock .st{color:#7cf0c4;}
+.codeblock .cm{color:#4a4a70;}
+.codeblock .nm{color:#f07ca8;}
+
+/* tip */
+.tip{
+  background:rgba(91,141,238,.08);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.7rem 0;
+  font-size:.83rem;color:var(--text);line-height:1.65;
+}
+.tip strong{color:var(--accent);margin-right:.3rem;}
+
+/* warning */
+.warn-box{
+  background:rgba(240,160,75,.08);border-left:3px solid var(--warn);
+  border-radius:0 8px 8px 0;padding:.65rem .9rem;margin:.7rem 0;
+  font-size:.83rem;color:var(--text);line-height:1.65;
+}
+.warn-box strong{color:var(--warn);margin-right:.3rem;}
+
+/* visual diagram */
+.visual{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:1rem;margin:.7rem 0;
+  text-align:center;
+}
+.visual svg{max-width:100%;height:auto;}
+
+/* mini challenge */
+.challenge{
+  background:rgba(240,214,91,.05);border:1px solid rgba(240,214,91,.2);
+  border-radius:10px;padding:.9rem 1rem;margin:1rem 0;
+}
+.challenge-label{
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  color:#f0d65b;text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:.5rem;display:block;
+}
+.challenge-q{font-size:.87rem;color:var(--text);line-height:1.65;margin-bottom:.7rem;}
+
+textarea.try-code{
+  width:100%;min-height:90px;resize:vertical;
+  background:#09090f;border:1px solid var(--border);border-radius:8px;
+  color:var(--success);font-family:'JetBrains Mono',monospace;
+  font-size:.78rem;padding:.7rem .9rem;line-height:1.6;
+  outline:none;transition:border-color .2s;tab-size:4;
+  margin-bottom:.6rem;
+}
+textarea.try-code:focus{border-color:var(--accent);}
+
+.challenge-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;}
+
+.btn{
+  padding:.38rem .95rem;border-radius:7px;border:none;
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:.77rem;
+  cursor:pointer;transition:all .18s;
+}
+.btn-check{background:var(--accent);color:#fff;}
+.btn-check:hover{filter:brightness(1.15);}
+.btn-answer{background:var(--surface);border:1px solid var(--border);color:var(--muted);}
+.btn-answer:hover{border-color:var(--accent2);color:var(--accent2);}
+.btn-mark{background:var(--surface);border:1px solid var(--border);color:var(--muted);}
+.btn-mark.marked{background:rgba(91,237,210,.1);border-color:rgba(91,237,210,.3);color:var(--success);}
+
+.result-out{
+  display:none;background:#09090f;border:1px solid var(--border);
+  border-radius:8px;padding:.65rem .9rem;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  white-space:pre-wrap;line-height:1.6;
+}
+.result-out.show{display:block;}
+.result-out.pass{border-color:rgba(91,237,210,.4);color:var(--success);}
+.result-out.fail{border-color:rgba(237,91,123,.4);color:var(--error);}
+
+.answer-box{
+  display:none;background:#09090f;border:1px solid rgba(224,91,222,.2);
+  border-radius:8px;padding:.65rem .9rem;margin-top:.4rem;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--accent2);
+  white-space:pre-wrap;line-height:1.6;
+}
+.answer-box.show{display:block;}
+.answer-label{color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.3rem;}
+
+/* ── MOBILE HIDE SIDEBAR ── */
+@media(max-width:700px){
+  .sidebar{display:none;}
+  .content{padding:1.5rem 1rem 5rem;}
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.section-block{animation:fadeUp .4s ease both;}
+
+footer{
+  text-align:center;padding:2rem;color:var(--muted);font-size:.8rem;
+  border-top:1px solid var(--border);position:relative;z-index:1;
+}
+footer a{color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🐍 Baraa Python<span>Bootcamp Companion</span></div>
+  <div class="hdr-right">
+    <div class="overall-prog">
+      <span id="prog-lbl">0/0 mësuar</span>
+      <div class="prog-pill"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-label">Seksionet e Kursit</div>
+  <!-- generated by JS -->
+</nav>
+
+<!-- CONTENT -->
+<main class="content" id="content">
+  <!-- generated by JS -->
+</main>
+
+</div>
+
+<footer>
+  Bazuar në kursin e <a href="https://www.datawithbaraa.com" target="_blank">Baraa Khatib Salkini</a> — The Complete Python Bootcamp (13 orë) 🎓
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CURRICULUM DATA
+// ═══════════════════════════════════════════════════════════
+const sections = [
+  {
+    id: 's1', color: '#5b8dee', emoji: '🧱',
+    name: 'Python Foundations',
+    desc: 'Çfarë është Python, si punon, variablat, inputi dhe tipet bazë të të dhënave.',
+    topics: ['Variables', 'print()', 'input()', 'Data Types', 'Comments', 'Memory'],
+    lessons: [
+      {
+        id: 'l01', title: 'Çfarë është Python?', sub: 'Gjuha, interpretuesi, si ekzekutohet kodi',
+        content: `
+<div class="concept"><h4>💡 Koncepti</h4>
+<p>Python është gjuhë programimi e <strong>lartë nivelit</strong>. Kur shkruaj kodin, Python e kthen atë në instruksione që kompjuteri i kupton hap pas hapi — kjo quhet <strong>interpretim</strong>.</p>
+<ul>
+<li>Python lexon kodin rresht pas rreshti (nga lart poshtë)</li>
+<li>Çdo rresht ekzekutohet menjëherë</li>
+<li>Nuk ka nevojë për kompilim si C/Java</li>
+</ul>
+</div>
+
+<div class="codeblock"><span class="cm"># Ky është kodi yt i parë Python</span>
+<span class="fn">print</span>(<span class="st">"Përshëndetje, Baraa!"</span>)
+
+<span class="cm"># Output:</span>
+<span class="cm"># Përshëndetje, Baraa!</span>
+</div>
+
+<div class="tip"><strong>🎯 Baraa thotë:</strong> Python u dizajnua të jetë i lexueshëm. Nëse kodi duket si anglisht, je duke bërë mirë.</div>`,
+        challenge: {
+          q: 'Shkruaj 3 rreshta print() me emrin tënd, moshën dhe qytetin tënd.',
+          answer: 'print("Blerim")\nprint(22)\nprint("Prishtinë")',
+          test: c => c.includes('print') && (c.match(/print/g)||[]).length >= 2
+        }
+      },
+      {
+        id: 'l02', title: 'Variablat & Memoria', sub: 'Si Python ruan vlerat në memorie',
+        content: `
+<div class="concept"><h4>💡 Çfarë është një variabël?</h4>
+<p>Variabla është si <strong>etiketë</strong> që tregon drejt një vlerë në memorie. Python krijon vlerën e parë, pastaj vendos etiketën mbi të.</p>
+</div>
+
+<div class="visual">
+<svg viewBox="0 0 420 90" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono" font-size="13">
+  <rect x="10" y="20" width="100" height="50" rx="8" fill="#1b1b2a" stroke="#272740"/>
+  <text x="60" y="42" fill="#5b8dee" text-anchor="middle" font-weight="bold">name</text>
+  <text x="60" y="62" fill="#6a6a90" text-anchor="middle" font-size="10">variabla</text>
+  <line x1="110" y1="45" x2="165" y2="45" stroke="#3a3a58" stroke-width="1.5" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3a3a58"/></marker></defs>
+  <rect x="165" y="15" width="120" height="60" rx="8" fill="#09090f" stroke="#3a3a58"/>
+  <text x="225" y="40" fill="#7cf0c4" text-anchor="middle" font-size="14" font-weight="bold">"Baraa"</text>
+  <text x="225" y="62" fill="#4a4a70" text-anchor="middle" font-size="10">memoria (RAM)</text>
+  <text x="320" y="48" fill="#6a6a90" font-size="11">← adresa</text>
+</svg>
+</div>
+
+<div class="codeblock"><span class="cm"># Krijo variabla</span>
+name = <span class="st">"Baraa"</span>
+age = <span class="nm">35</span>
+height = <span class="nm">1.75</span>
+is_engineer = <span class="kw">True</span>
+
+<span class="cm"># Prano inputin nga përdoruesi</span>
+user_name = <span class="fn">input</span>(<span class="st">"Si të quajnë? "</span>)
+<span class="fn">print</span>(<span class="st">"Përshëndetje,"</span>, user_name)
+</div>
+
+<div class="tip"><strong>📌 Rregullat e emërtimit:</strong> Emrat fillojnë me shkronjë ose _, janë case-sensitive (name ≠ Name), dhe nuk mund të jenë fjalë kyçe (if, while, for…)</div>
+
+<div class="warn-box"><strong>⚠️ Kujdes:</strong> input() gjithmonë kthen <strong>string</strong>! Nëse duhet numër, ktheje: int(input("Mosha: "))</div>`,
+        challenge: {
+          q: 'Krijo 4 variabla: emri (string), mosha (int), mesatarja (float), student (bool). Printo të gjitha.',
+          answer: 'emri = "Blerim"\nmosha = 22\nmesatarja = 9.5\nstudent = True\nprint(emri, mosha, mesatarja, student)',
+          test: c => c.includes('=') && c.includes('True') || c.includes('False')
+        }
+      },
+      {
+        id: 'l03', title: 'Tipet e të Dhënave', sub: 'str, int, float, bool — dhe type()',
+        content: `
+<div class="concept"><h4>💡 4 Tipet Kryesore</h4>
+<ul>
+<li><strong>str</strong> — tekst: "Baraa", 'Python'</li>
+<li><strong>int</strong> — numër i plotë: 42, -7, 0</li>
+<li><strong>float</strong> — numër me presje: 3.14, -0.5</li>
+<li><strong>bool</strong> — vlerë logjike: True / False</li>
+</ul>
+</div>
+
+<div class="codeblock"><span class="cm"># Kontrollo tipin me type()</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="st">"Python"</span>))   <span class="cm"># &lt;class 'str'&gt;</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="nm">42</span>))       <span class="cm"># &lt;class 'int'&gt;</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="nm">3.14</span>))     <span class="cm"># &lt;class 'float'&gt;</span>
+<span class="fn">print</span>(<span class="fn">type</span>(<span class="kw">True</span>))     <span class="cm"># &lt;class 'bool'&gt;</span>
+
+<span class="cm"># Konverto mes tipeve (casting)</span>
+age_str = <span class="st">"25"</span>
+age_int = <span class="fn">int</span>(age_str)    <span class="cm"># "25" → 25</span>
+pi_int  = <span class="fn">int</span>(<span class="nm">3.99</span>)      <span class="cm"># 3.99 → 3 (PRITET, nuk rumbullakoset!)</span>
+num_str = <span class="fn">str</span>(<span class="nm">100</span>)       <span class="cm"># 100 → "100"</span>
+</div>
+
+<div class="tip"><strong>🎯 Baraa thotë:</strong> Kur dy tipë ndërveprojnë gabimisht, Python "bërtet". int("abc") → ValueError. Gjithmonë kthe inputin e duhur.</div>`,
+        challenge: {
+          q: 'Merr inputin e moshës nga përdoruesi, ktheje në int, shto 10, printo "Pas 10 vitesh do kesh X vjeç".',
+          answer: 'mosha = int(input("Mosha: "))\nprint("Pas 10 vitesh do kesh", mosha + 10, "vjeç")',
+          test: c => c.includes('int') && c.includes('input')
+        }
+      }
+    ]
+  },
+  {
+    id: 's2', color: '#e05bde', emoji: '📝',
+    name: 'Working with Strings',
+    desc: 'Manipulo tekstin — indexing, slicing, metodat e stringut, formatimi.',
+    topics: ['Indexing', 'Slicing', 'Methods', 'f-strings', 'Validation'],
+    lessons: [
+      {
+        id: 'l04', title: 'Bazat e Stringut', sub: 'Krijo, indekso dhe navigo strings',
+        content: `
+<div class="concept"><h4>💡 String = Sekuencë Karakteresh</h4>
+<p>Çdo karakter ka një <strong>indeks</strong>: fillon nga 0 (majtas) ose -1 (djathtas).</p>
+</div>
+
+<div class="visual">
+<svg viewBox="0 0 420 70" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono" font-size="12">
+  <text x="10" y="15" fill="#6a6a90" font-size="10">s = "Python"</text>
+  <g>
+    <rect x="10" y="22" width="58" height="32" rx="4" fill="#1b1b2a" stroke="#272740"/>
+    <text x="39" y="43" fill="#e05bde" text-anchor="middle" font-size="14" font-weight="bold">P</text>
+    <text x="39" y="20" fill="#4a4a70" text-anchor="middle" font-size="9">0 / -6</text>
+  </g><g>
+    <rect x="72" y="22" width="58" height="32" rx="4" fill="#1b1b2a" stroke="#272740"/>
+    <text x="101" y="43" fill="#e05bde" text-anchor="middle" font-size="14" font-weight="bold">y</text>
+    <text x="101" y="20" fill="#4a4a70" text-anchor="middle" font-size="9">1 / -5</text>
+  </g><g>
+    <rect x="134" y="22" width="58" height="32" rx="4" fill="#1b1b2a" stroke="#272740"/>
+    <text x="163" y="43" fill="#e05bde" text-anchor="middle" font-size="14" font-weight="bold">t</text>
+    <text x="163" y="20" fill="#4a4a70" text-anchor="middle" font-size="9">2 / -4</text>
+  </g><g>
+    <rect x="196" y="22" width="58" height="32" rx="4" fill="#1b1b2a" stroke="#272740"/>
+    <text x="225" y="43" fill="#e05bde" text-anchor="middle" font-size="14" font-weight="bold">h</text>
+    <text x="225" y="20" fill="#4a4a70" text-anchor="middle" font-size="9">3 / -3</text>
+  </g><g>
+    <rect x="258" y="22" width="58" height="32" rx="4" fill="#1b1b2a" stroke="#272740"/>
+    <text x="287" y="43" fill="#e05bde" text-anchor="middle" font-size="14" font-weight="bold">o</text>
+    <text x="287" y="20" fill="#4a4a70" text-anchor="middle" font-size="9">4 / -2</text>
+  </g><g>
+    <rect x="320" y="22" width="58" height="32" rx="4" fill="#1b1b2a" stroke="#272740"/>
+    <text x="349" y="43" fill="#e05bde" text-anchor="middle" font-size="14" font-weight="bold">n</text>
+    <text x="349" y="20" fill="#4a4a70" text-anchor="middle" font-size="9">5 / -1</text>
+  </g>
+</svg>
+</div>
+
+<div class="codeblock">s = <span class="st">"Python"</span>
+
+<span class="cm"># Indexing</span>
+<span class="fn">print</span>(s[<span class="nm">0</span>])     <span class="cm"># P</span>
+<span class="fn">print</span>(s[-<span class="nm">1</span>])    <span class="cm"># n</span>
+
+<span class="cm"># Slicing: s[start:end:step]</span>
+<span class="fn">print</span>(s[<span class="nm">0</span>:<span class="nm">3</span>])   <span class="cm"># Pyt</span>
+<span class="fn">print</span>(s[::-<span class="nm">1</span>])  <span class="cm"># nohtyP (reverse)</span>
+<span class="fn">print</span>(s[<span class="nm">2</span>:])    <span class="cm"># thon</span>
+</div>`,
+        challenge: {
+          q: 'Merr stringun s="Programming". Printo: karakteri i parë, karakteri i fundit, stringun mbrapsht, dhe "gram" (slice).',
+          answer: 's = "Programming"\nprint(s[0])\nprint(s[-1])\nprint(s[::-1])\nprint(s[5:9])',
+          test: c => c.includes('[0]') || c.includes('[-1]') || c.includes('[::-1]')
+        }
+      },
+      {
+        id: 'l05', title: 'Metodat e Stringut', sub: 'upper, lower, strip, replace, split, join',
+        content: `
+<div class="codeblock">s = <span class="st">"  Hello, Baraa!  "</span>
+
+<span class="cm"># Transformime</span>
+s.<span class="fn">upper</span>()          <span class="cm"># "  HELLO, BARAA!  "</span>
+s.<span class="fn">lower</span>()          <span class="cm"># "  hello, baraa!  "</span>
+s.<span class="fn">strip</span>()          <span class="cm"># "Hello, Baraa!" (heq hapësirat)</span>
+s.<span class="fn">strip</span>().<span class="fn">title</span>()  <span class="cm"># "Hello, Baraa!"</span>
+
+<span class="cm"># Kërkim</span>
+s.<span class="fn">find</span>(<span class="st">"Baraa"</span>)     <span class="cm"># 9 (indeksi ku fillon)</span>
+s.<span class="fn">count</span>(<span class="st">"l"</span>)       <span class="cm"># 2</span>
+<span class="st">"Baraa"</span> <span class="kw">in</span> s        <span class="cm"># True</span>
+
+<span class="cm"># Modifikim</span>
+s.<span class="fn">replace</span>(<span class="st">"Baraa"</span>, <span class="st">"World"</span>)
+s.<span class="fn">strip</span>().<span class="fn">split</span>(<span class="st">","</span>)  <span class="cm"># ["Hello", " Baraa!"]</span>
+<span class="st">"-"</span>.<span class="fn">join</span>([<span class="st">"a"</span>,<span class="st">"b"</span>,<span class="st">"c"</span>])  <span class="cm"># "a-b-c"</span>
+</div>
+
+<div class="tip"><strong>🎯 f-strings (mënyra moderne e formatimit):</strong><br>
+name = "Baraa" → f"Përshëndetje, {name}!" → "Përshëndetje, Baraa!"</div>
+
+<div class="codeblock">name = <span class="st">"Baraa"</span>
+age = <span class="nm">35</span>
+pi = <span class="nm">3.14159</span>
+
+<span class="fn">print</span>(<span class="st">f"Emri: {name.upper()}"</span>)
+<span class="fn">print</span>(<span class="st">f"Mosha: {age:03d}"</span>)    <span class="cm"># 035</span>
+<span class="fn">print</span>(<span class="st">f"Pi: {pi:.2f}"</span>)      <span class="cm"># 3.14</span>
+</div>`,
+        challenge: {
+          q: 'Merr input emrin dhe mbiemrin. Printo: i bashkuar me titull (Title Case), gjatësia totale, dhe reversed.',
+          answer: 'emri = input("Emri: ")\nmbiemri = input("Mbiemri: ")\nfull = emri + " " + mbiemri\nprint(full.title())\nprint(len(full))\nprint(full[::-1])',
+          test: c => (c.includes('.title()') || c.includes('.upper()')) && c.includes('len') || c.includes('[::-1]')
+        }
+      }
+    ]
+  },
+  {
+    id: 's3', color: '#f0a04b', emoji: '🔢',
+    name: 'Working with Numbers',
+    desc: 'Int, float, operatorë matematikor, raundimet, modulo dhe random.',
+    topics: ['int/float', 'Arithmetic', 'math module', 'round()', 'random'],
+    lessons: [
+      {
+        id: 'l06', title: 'Operatorët Matematikor', sub: '+, -, *, /, //, %, **',
+        content: `
+<div class="codeblock">a = <span class="nm">17</span>
+b = <span class="nm">5</span>
+
+<span class="fn">print</span>(a + b)    <span class="cm"># 22  (mbledhje)</span>
+<span class="fn">print</span>(a - b)    <span class="cm"># 12  (zbritje)</span>
+<span class="fn">print</span>(a * b)    <span class="cm"># 85  (shumëzim)</span>
+<span class="fn">print</span>(a / b)    <span class="cm"># 3.4 (pjesëtim → gjithmonë float!)</span>
+<span class="fn">print</span>(a // b)   <span class="cm"># 3   (pjesëtim i plotë — floor)</span>
+<span class="fn">print</span>(a % b)    <span class="cm"># 2   (mbetja — modulo)</span>
+<span class="fn">print</span>(a ** b)   <span class="cm"># 1419857 (fuqia)</span>
+</div>
+
+<div class="concept"><h4>🎯 Pse modulo (%) është i rëndësishëm?</h4>
+<ul>
+<li>n % 2 == 0 → numri është çift</li>
+<li>n % 3 == 0 → ndahet me 3</li>
+<li>Bazë për FizzBuzz, cipher, rotacion</li>
+</ul>
+</div>
+
+<div class="codeblock"><span class="kw">import</span> math
+
+<span class="fn">print</span>(math.sqrt(<span class="nm">144</span>))    <span class="cm"># 12.0</span>
+<span class="fn">print</span>(math.pi)           <span class="cm"># 3.141592...</span>
+<span class="fn">print</span>(math.ceil(<span class="nm">4.1</span>))    <span class="cm"># 5</span>
+<span class="fn">print</span>(math.floor(<span class="nm">4.9</span>))   <span class="cm"># 4</span>
+<span class="fn">print</span>(<span class="fn">round</span>(<span class="nm">3.456</span>, <span class="nm">2</span>))   <span class="cm"># 3.46</span>
+
+<span class="kw">import</span> random
+<span class="fn">print</span>(random.<span class="fn">randint</span>(<span class="nm">1</span>, <span class="nm">10</span>))    <span class="cm"># numër random 1-10</span>
+<span class="fn">print</span>(random.<span class="fn">random</span>())          <span class="cm"># float random 0.0-1.0</span>
+</div>`,
+        challenge: {
+          q: 'Llogarit sipërfaqen dhe perimetrin e një rrethi me r=7. Printo me 2 decimale duke përdorur f-string.',
+          answer: 'import math\nr = 7\nS = math.pi * r**2\nP = 2 * math.pi * r\nprint(f"Sipërfaqja: {S:.2f}")\nprint(f"Perimetri: {P:.2f}")',
+          test: c => c.includes('math') && (c.includes('pi') || c.includes('r**2'))
+        }
+      }
+    ]
+  },
+  {
+    id: 's4', color: '#5bedbd', emoji: '⚖️',
+    name: 'Logic & Operators',
+    desc: 'Boolean, operatorët krahasues dhe logjikë, membership dhe identity.',
+    topics: ['bool', 'Comparison', 'and/or/not', 'in/not in', 'is/is not'],
+    lessons: [
+      {
+        id: 'l07', title: 'Operatorët Boolean', sub: 'Krahasimet, and, or, not',
+        content: `
+<div class="codeblock"><span class="cm"># Operatorët krahasues → japin bool</span>
+<span class="nm">5</span> > <span class="nm">3</span>       <span class="cm"># True</span>
+<span class="nm">5</span> == <span class="nm">5</span>     <span class="cm"># True (krahasim, jo caktim!)</span>
+<span class="nm">5</span> != <span class="nm">3</span>     <span class="cm"># True</span>
+<span class="nm">5</span> >= <span class="nm">5</span>     <span class="cm"># True</span>
+
+<span class="cm"># Operatorët logjikë</span>
+<span class="kw">True</span> <span class="kw">and</span> <span class="kw">False</span>   <span class="cm"># False (të dyja duhet True)</span>
+<span class="kw">True</span> <span class="kw">or</span> <span class="kw">False</span>    <span class="cm"># True (mjafton njëra)</span>
+<span class="kw">not</span> <span class="kw">True</span>         <span class="cm"># False</span>
+
+<span class="cm"># Membership & Identity</span>
+<span class="st">"a"</span> <span class="kw">in</span> <span class="st">"Baraa"</span>      <span class="cm"># True</span>
+<span class="nm">3</span> <span class="kw">not in</span> [<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">4</span>]   <span class="cm"># True</span>
+
+x = <span class="kw">None</span>
+x <span class="kw">is</span> <span class="kw">None</span>           <span class="cm"># True (identity check)</span>
+</div>
+
+<div class="visual">
+<svg viewBox="0 0 420 80" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono" font-size="11">
+  <rect x="10" y="10" width="120" height="60" rx="8" fill="#1b1b2a" stroke="#272740"/>
+  <text x="70" y="35" fill="#5bedbd" text-anchor="middle" font-weight="bold">AND</text>
+  <text x="70" y="55" fill="#6a6a90" text-anchor="middle">T+T=T, tjera=F</text>
+
+  <rect x="150" y="10" width="120" height="60" rx="8" fill="#1b1b2a" stroke="#272740"/>
+  <text x="210" y="35" fill="#5b8dee" text-anchor="middle" font-weight="bold">OR</text>
+  <text x="210" y="55" fill="#6a6a90" text-anchor="middle">F+F=F, tjera=T</text>
+
+  <rect x="290" y="10" width="120" height="60" rx="8" fill="#1b1b2a" stroke="#272740"/>
+  <text x="350" y="35" fill="#ed5b7b" text-anchor="middle" font-weight="bold">NOT</text>
+  <text x="350" y="55" fill="#6a6a90" text-anchor="middle">kthen të kundërtën</text>
+</svg>
+</div>`,
+        challenge: {
+          q: 'Shruaj shprehjet: (a) a=8 është mes 5 dhe 15? (b) emri="Baraa" ka "ar" brenda? (c) not(5>10)',
+          answer: 'a = 8\nprint(5 < a < 15)\nemri = "Baraa"\nprint("ar" in emri)\nprint(not(5 > 10))',
+          test: c => c.includes('and') || c.includes('<') && c.includes('>') || c.includes('in')
+        }
+      }
+    ]
+  },
+  {
+    id: 's5', color: '#ed5b7b', emoji: '🔀',
+    name: 'Conditional Statements',
+    desc: 'if, elif, else — merr vendime bazuar në logjikë. Nested dhe match-case.',
+    topics: ['if/elif/else', 'Nested if', 'Inline if', 'match-case'],
+    lessons: [
+      {
+        id: 'l08', title: 'if / elif / else', sub: 'Struktura bazë e vendimmarrjes',
+        content: `
+<div class="concept"><h4>💡 Si funksionon if?</h4>
+<p>Python kontrollon kushtin — nëse është True, ekzekuton bllokun. Nëse jo, kalon te elif ose else.</p>
+</div>
+
+<div class="visual">
+<svg viewBox="0 0 420 130" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono" font-size="11">
+  <rect x="150" y="5" width="120" height="35" rx="7" fill="#ed5b7b22" stroke="#ed5b7b55"/>
+  <text x="210" y="27" fill="#ed5b7b" text-anchor="middle">Kusht?</text>
+  <text x="170" y="60" fill="#5bedbd" font-size="10">True ↙</text>
+  <text x="260" y="60" fill="#ed5b7b" font-size="10">↘ False</text>
+  <rect x="30" y="70" width="110" height="30" rx="6" fill="#5bedbd22" stroke="#5bedbd55"/>
+  <text x="85" y="90" fill="#5bedbd" text-anchor="middle">ekzekuto</text>
+  <rect x="280" y="70" width="110" height="30" rx="6" fill="#3a3a58" stroke="#272740"/>
+  <text x="335" y="90" fill="#6a6a90" text-anchor="middle">kalon</text>
+  <line x1="210" y1="40" x2="210" y2="55" stroke="#3a3a58" stroke-width="1.5"/>
+  <line x1="210" y1="55" x2="85" y2="70" stroke="#5bedbd55" stroke-width="1.5"/>
+  <line x1="210" y1="55" x2="335" y2="70" stroke="#3a3a58" stroke-width="1.5"/>
+</svg>
+</div>
+
+<div class="codeblock">score = <span class="nm">78</span>
+
+<span class="kw">if</span> score >= <span class="nm">90</span>:
+    <span class="fn">print</span>(<span class="st">"A — Shkëlqyer!"</span>)
+<span class="kw">elif</span> score >= <span class="nm">80</span>:
+    <span class="fn">print</span>(<span class="st">"B — Shumë mirë"</span>)
+<span class="kw">elif</span> score >= <span class="nm">70</span>:
+    <span class="fn">print</span>(<span class="st">"C — Mirë"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"F — Duhet të punosh më shumë"</span>)
+
+<span class="cm"># Output: C — Mirë</span>
+
+<span class="cm"># Inline if (ternary)</span>
+status = <span class="st">"Adult"</span> <span class="kw">if</span> score >= <span class="nm">18</span> <span class="kw">else</span> <span class="st">"Minor"</span>
+</div>`,
+        challenge: {
+          q: 'Merr moshën me input. Printo: "Fëmijë" (<13), "Teenager" (13-17), "I rritur" (18-64), "Senior" (65+).',
+          answer: 'age = int(input("Mosha: "))\nif age < 13:\n    print("Fëmijë")\nelif age < 18:\n    print("Teenager")\nelif age < 65:\n    print("I rritur")\nelse:\n    print("Senior")',
+          test: c => c.includes('elif') && c.includes('else') && c.includes('if')
+        }
+      },
+      {
+        id: 'l09', title: 'Match Case (Python 3.10+)', sub: 'Switch-style matching',
+        content: `
+<div class="codeblock">day = <span class="st">"Monday"</span>
+
+<span class="kw">match</span> day:
+    <span class="kw">case</span> <span class="st">"Monday"</span> | <span class="st">"Tuesday"</span> | <span class="st">"Wednesday"</span>:
+        <span class="fn">print</span>(<span class="st">"Fillim jave — focus!"</span>)
+    <span class="kw">case</span> <span class="st">"Thursday"</span> | <span class="st">"Friday"</span>:
+        <span class="fn">print</span>(<span class="st">"Pothuajse fundjavë!"</span>)
+    <span class="kw">case</span> <span class="st">"Saturday"</span> | <span class="st">"Sunday"</span>:
+        <span class="fn">print</span>(<span class="st">"Fundjavë! Rezzo."</span>)
+    <span class="kw">case</span> _:
+        <span class="fn">print</span>(<span class="st">"Ditë e panjohur"</span>)
+</div>
+
+<div class="tip"><strong>📌 Baraa thotë:</strong> match-case është më i pastër se if/elif/elif/... kur ke shumë raste specifike. Mos e keqpërdor — nuk zëvendëson gjithë if-et.</div>`,
+        challenge: {
+          q: 'Shkruaj match-case për notat: "A"→"Shkëlqyer", "B"→"Mirë", "C"→"Kalon", tjera→"Rishiko".',
+          answer: 'nota = input("Nota: ")\nmatch nota:\n    case "A":\n        print("Shkëlqyer")\n    case "B":\n        print("Mirë")\n    case "C":\n        print("Kalon")\n    case _:\n        print("Rishiko")',
+          test: c => c.includes('match') && c.includes('case')
+        }
+      }
+    ]
+  },
+  {
+    id: 's6', color: '#a07cf0', emoji: '🔁',
+    name: 'Loops',
+    desc: 'for dhe while loops, range(), break, continue, pass, loops të ndërlidhur.',
+    topics: ['for loop', 'while loop', 'range()', 'break/continue', 'Nested loops'],
+    lessons: [
+      {
+        id: 'l10', title: 'For Loops', sub: 'Itero mbi sekuenca — range, string, lista',
+        content: `
+<div class="codeblock"><span class="cm"># Loop mbi range</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">5</span>):
+    <span class="fn">print</span>(i)       <span class="cm"># 0,1,2,3,4</span>
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">2</span>, <span class="nm">10</span>, <span class="nm">2</span>):
+    <span class="fn">print</span>(i)       <span class="cm"># 2,4,6,8</span>
+
+<span class="cm"># Loop mbi string</span>
+<span class="kw">for</span> ch <span class="kw">in</span> <span class="st">"Baraa"</span>:
+    <span class="fn">print</span>(ch)      <span class="cm"># B,a,r,a,a</span>
+
+<span class="cm"># Loop mbi listë</span>
+fruits = [<span class="st">"molla"</span>, <span class="st">"dardha"</span>, <span class="st">"rrushi"</span>]
+<span class="kw">for</span> f <span class="kw">in</span> fruits:
+    <span class="fn">print</span>(f.<span class="fn">upper</span>())
+
+<span class="cm"># enumerate — merr indeksin dhe vlerën</span>
+<span class="kw">for</span> i, f <span class="kw">in</span> <span class="fn">enumerate</span>(fruits):
+    <span class="fn">print</span>(<span class="st">f"{i}: {f}"</span>)
+</div>`,
+        challenge: {
+          q: 'Printo tabelën e shumëzimit të 7 (nga 1×7 deri 10×7) me format "7 × N = X".',
+          answer: 'for i in range(1, 11):\n    print(f"7 × {i} = {7*i}")',
+          test: c => c.includes('range') && c.includes('for')
+        }
+      },
+      {
+        id: 'l11', title: 'While Loop & Control', sub: 'while, break, continue, pass',
+        content: `
+<div class="codeblock"><span class="cm"># While — vazhdo derisa kushti është True</span>
+count = <span class="nm">0</span>
+<span class="kw">while</span> count < <span class="nm">5</span>:
+    <span class="fn">print</span>(count)
+    count += <span class="nm">1</span>
+
+<span class="cm"># break — dil nga loop</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">10</span>):
+    <span class="kw">if</span> i == <span class="nm">5</span>:
+        <span class="kw">break</span>
+    <span class="fn">print</span>(i)        <span class="cm"># 0,1,2,3,4</span>
+
+<span class="cm"># continue — kalo këtë iterim</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">10</span>):
+    <span class="kw">if</span> i % <span class="nm">2</span> == <span class="nm">0</span>:
+        <span class="kw">continue</span>
+    <span class="fn">print</span>(i)        <span class="cm"># 1,3,5,7,9 (vetëm tek)</span>
+</div>
+
+<div class="tip"><strong>🎯 While + input — pattern klasik:</strong><br>
+while True: → user_input = input("...") → if user_input == "quit": break</div>`,
+        challenge: {
+          q: 'Me while loop, printo numrat nga 1 deri 20 por kalon (continue) multiplat e 3.',
+          answer: 'i = 1\nwhile i <= 20:\n    if i % 3 == 0:\n        i += 1\n        continue\n    print(i)\n    i += 1',
+          test: c => c.includes('while') && c.includes('continue')
+        }
+      }
+    ]
+  },
+  {
+    id: 's7', color: '#5be8ed', emoji: '📦',
+    name: 'Data Structures',
+    desc: 'Lists, Tuples, Sets dhe Dictionaries — secila me karakteristikat dhe metodat e veta.',
+    topics: ['Lists', 'Tuples', 'Sets', 'Dictionaries', 'Comprehensions'],
+    lessons: [
+      {
+        id: 'l12', title: 'Lists — Struktura më Fleksibël', sub: 'Krijo, modifiko, sorto lista',
+        content: `
+<div class="concept"><h4>💡 Lista = e renditur, e ndryshueshme, lejon duplikate</h4>
+<ul>
+<li>Mund të mbash çdo tip të dhënash</li>
+<li>Indekset fillojnë nga 0</li>
+<li>Mund të ndryshohet pas krijimit (mutable)</li>
+</ul>
+</div>
+
+<div class="codeblock">nums = [<span class="nm">3</span>, <span class="nm">1</span>, <span class="nm">4</span>, <span class="nm">1</span>, <span class="nm">5</span>, <span class="nm">9</span>]
+
+<span class="cm"># Metoda kryesore</span>
+nums.<span class="fn">append</span>(<span class="nm">2</span>)          <span class="cm"># shto në fund</span>
+nums.<span class="fn">insert</span>(<span class="nm">0</span>, <span class="nm">99</span>)      <span class="cm"># shto në indeks 0</span>
+nums.<span class="fn">remove</span>(<span class="nm">1</span>)          <span class="cm"># hiq vlerën e parë 1</span>
+nums.<span class="fn">pop</span>()               <span class="cm"># hiq dhe kthen të fundit</span>
+nums.<span class="fn">sort</span>()              <span class="cm"># sorto në vend</span>
+nums.<span class="fn">reverse</span>()           <span class="cm"># kthen mbrapsht</span>
+<span class="fn">sorted</span>(nums)              <span class="cm"># kthen listë të re</span>
+
+<span class="cm"># List Comprehension — mënyra e Baraa-s</span>
+squares = [x**<span class="nm">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">6</span>)]
+<span class="cm"># [1, 4, 9, 16, 25]</span>
+
+evens = [x <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">20</span>) <span class="kw">if</span> x % <span class="nm">2</span> == <span class="nm">0</span>]
+<span class="cm"># [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]</span>
+</div>`,
+        challenge: {
+          q: 'Krijo listën e numrave 1-10. Me list comprehension bëj listën e kubeve. Printo minimumit, maksimumit dhe shumës.',
+          answer: 'nums = list(range(1, 11))\ncubes = [x**3 for x in nums]\nprint(min(nums), max(nums), sum(nums))',
+          test: c => c.includes('for') && c.includes('**') || c.includes('min') || c.includes('max')
+        }
+      },
+      {
+        id: 'l13', title: 'Tuples, Sets & Dictionaries', sub: 'Zgjedh strukturën e duhur',
+        content: `
+<div class="codeblock"><span class="cm"># TUPLE — e renditur, e pandryshueshme (immutable)</span>
+coords = (<span class="nm">42.66</span>, <span class="nm">21.17</span>)   <span class="cm"># Prishtina</span>
+lat, lon = coords           <span class="cm"># unpacking</span>
+
+<span class="cm"># SET — unike, jo e renditur, e shpejtë për kërkim</span>
+tags = {<span class="st">"python"</span>, <span class="st">"data"</span>, <span class="st">"python"</span>}
+<span class="cm"># {"python", "data"} — duplikati hiqet automatikisht</span>
+tags.<span class="fn">add</span>(<span class="st">"sql"</span>)
+a = {<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>}; b = {<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">4</span>}
+a & b   <span class="cm"># {2,3} intersection</span>
+a | b   <span class="cm"># {1,2,3,4} union</span>
+a - b   <span class="cm"># {1} difference</span>
+
+<span class="cm"># DICTIONARY — çelës: vlerë</span>
+person = {
+    <span class="st">"name"</span>: <span class="st">"Baraa"</span>,
+    <span class="st">"age"</span>: <span class="nm">35</span>,
+    <span class="st">"skills"</span>: [<span class="st">"Python"</span>, <span class="st">"SQL"</span>]
+}
+<span class="fn">print</span>(person[<span class="st">"name"</span>])         <span class="cm"># Baraa</span>
+<span class="fn">print</span>(person.<span class="fn">get</span>(<span class="st">"city"</span>, <span class="st">"N/A"</span>))  <span class="cm"># N/A (safe access)</span>
+
+<span class="cm"># Dict comprehension</span>
+sq_dict = {x: x**<span class="nm">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>,<span class="nm">6</span>)}
+<span class="cm"># {1:1, 2:4, 3:9, 4:16, 5:25}</span>
+</div>
+
+<div class="concept"><h4>📊 Kur të përdorësh çfarë?</h4>
+<ul>
+<li><strong>List</strong> — koleksion i renditur që ndryshon</li>
+<li><strong>Tuple</strong> — të dhëna fikse (koordinata, RGB)</li>
+<li><strong>Set</strong> — vetëm vlera unike, kërkim i shpejtë</li>
+<li><strong>Dict</strong> — çelës-vlerë, struktura JSON-like</li>
+</ul>
+</div>`,
+        challenge: {
+          q: 'Krijo dict për një student (emri, nota, lëndët[lista]). Printo çdo çelës-vlerë me .items().',
+          answer: 'student = {"emri": "Blerim", "nota": 9.5, "lëndët": ["Python", "Math"]}\nfor k, v in student.items():\n    print(f"{k}: {v}")',
+          test: c => c.includes('{') && c.includes(':') && c.includes('.items()')
+        }
+      }
+    ]
+  },
+  {
+    id: 's8', color: '#f0d65b', emoji: '⚙️',
+    name: 'Functions',
+    desc: 'Shkruaj funksione të pastra, parametra, return, *args, **kwargs, lambda, scope.',
+    topics: ['def', 'Parameters', 'return', '*args/**kwargs', 'lambda', 'Scope'],
+    lessons: [
+      {
+        id: 'l14', title: 'Funksionet Bazë', sub: 'def, parametra, return values',
+        content: `
+<div class="concept"><h4>💡 Pse funksionet?</h4>
+<ul>
+<li><strong>DRY</strong> — Don't Repeat Yourself</li>
+<li>Kodi bëhet i lexueshëm dhe i testuar</li>
+<li>Baraa thotë: "Nëse e shkruaj 2 herë, e bëj funksion"</li>
+</ul>
+</div>
+
+<div class="codeblock"><span class="cm"># Funksion bazë</span>
+<span class="kw">def</span> <span class="fn">greet</span>(name):
+    <span class="kw">return</span> <span class="st">f"Mirëdita, {name}!"</span>
+
+<span class="fn">print</span>(<span class="fn">greet</span>(<span class="st">"Baraa"</span>))   <span class="cm"># Mirëdita, Baraa!</span>
+
+<span class="cm"># Default values</span>
+<span class="kw">def</span> <span class="fn">power</span>(base, exp=<span class="nm">2</span>):
+    <span class="kw">return</span> base ** exp
+
+<span class="fn">print</span>(<span class="fn">power</span>(<span class="nm">3</span>))     <span class="cm"># 9  (exp default = 2)</span>
+<span class="fn">print</span>(<span class="fn">power</span>(<span class="nm">2</span>, <span class="nm">10</span>)) <span class="cm"># 1024</span>
+
+<span class="cm"># *args — numër i papërcaktuar argumentesh</span>
+<span class="kw">def</span> <span class="fn">total</span>(*args):
+    <span class="kw">return</span> <span class="fn">sum</span>(args)
+
+<span class="fn">print</span>(<span class="fn">total</span>(<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>))  <span class="cm"># 10</span>
+
+<span class="cm"># **kwargs — argumentet me emër</span>
+<span class="kw">def</span> <span class="fn">profile</span>(**kwargs):
+    <span class="kw">for</span> k, v <span class="kw">in</span> kwargs.<span class="fn">items</span>():
+        <span class="fn">print</span>(<span class="st">f"{k}: {v}"</span>)
+
+<span class="fn">profile</span>(name=<span class="st">"Baraa"</span>, role=<span class="st">"Engineer"</span>)
+</div>`,
+        challenge: {
+          q: 'Shkruaj funksionin celsius_to_f(c) dhe f_to_celsius(f). Testo me: 100°C → 212°F dhe 32°F → 0°C.',
+          answer: 'def celsius_to_f(c):\n    return (c * 9/5) + 32\n\ndef f_to_celsius(f):\n    return (f - 32) * 5/9\n\nprint(celsius_to_f(100))\nprint(f_to_celsius(32))',
+          test: c => c.includes('def') && c.includes('return') && (c.includes('9/5') || c.includes('5/9'))
+        }
+      },
+      {
+        id: 'l15', title: 'Lambda, Scope & Closures', sub: 'Funksione anonime dhe scope i variablave',
+        content: `
+<div class="codeblock"><span class="cm"># Lambda — funksion i shkurtër me një shprehje</span>
+square = <span class="kw">lambda</span> x: x**<span class="nm">2</span>
+add    = <span class="kw">lambda</span> a, b: a + b
+
+<span class="fn">print</span>(square(<span class="nm">5</span>))    <span class="cm"># 25</span>
+<span class="fn">print</span>(add(<span class="nm">3</span>, <span class="nm">4</span>))   <span class="cm"># 7</span>
+
+<span class="cm"># Përdorim klasik — sorted me key</span>
+students = [(<span class="st">"Ana"</span>, <span class="nm">85</span>), (<span class="st">"Beni"</span>, <span class="nm">92</span>), (<span class="st">"Cara"</span>, <span class="nm">78</span>)]
+<span class="fn">sorted</span>(students, key=<span class="kw">lambda</span> x: x[<span class="nm">1</span>], reverse=<span class="kw">True</span>)
+
+<span class="cm"># SCOPE — ku jeton variabla?</span>
+x = <span class="st">"global"</span>
+
+<span class="kw">def</span> <span class="fn">foo</span>():
+    x = <span class="st">"local"</span>    <span class="cm"># e re, nuk ndryshon global-in</span>
+    <span class="fn">print</span>(x)      <span class="cm"># local</span>
+
+<span class="fn">foo</span>()
+<span class="fn">print</span>(x)          <span class="cm"># global</span>
+
+<span class="cm"># global keyword — ndryshon variablin global brenda funksionit</span>
+counter = <span class="nm">0</span>
+<span class="kw">def</span> <span class="fn">increment</span>():
+    <span class="kw">global</span> counter
+    counter += <span class="nm">1</span>
+</div>
+
+<div class="warn-box"><strong>⚠️ Baraa paralajmëron:</strong> Mos abuzoni me global! Prefero të kalosh dhe të kthesh vlera me parametra/return. Kodi bëhet i paparashikueshëm me shumë global.</div>`,
+        challenge: {
+          q: 'Krijo listën e studentëve me (emri, GPA). Sorto sipas GPA nga e larta me lambda. Printo listën.',
+          answer: 'students = [("Ana", 3.8), ("Beni", 3.9), ("Cara", 3.5)]\nsorted_s = sorted(students, key=lambda x: x[1], reverse=True)\nfor s in sorted_s:\n    print(s)',
+          test: c => c.includes('lambda') && c.includes('sorted')
+        }
+      }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let learnedSet = new Set(JSON.parse(localStorage.getItem('baraa_py_learned') || '[]'));
+
+function saveLearned(){ localStorage.setItem('baraa_py_learned', JSON.stringify([...learnedSet])); }
+
+function updateProgress(){
+  const total = sections.reduce((a, s) => a + s.lessons.length, 0);
+  const done  = learnedSet.size;
+  document.getElementById('prog-lbl').textContent = `${done}/${total} mësuar`;
+  document.getElementById('prog-fill').style.width = (done/total*100)+'%';
+
+  // Update sidebar nav items
+  sections.forEach(sec => {
+    const secDone = sec.lessons.filter(l => learnedSet.has(l.id)).length;
+    const navItem = document.querySelector(`[data-nav="${sec.id}"]`);
+    if(navItem){
+      const progEl = navItem.querySelector('.nav-progress');
+      if(progEl) progEl.textContent = `${secDone}/${sec.lessons.length}`;
+      navItem.classList.toggle('done-nav', secDone === sec.lessons.length);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+
+// Sidebar
+const sidebar = document.getElementById('sidebar');
+sections.forEach((sec, i) => {
+  const div = document.createElement('div');
+  div.className = 'nav-item';
+  div.dataset.nav = sec.id;
+  div.innerHTML = `<div class="nav-dot" style="background:${sec.color}22;border:2px solid ${sec.color}55;"></div>${sec.name.split(' ').slice(-1)[0]}<span class="nav-progress">0/${sec.lessons.length}</span>`;
+  div.style.setProperty('border-left-color', 'transparent');
+  div.onclick = () => {
+    document.getElementById(sec.id)?.scrollIntoView({behavior:'smooth', block:'start'});
+  };
+  sidebar.appendChild(div);
+});
+
+// Main content
+const content = document.getElementById('content');
+sections.forEach((sec, si) => {
+  const secDiv = document.createElement('div');
+  secDiv.className = 'section-block';
+  secDiv.id = sec.id;
+
+  secDiv.innerHTML = `
+    <div class="section-hero">
+      <div class="section-num" style="background:${sec.color}15;color:${sec.color};">${sec.emoji}</div>
+      <div class="section-info">
+        <div style="font-size:.72rem;font-family:'JetBrains Mono',monospace;color:${sec.color};letter-spacing:.1em;margin-bottom:.2rem;">SEKSIONI ${si+1}</div>
+        <div class="section-name" style="color:${sec.color}">${sec.name}</div>
+        <div class="section-desc">${sec.desc}</div>
+        <div class="section-topics">
+          ${sec.topics.map(t => `<span class="topic-pill">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    ${sec.lessons.map((lesson, li) => renderLesson(lesson, sec.color, si*20+li+1)).join('')}
+  `;
+
+  content.appendChild(secDiv);
+});
+
+function renderLesson(lesson, color, num){
+  const learned = learnedSet.has(lesson.id);
+  return `
+  <div class="lesson${learned?' learned':''}" id="card-${lesson.id}">
+    <div class="lesson-head" onclick="toggleLesson('${lesson.id}')">
+      <div class="lesson-icon" style="background:${color}15;color:${color};">${num}</div>
+      <div class="lesson-meta">
+        <div class="lesson-title">${lesson.title}</div>
+        <div class="lesson-sub">${lesson.sub}</div>
+      </div>
+      <div class="lesson-check${learned?' checked':''}" id="chk-${lesson.id}"
+           onclick="event.stopPropagation();markLearned('${lesson.id}')">✓</div>
+      <button class="lesson-toggle" id="tog-${lesson.id}">▼</button>
+    </div>
+    <div class="lesson-body" id="body-${lesson.id}">
+      ${lesson.content}
+      ${lesson.challenge ? renderChallenge(lesson.challenge, lesson.id, color) : ''}
+      <div style="margin-top:.8rem;display:flex;gap:.5rem;">
+        <button class="btn btn-mark${learned?' marked':''}" id="mbtn-${lesson.id}"
+                onclick="markLearned('${lesson.id}')">
+          ${learned ? '✓ E mësuar' : 'Shëno si e mësuar'}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderChallenge(ch, lid, color){
+  return `
+  <div class="challenge" style="border-color:${color}33;background:${color}08;">
+    <span class="challenge-label" style="color:${color};">✏️ MINI SFIDË</span>
+    <div class="challenge-q">${ch.q}</div>
+    <textarea class="try-code" id="trycode-${lid}" placeholder="# Shkruaj zgjidhjen këtu..." spellcheck="false"></textarea>
+    <div class="challenge-actions">
+      <button class="btn btn-check" style="background:${color}" onclick="checkChallenge('${lid}')">▶ Kontrollo</button>
+      <button class="btn btn-answer" onclick="toggleAnswer('${lid}')">👁 Zgjidhja</button>
+    </div>
+    <div class="result-out" id="res-${lid}"></div>
+    <div class="answer-box" id="ans-${lid}">
+      <span class="answer-label">Zgjidhja zyrtare</span>${ch.answer}
+    </div>
+  </div>`;
+}
+
+// ── Interactions ─────────────────────────────────────────
+function toggleLesson(id){
+  document.getElementById(`body-${id}`).classList.toggle('open');
+  document.getElementById(`tog-${id}`).classList.toggle('open');
+}
+
+function checkChallenge(lid){
+  const allSections = sections;
+  let ch = null;
+  for(const sec of allSections){
+    const lesson = sec.lessons.find(l => l.id === lid);
+    if(lesson){ ch = lesson.challenge; break; }
+  }
+  if(!ch) return;
+
+  const code = document.getElementById(`trycode-${lid}`).value.trim();
+  const res = document.getElementById(`res-${lid}`);
+  res.className = 'result-out show';
+
+  if(!code){
+    res.classList.add('fail');
+    res.textContent = '⚠ Shkruaj diçka fillimisht!';
+    return;
+  }
+
+  const passed = ch.test(code);
+  if(passed){
+    res.classList.add('pass');
+    res.textContent = '✓ Shumë mirë! Kodi kalon testin. Shëno mësimin si të mësuar.';
+    // auto-learn
+    if(!learnedSet.has(lid)){
+      learnedSet.add(lid);
+      saveLearned();
+      updateProgress();
+      refreshLearnedState(lid);
+    }
+  } else {
+    res.classList.add('fail');
+    res.textContent = '✗ Provo sërish — ose shiko zgjidhjen.';
+  }
+}
+
+function toggleAnswer(lid){
+  document.getElementById(`ans-${lid}`).classList.toggle('show');
+}
+
+function markLearned(id){
+  if(learnedSet.has(id)) learnedSet.delete(id);
+  else learnedSet.add(id);
+  saveLearned();
+  updateProgress();
+  refreshLearnedState(id);
+}
+
+function refreshLearnedState(id){
+  const card = document.getElementById(`card-${id}`);
+  if(!card) return;
+  const done = learnedSet.has(id);
+  card.classList.toggle('learned', done);
+  const chk = document.getElementById(`chk-${id}`);
+  if(chk) chk.classList.toggle('checked', done);
+  const mbtn = document.getElementById(`mbtn-${id}`);
+  if(mbtn){
+    mbtn.textContent = done ? '✓ E mësuar' : 'Shëno si e mësuar';
+    mbtn.className = `btn btn-mark${done?' marked':''}`;
+  }
+}
+
+// Tab key
+document.addEventListener('keydown', e => {
+  if(e.key === 'Tab' && e.target.classList.contains('try-code')){
+    e.preventDefault();
+    const s = e.target.selectionStart, en = e.target.selectionEnd;
+    e.target.value = e.target.value.substring(0,s) + '    ' + e.target.value.substring(en);
+    e.target.selectionStart = e.target.selectionEnd = s + 4;
+  }
+});
+
+// Init
+updateProgress();
+</script>
+</body>
+</html>
