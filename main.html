@@ -143,7 +143,7 @@
   /* ── cards ── */
   .cards {
     position: relative; z-index: 5;
-    display: grid; grid-template-columns: 1fr 1fr;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem; max-width: 900px; width: 100%;
     padding: 0 2rem 6rem;
   }
@@ -288,6 +288,7 @@
   .stats { animation: rise .7s .25s both; }
   .card:nth-child(1) { animation: rise .7s .35s both; }
   .card:nth-child(2) { animation: rise .7s .45s both; }
+  .card:nth-child(3) { animation: rise .7s .55s both; }
 </style>
 </head>
 <body>
@@ -320,7 +321,7 @@
     <span class="stat-label">Detyra SQL</span>
   </div>
   <div class="stat">
-    <span class="stat-num green">2</span>
+    <span class="stat-num green">3</span>
     <span class="stat-label">Kurse aktive</span>
   </div>
 </div>
@@ -353,16 +354,16 @@
     </div>
   </a>
 
-  <!-- SQL Card -->
-  <a class="card card-sql" href="SqlLearn/__index.html">
+  <!-- SQL Quiz Card -->
+  <a class="card card-sql" href="Sql/index.html">
     <div class="card-icon">🗄️</div>
     <div>
       <div class="card-meta">
-        <span class="card-tag tag-sql">SQL</span>
+        <span class="card-tag tag-sql">SQL · QUIZ</span>
       </div>
-      <h2>SQL<br>Practice</h2>
+      <h2>SQL<br>Quiz</h2>
     </div>
-    <p>Ushtrime SQL nga bazat e bazës së të dhënave — SELECT, JOIN, GROUP BY, subqueries dhe shumë më tepër.</p>
+    <p>Testo njohuritë e tua me pyetje dhe detyra SQL. SELECT, JOIN, GROUP BY dhe shumë më tepër.</p>
     <div class="card-topics">
       <span class="topic">SELECT</span>
       <span class="topic">WHERE</span>
@@ -370,10 +371,33 @@
       <span class="topic">GROUP BY</span>
       <span class="topic">Subqueries</span>
       <span class="topic">Aggregate</span>
-      <span class="topic">DDL</span>
     </div>
     <div class="card-cta">
-      <span class="cta-text">Fillo Praktikën →</span>
+      <span class="cta-text">Fillo Quiz-in →</span>
+      <div class="cta-arrow">↗</div>
+    </div>
+  </a>
+
+  <!-- SQL Learn Card -->
+  <a class="card card-sql" href="SqlLearn/index.html">
+    <div class="card-icon">📚</div>
+    <div>
+      <div class="card-meta">
+        <span class="card-tag tag-sql">SQL · KURS</span>
+      </div>
+      <h2>SQL<br>Learn</h2>
+    </div>
+    <p>Mëso SQL hap pas hapi — nga bazat deri te konceptet e avancuara me shpjegime dhe shembuj praktikë.</p>
+    <div class="card-topics">
+      <span class="topic">DDL</span>
+      <span class="topic">DML</span>
+      <span class="topic">Joins</span>
+      <span class="topic">Indexes</span>
+      <span class="topic">Views</span>
+      <span class="topic">Transactions</span>
+    </div>
+    <div class="card-cta">
+      <span class="cta-text">Fillo Kursin →</span>
       <div class="cta-arrow">↗</div>
     </div>
   </a>
