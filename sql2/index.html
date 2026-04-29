@@ -3,1147 +3,1410 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detyra SQL — Python Handbook</title>
+<title>35 Detyra SQL — Python Handbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0f1a;
-    --surface: #13172b;
-    --card: #1a1f38;
-    --accent: #6c63ff;
-    --accent2: #00d4aa;
-    --accent3: #ff6584;
-    --accent4: #ffc947;
-    --text: #e8eaf6;
-    --muted: #7b82a8;
-    --border: rgba(108,99,255,0.2);
-    --success: #00d4aa;
-    --error: #ff6584;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Sora', sans-serif;
-    --radius: 12px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* grid bg */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(108,99,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(108,99,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 0 24px 80px; }
-
-  /* HEADER */
-  header {
-    padding: 60px 0 40px;
-    text-align: center;
-  }
-
-  .tag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent2);
-    border: 1px solid rgba(0,212,170,0.3);
-    padding: 4px 14px;
-    border-radius: 100px;
-    margin-bottom: 20px;
-  }
-
-  h1 {
-    font-size: clamp(32px, 6vw, 56px);
-    font-weight: 700;
-    line-height: 1.1;
-    background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent2) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 16px;
-  }
-
-  header p {
-    font-size: 16px;
-    color: var(--muted);
-    max-width: 560px;
-    margin: 0 auto 36px;
-    line-height: 1.7;
-  }
-
-  /* STATS BAR */
-  .stats {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-bottom: 56px;
-    flex-wrap: wrap;
-  }
-
-  .stat {
-    text-align: center;
-  }
-
-  .stat-num {
-    font-family: var(--mono);
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--accent);
-    display: block;
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 4px;
-    display: block;
-  }
-
-  /* SECTION LABEL */
-  .section-label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .section-label h2 {
-    font-size: 13px;
-    font-family: var(--mono);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* EXERCISE CARD */
-  .exercise {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 24px;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-
-  .exercise:hover { border-color: rgba(108,99,255,0.4); }
-
-  .ex-header {
-    padding: 20px 24px 16px;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .ex-num {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    background: rgba(108,99,255,0.12);
-    border: 1px solid rgba(108,99,255,0.25);
-    border-radius: 6px;
-    padding: 4px 10px;
-    white-space: nowrap;
-    margin-top: 2px;
-    flex-shrink: 0;
-  }
-
-  .ex-meta { flex: 1; }
-
-  .ex-title {
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 6px;
-    line-height: 1.4;
-  }
-
-  .ex-desc {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  .badge {
-    font-size: 11px;
-    font-family: var(--mono);
-    padding: 3px 10px;
-    border-radius: 100px;
-    font-weight: 400;
-    flex-shrink: 0;
-  }
-
-  .badge-easy { background: rgba(0,212,170,0.1); color: var(--accent2); border: 1px solid rgba(0,212,170,0.2); }
-  .badge-medium { background: rgba(255,201,71,0.1); color: var(--accent4); border: 1px solid rgba(255,201,71,0.2); }
-  .badge-hard { background: rgba(255,101,132,0.1); color: var(--accent3); border: 1px solid rgba(255,101,132,0.2); }
-
-  .ex-body { padding: 0 24px 20px; }
-
-  .context-box {
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 14px;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.65;
-  }
-
-  .context-box strong {
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  /* SCHEMA TABLE */
-  .schema {
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 14px;
-    overflow-x: auto;
-  }
-
-  .schema-title {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent2);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
-  }
-
-  .schema table {
-    font-family: var(--mono);
-    font-size: 12px;
-    border-collapse: collapse;
-    width: 100%;
-  }
-
-  .schema th {
-    color: var(--muted);
-    font-weight: 400;
-    text-align: left;
-    padding: 4px 16px 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-
-  .schema td {
-    padding: 5px 16px 5px 0;
-    color: var(--text);
-  }
-
-  .schema td:last-child { color: var(--muted); }
-
-  /* TASK LIST */
-  .tasks {
-    margin-bottom: 14px;
-  }
-
-  .tasks-title {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    font-family: var(--mono);
-    margin-bottom: 10px;
-  }
-
-  .task-item {
-    display: flex;
-    gap: 10px;
-    padding: 7px 0;
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.5;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-  }
-
-  .task-item:last-child { border-bottom: none; }
-
-  .task-dot {
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--accent);
-    border-radius: 4px;
-    flex-shrink: 0;
-    margin-top: 1px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* CODE EDITOR */
-  .editor-wrap {
-    position: relative;
-    margin-bottom: 14px;
-  }
-
-  .editor-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-
-  textarea.sql-input {
-    width: 100%;
-    background: #0a0c1a;
-    border: 1px solid rgba(108,99,255,0.25);
-    border-radius: 8px;
-    color: #a9b4ff;
-    font-family: var(--mono);
-    font-size: 13px;
-    line-height: 1.7;
-    padding: 14px 16px;
-    resize: vertical;
-    min-height: 120px;
-    transition: border-color 0.2s;
-    outline: none;
-    caret-color: var(--accent2);
-  }
-
-  textarea.sql-input:focus {
-    border-color: rgba(108,99,255,0.6);
-    box-shadow: 0 0 0 3px rgba(108,99,255,0.08);
-  }
-
-  /* BUTTONS */
-  .btn-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 8px 18px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .btn-run {
-    background: var(--accent);
-    color: #fff;
-  }
-  .btn-run:hover { background: #8078ff; transform: translateY(-1px); }
-  .btn-run:active { transform: translateY(0); }
-
-  .btn-hint {
-    background: transparent;
-    color: var(--accent4);
-    border: 1px solid rgba(255,201,71,0.3);
-  }
-  .btn-hint:hover { background: rgba(255,201,71,0.08); }
-
-  .btn-answer {
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid rgba(0,212,170,0.3);
-  }
-  .btn-answer:hover { background: rgba(0,212,170,0.08); }
-
-  .btn-reset {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .btn-reset:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
-  /* FEEDBACK */
-  .feedback {
-    margin-top: 12px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: var(--mono);
-    display: none;
-  }
-
-  .feedback.show { display: block; }
-  .feedback.ok { background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); color: var(--accent2); }
-  .feedback.err { background: rgba(255,101,132,0.08); border: 1px solid rgba(255,101,132,0.2); color: var(--accent3); }
-  .feedback.hint { background: rgba(255,201,71,0.08); border: 1px solid rgba(255,201,71,0.2); color: var(--accent4); }
-  .feedback.ans { background: rgba(108,99,255,0.08); border: 1px solid rgba(108,99,255,0.2); color: #a9b4ff; white-space: pre-wrap; }
-
-  /* SECTION DIVIDER */
-  .section-div {
-    margin: 48px 0 32px;
-  }
-
-  /* PROGRESS BAR */
-  .progress-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    height: 6px;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto 8px;
-    overflow: hidden;
-  }
-
-  .progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 100px;
-    transition: width 0.5s ease;
-    width: 0%;
-  }
-
-  .progress-text {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--muted);
-    text-align: center;
-    margin-bottom: 32px;
-  }
-
-  /* TOPIC CHIPS */
-  .topic-chip {
-    display: inline-block;
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--accent);
-    background: rgba(108,99,255,0.08);
-    border: 1px solid rgba(108,99,255,0.15);
-    border-radius: 100px;
-    padding: 2px 10px;
-    margin-right: 6px;
-    margin-bottom: 12px;
-  }
-
-  /* RESULT TABLE */
-  .result-table-wrap {
-    overflow-x: auto;
-    margin-top: 12px;
-  }
-
-  .result-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-
-  .result-table th {
-    background: rgba(108,99,255,0.15);
-    color: var(--accent);
-    padding: 8px 12px;
-    text-align: left;
-    font-weight: 400;
-  }
-
-  .result-table td {
-    padding: 7px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    color: var(--text);
-  }
-
-  .result-table tr:last-child td { border-bottom: none; }
-  .result-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
-
-  @media (max-width: 600px) {
-    .ex-header { flex-wrap: wrap; }
-    .stats { gap: 24px; }
-    .stat-num { font-size: 24px; }
-  }
+:root{--bg:#0d0f1a;--surface:#13172b;--card:#1a1f38;--accent:#6c63ff;--accent2:#00d4aa;--accent3:#ff6584;--accent4:#ffc947;--text:#e8eaf6;--muted:#7b82a8;--border:rgba(108,99,255,0.2);--mono:'Space Mono',monospace;--sans:'Sora',sans-serif;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(108,99,255,.04)1px,transparent 1px),linear-gradient(90deg,rgba(108,99,255,.04)1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1020px;margin:0 auto;padding:0 24px 100px}
+header{padding:56px 0 32px;text-align:center}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent2);border:1px solid rgba(0,212,170,.3);padding:4px 14px;border-radius:100px;margin-bottom:18px}
+h1{font-size:clamp(28px,5vw,52px);font-weight:700;line-height:1.1;background:linear-gradient(135deg,#fff 0%,var(--accent) 55%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px}
+header p{font-size:15px;color:var(--muted);max-width:540px;margin:0 auto 28px;line-height:1.7}
+.stats{display:flex;justify-content:center;gap:36px;margin-bottom:14px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--accent);display:block;line-height:1}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;display:block}
+.progress-wrap{background:var(--card);border:1px solid var(--border);border-radius:100px;height:6px;width:100%;max-width:400px;margin:24px auto 8px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;transition:width .5s ease;width:0%}
+.progress-text{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center;margin-bottom:36px}
+/* nav tabs */
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px;border-bottom:1px solid var(--border);padding-bottom:0}
+.nav-tab{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:10px 16px;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* section */
+.section{display:none}
+.section.active{display:block}
+.section-header{margin:0 0 24px}
+.section-header h2{font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px}
+.section-header p{font-size:13px;color:var(--muted);line-height:1.6}
+/* exercise card */
+.ex{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:20px;overflow:hidden;transition:border-color .2s}
+.ex:hover{border-color:rgba(108,99,255,.4)}
+.ex-header{padding:18px 22px 14px;display:flex;align-items:flex-start;gap:14px}
+.ex-num{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.25);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:2px;flex-shrink:0}
+.ex-meta{flex:1}
+.ex-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.4}
+.ex-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.chips{margin:6px 0 4px}
+.chip{display:inline-block;font-size:11px;font-family:var(--mono);color:var(--accent);background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.15);border-radius:100px;padding:2px 9px;margin-right:5px;margin-bottom:4px}
+.badge{font-size:10px;font-family:var(--mono);padding:3px 10px;border-radius:100px;flex-shrink:0}
+.badge-easy{background:rgba(0,212,170,.1);color:var(--accent2);border:1px solid rgba(0,212,170,.2)}
+.badge-med{background:rgba(255,201,71,.1);color:var(--accent4);border:1px solid rgba(255,201,71,.2)}
+.badge-hard{background:rgba(255,101,132,.1);color:var(--accent3);border:1px solid rgba(255,101,132,.2)}
+.ex-body{padding:0 22px 18px}
+.ctx{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:var(--muted);line-height:1.65}
+.ctx strong{color:var(--text);font-weight:600}
+.ctx code{font-family:var(--mono);font-size:11px;color:var(--accent2)}
+.schema{background:var(--surface);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px 16px;margin-bottom:12px;overflow-x:auto}
+.schema-title{font-family:var(--mono);font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.schema table{font-family:var(--mono);font-size:11px;border-collapse:collapse;width:100%}
+.schema th{color:var(--muted);font-weight:400;text-align:left;padding:3px 14px 3px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.schema td{padding:4px 14px 4px 0;color:var(--text)}
+.schema td:last-child{color:var(--muted)}
+.tasks{margin-bottom:12px}
+.tasks-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-family:var(--mono);margin-bottom:8px}
+.ti{display:flex;gap:9px;padding:6px 0;font-size:13px;color:var(--text);line-height:1.5;border-bottom:1px solid rgba(255,255,255,.04)}
+.ti:last-child{border-bottom:none}
+.ti-dot{width:16px;height:16px;border:1.5px solid var(--accent);border-radius:4px;flex-shrink:0;margin-top:1px}
+.el{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+textarea.sq{width:100%;background:#0a0c1a;border:1px solid rgba(108,99,255,.25);border-radius:8px;color:#a9b4ff;font-family:var(--mono);font-size:12px;line-height:1.7;padding:12px 14px;resize:vertical;min-height:100px;transition:border-color .2s;outline:none;caret-color:var(--accent2);margin-bottom:10px}
+textarea.sq:focus{border-color:rgba(108,99,255,.6);box-shadow:0 0 0 3px rgba(108,99,255,.08)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:var(--mono);font-size:11px;padding:7px 16px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;letter-spacing:.05em;text-transform:uppercase}
+.btn-run{background:var(--accent);color:#fff}
+.btn-run:hover{background:#8078ff;transform:translateY(-1px)}
+.btn-hint{background:transparent;color:var(--accent4);border:1px solid rgba(255,201,71,.3)}
+.btn-hint:hover{background:rgba(255,201,71,.08)}
+.btn-ans{background:transparent;color:var(--accent2);border:1px solid rgba(0,212,170,.3)}
+.btn-ans:hover{background:rgba(0,212,170,.08)}
+.btn-reset{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+.btn-reset:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.fb{margin-top:10px;padding:11px 14px;border-radius:8px;font-size:12px;font-family:var(--mono);display:none;line-height:1.6;white-space:pre-wrap}
+.fb.show{display:block}
+.fb.ok{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);color:var(--accent2)}
+.fb.err{background:rgba(255,101,132,.08);border:1px solid rgba(255,101,132,.2);color:var(--accent3)}
+.fb.hint{background:rgba(255,201,71,.08);border:1px solid rgba(255,201,71,.2);color:var(--accent4)}
+.fb.ans{background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.2);color:#a9b4ff}
+.solved-badge{display:none;font-family:var(--mono);font-size:10px;color:var(--accent2);margin-left:8px}
+.is-solved .solved-badge{display:inline}
+.is-solved{border-color:rgba(0,212,170,.25)!important}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <header>
-    <div class="tag">Data With Baraa — SQL Edition</div>
-    <h1>Detyra SQL<br>me Kod</h1>
-    <p>Detyra praktike SQL të ndërtuara mbi temat e Python Handbook. Shkruaj kueriet, provo njohuritë, dhe kontrollo rezultatet.</p>
-    <div class="progress-wrap">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-    <div class="progress-text" id="progressText">0 / 10 detyra të zgjidhura</div>
-  </header>
-
+<header>
+  <div class="tag">Data With Baraa — SQL Edition</div>
+  <h1>35 Detyra SQL<br>me Kod</h1>
+  <p>Detyra praktike SQL të ndërtuara mbi temat e Python Handbook. Shkruaj kueriet, provo, dhe mëso lidhjen midis Python dhe SQL.</p>
   <div class="stats">
-    <div class="stat">
-      <span class="stat-num">10</span>
-      <span class="stat-label">Detyra</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">5</span>
-      <span class="stat-label">Tema</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">SQL</span>
-      <span class="stat-label">Gjuha</span>
-    </div>
+    <div class="stat"><span class="stat-num">35</span><span class="stat-label">Detyra</span></div>
+    <div class="stat"><span class="stat-num">7</span><span class="stat-label">Tema</span></div>
+    <div class="stat"><span class="stat-num" id="solvedCount">0</span><span class="stat-label">Zgjidhura</span></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-text" id="progressText">0 / 35 detyra të zgjidhura</div>
+</header>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="showTab(0)">1. Bazat</button>
+  <button class="nav-tab" onclick="showTab(1)">2. Strings</button>
+  <button class="nav-tab" onclick="showTab(2)">3. Numrat</button>
+  <button class="nav-tab" onclick="showTab(3)">4. Logjika</button>
+  <button class="nav-tab" onclick="showTab(4)">5. Loops & Grupe</button>
+  <button class="nav-tab" onclick="showTab(5)">6. Funksionet</button>
+  <button class="nav-tab" onclick="showTab(6)">7. Avancuar</button>
+</nav>
+
+<!-- ==================== TAB 0: BAZAT ==================== -->
+<div class="section active" id="tab0">
+  <div class="section-header">
+    <h2>Bazat e SQL — Variablat, Tipet, print()</h2>
+    <p>Ashtu si variablat ruajnë dhe shfaqin të dhëna në Python, SELECT kthen të dhëna nga tabela. Këto janë ekuivalentët e <code>print()</code> dhe <code>type()</code>.</p>
   </div>
 
-  <!-- ============ SECTION 1 ============ -->
-  <div class="section-div">
-    <div class="section-label"><h2>Tema 1 — Variablat &amp; Tipet e të dhënave</h2></div>
-  </div>
-
-  <!-- EX 1 -->
-  <div class="exercise" id="ex1">
+  <!-- 01 -->
+  <div class="ex" id="ex1">
     <div class="ex-header">
       <div class="ex-num">01</div>
       <div class="ex-meta">
-        <div class="ex-title">Selekto të gjithë studentët</div>
-        <div>
-          <span class="topic-chip">SELECT</span>
-          <span class="topic-chip">FROM</span>
-        </div>
-        <div class="ex-desc">Ashtu si variablat ruajnë të dhëna, tabela <code>students</code> ruan informacion për studentët. Selekto të gjitha kolonat dhe rreshtat.</div>
+        <div class="ex-title">Selekto të gjithë studentët <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">SELECT *</span><span class="chip">FROM</span></div>
+        <div class="ex-desc">Si <code>print(lista)</code> shfaq gjithçka, <code>SELECT *</code> kthen të gjitha kolonat.</div>
       </div>
-      <span class="badge badge-easy">E lehtë</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
       <div class="schema">
         <div class="schema-title">Tabela: students</div>
-        <table>
-          <tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
-          <tr><td>student_id</td><td>INT</td><td>1</td></tr>
-          <tr><td>emri</td><td>VARCHAR</td><td>'Baraa'</td></tr>
-          <tr><td>mosha</td><td>INT</td><td>25</td></tr>
-          <tr><td>qyteti</td><td>VARCHAR</td><td>'Tiranë'</td></tr>
-          <tr><td>nota</td><td>FLOAT</td><td>9.5</td></tr>
-        </table>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>student_id</td><td>INT</td><td>1</td></tr>
+        <tr><td>emri</td><td>VARCHAR</td><td>'Baraa'</td></tr>
+        <tr><td>mosha</td><td>INT</td><td>25</td></tr>
+        <tr><td>qyteti</td><td>VARCHAR</td><td>'Tiranë'</td></tr>
+        <tr><td>nota</td><td>FLOAT</td><td>9.5</td></tr>
+        <tr><td>aktiv</td><td>BOOLEAN</td><td>TRUE</td></tr></table>
       </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Shkruaj kuerin që kthen të gjitha kolonat nga tabela <strong>students</strong></span></div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Kthen të gjitha kolonat dhe rreshtat nga tabela <strong>students</strong></span></div>
       </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp1" rows="4" spellcheck="false" placeholder="SELECT ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp1" rows="3" placeholder="SELECT ..."></textarea>
       <div class="btn-row">
         <button class="btn btn-run" onclick="check(1)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(1)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(1)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(1)">↺ Pastro</button>
+        <button class="btn btn-hint" onclick="hint(1)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(1)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(1)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb1"></div>
-      <div class="result-table-wrap" id="rt1" style="display:none"></div>
+      <div class="fb" id="fb1"></div>
     </div>
   </div>
 
-  <!-- EX 2 -->
-  <div class="exercise" id="ex2">
+  <!-- 02 -->
+  <div class="ex" id="ex2">
     <div class="ex-header">
       <div class="ex-num">02</div>
       <div class="ex-meta">
-        <div class="ex-title">Filtro sipas tipit të të dhënave</div>
-        <div>
-          <span class="topic-chip">WHERE</span>
-          <span class="topic-chip">Tipet</span>
-        </div>
-        <div class="ex-desc">Ashtu si Python ka tipe të ndryshme (int, str, bool), SQL gjithashtu bën dallim midis tipeve. Gjej studentët me notë mbi 8.0 dhe moshë nën 30 vjeç.</div>
+        <div class="ex-title">Selekto kolona specifike <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">SELECT kolonat</span></div>
+        <div class="ex-desc">Si aksesojmë vlera specifike nga një dictionary me çelësa, zgjedhim kolona specifike me emrat e tyre.</div>
       </div>
-      <span class="badge badge-easy">E lehtë</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
-      <div class="context-box">
-        <strong>Kontekst:</strong> Në Python, <code>nota > 8.0</code> dhe <code>mosha &lt; 30</code> janë kushte boolean. Në SQL, i shkruajmë ato brenda klauzolës WHERE duke i lidhur me <code>AND</code>.
+      <div class="ctx"><strong>Python:</strong> <code>print(student['emri'], student['mosha'], student['nota'])</code><br><strong>SQL:</strong> <code>SELECT emri, mosha, nota FROM students</code></div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Selekto vetëm <strong>emri, qyteti, nota</strong> nga students</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto sipas <strong>emri</strong> alfabetikisht (ASC)</span></div>
       </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Selekto <strong>emri, mosha, nota</strong> nga <strong>students</strong></span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Ku nota > 8.0 <strong>AND</strong> mosha &lt; 30</span></div>
-      </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp2" rows="5" spellcheck="false" placeholder="SELECT emri, ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp2" rows="3" placeholder="SELECT emri, ..."></textarea>
       <div class="btn-row">
         <button class="btn btn-run" onclick="check(2)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(2)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(2)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(2)">↺ Pastro</button>
+        <button class="btn btn-hint" onclick="hint(2)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(2)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(2)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb2"></div>
+      <div class="fb" id="fb2"></div>
     </div>
   </div>
 
-  <!-- ============ SECTION 2 ============ -->
-  <div class="section-div">
-    <div class="section-label"><h2>Tema 2 — Strings &amp; Operatorët</h2></div>
-  </div>
-
-  <!-- EX 3 -->
-  <div class="exercise" id="ex3">
+  <!-- 03 -->
+  <div class="ex" id="ex3">
     <div class="ex-header">
       <div class="ex-num">03</div>
       <div class="ex-meta">
-        <div class="ex-title">Kërkim teksti me LIKE</div>
-        <div>
-          <span class="topic-chip">LIKE</span>
-          <span class="topic-chip">Strings</span>
-        </div>
-        <div class="ex-desc">Ashtu si <code>find()</code> dhe <code>startswith()</code> në Python kërkojnë tekst brenda stringjeve, SQL ka operatorin <code>LIKE</code> për kërkim të modeleve.</div>
+        <div class="ex-title">Filtro me WHERE — kushti boolean <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">WHERE</span><span class="chip">Operatorët krahasues</span></div>
+        <div class="ex-desc">WHERE është si <code>if kusht:</code> — ekzekuton bllokun vetëm kur kushti është True.</div>
       </div>
-      <span class="badge badge-easy">E lehtë</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
-      <div class="schema">
-        <div class="schema-title">Tabela: produktet</div>
-        <table>
-          <tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
-          <tr><td>produkt_id</td><td>INT</td><td>1</td></tr>
-          <tr><td>emri</td><td>VARCHAR</td><td>'Python Bootcamp'</td></tr>
-          <tr><td>kategoria</td><td>VARCHAR</td><td>'Programim'</td></tr>
-          <tr><td>cmimi</td><td>DECIMAL</td><td>49.99</td></tr>
-          <tr><td>aktiv</td><td>BOOLEAN</td><td>TRUE</td></tr>
-        </table>
+      <div class="ctx"><strong>Python:</strong> <code>[s for s in students if s['nota'] >= 8.0]</code><br><strong>SQL:</strong> <code>SELECT * FROM students WHERE nota >= 8.0</code></div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Kthen <strong>emri, mosha, nota</strong> të studentëve me nota >= 8.0</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto nga nota DESC</span></div>
       </div>
-      <div class="context-box">
-        <strong>Python vs SQL:</strong> <code>'Python' in emri</code> → SQL: <code>emri LIKE '%Python%'</code><br>
-        <code>emri.startswith('Data')</code> → SQL: <code>emri LIKE 'Data%'</code>
-      </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Selekto <strong>emri, kategoria, cmimi</strong> nga <strong>produktet</strong></span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Ku emri përmban fjalën <strong>'Data'</strong> (kudo brenda emrit)</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Sorto sipas cmimit nga i ulëti te i larti</span></div>
-      </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp3" rows="6" spellcheck="false" placeholder="SELECT emri, ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp3" rows="4" placeholder="SELECT emri, mosha, nota&#10;FROM students&#10;WHERE ..."></textarea>
       <div class="btn-row">
         <button class="btn btn-run" onclick="check(3)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(3)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(3)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(3)">↺ Pastro</button>
+        <button class="btn btn-hint" onclick="hint(3)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(3)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(3)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb3"></div>
+      <div class="fb" id="fb3"></div>
     </div>
   </div>
 
-  <!-- EX 4 -->
-  <div class="exercise" id="ex4">
+  <!-- 04 -->
+  <div class="ex" id="ex4">
     <div class="ex-header">
       <div class="ex-num">04</div>
       <div class="ex-meta">
-        <div class="ex-title">Transformim i stringjeve</div>
-        <div>
-          <span class="topic-chip">UPPER/LOWER</span>
-          <span class="topic-chip">CONCAT</span>
-          <span class="topic-chip">LEN</span>
-        </div>
-        <div class="ex-desc">Funksionet e stringjeve të Python si <code>upper()</code>, <code>lower()</code>, <code>len()</code> kanë ekuivalentët e tyre direkte në SQL.</div>
+        <div class="ex-title">DISTINCT — vlera unike si Set <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">DISTINCT</span><span class="chip">Set</span></div>
+        <div class="ex-desc">Ashtu si <code>set(lista)</code> heq duplikatet, <code>SELECT DISTINCT</code> kthen vetëm vlera unike.</div>
       </div>
-      <span class="badge badge-medium">Mesatare</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
-      <div class="context-box">
-        <strong>Ekuivalentet:</strong><br>
-        <code>emri.upper()</code> → <code>UPPER(emri)</code><br>
-        <code>emri.lower()</code> → <code>LOWER(emri)</code><br>
-        <code>len(emri)</code> → <code>LEN(emri)</code> ose <code>LENGTH(emri)</code><br>
-        <code>'Hello' + ' ' + 'World'</code> → <code>CONCAT(col1, ' ', col2)</code>
+      <div class="ctx"><strong>Python:</strong> <code>set([s['qyteti'] for s in students])</code><br><strong>SQL:</strong> <code>SELECT DISTINCT qyteti FROM students</code></div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Selekto të gjitha <strong>qytetet unike</strong> nga students</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto alfabetikisht</span></div>
       </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Nga tabela <strong>students</strong>, krijo kolonë <strong>emri_madh</strong> = emri me shkronja të mëdha</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Krijo kolonë <strong>profili</strong> = CONCAT(emri, ' nga ', qyteti)</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Krijo kolonë <strong>gjatesia</strong> = gjatësia e emrit</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Filtro vetëm ata ku gjatësia e emrit > 4 karaktere</span></div>
-      </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp4" rows="7" spellcheck="false" placeholder="SELECT UPPER(emri) AS emri_madh, ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp4" rows="3" placeholder="SELECT DISTINCT ..."></textarea>
       <div class="btn-row">
         <button class="btn btn-run" onclick="check(4)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(4)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(4)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(4)">↺ Pastro</button>
+        <button class="btn btn-hint" onclick="hint(4)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(4)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(4)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb4"></div>
+      <div class="fb" id="fb4"></div>
     </div>
   </div>
 
-  <!-- ============ SECTION 3 ============ -->
-  <div class="section-div">
-    <div class="section-label"><h2>Tema 3 — Numrat &amp; Llogaritjet</h2></div>
-  </div>
-
-  <!-- EX 5 -->
-  <div class="exercise" id="ex5">
+  <!-- 05 -->
+  <div class="ex" id="ex5">
     <div class="ex-header">
       <div class="ex-num">05</div>
       <div class="ex-meta">
-        <div class="ex-title">Funksionet matematikore</div>
-        <div>
-          <span class="topic-chip">ROUND</span>
-          <span class="topic-chip">ABS</span>
-          <span class="topic-chip">AVG</span>
-        </div>
-        <div class="ex-desc">Ashtu si <code>round()</code>, <code>abs()</code> dhe <code>math.ceil()</code> në Python, SQL ka funksionet ROUND, ABS, CEILING, FLOOR për kontrollimin e numrave.</div>
+        <div class="ex-title">LIMIT — si slice të listës <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">LIMIT</span><span class="chip">TOP</span><span class="chip">ORDER BY</span></div>
+        <div class="ex-desc"><code>lista[:5]</code> në Python = <code>LIMIT 5</code> në SQL — merr vetëm N rreshtat e parë.</div>
       </div>
-      <span class="badge badge-medium">Mesatare</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
-      <div class="schema">
-        <div class="schema-title">Tabela: shitjet</div>
-        <table>
-          <tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
-          <tr><td>shitja_id</td><td>INT</td><td>1</td></tr>
-          <tr><td>produkti</td><td>VARCHAR</td><td>'Kurs Python'</td></tr>
-          <tr><td>sasia</td><td>INT</td><td>5</td></tr>
-          <tr><td>cmimi_unit</td><td>DECIMAL</td><td>29.999</td></tr>
-          <tr><td>zbritja</td><td>DECIMAL</td><td>-3.75</td></tr>
-        </table>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Merr <strong>3 studentët me notat më të larta</strong></span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri, qyteti, nota</span></div>
       </div>
-      <div class="context-box">
-        <strong>Python → SQL:</strong><br>
-        <code>round(x, 2)</code> → <code>ROUND(x, 2)</code><br>
-        <code>abs(x)</code> → <code>ABS(x)</code><br>
-        <code>sasia * cmimi</code> → <code>sasia * cmimi_unit</code>
-      </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Llogarit <strong>totali</strong> = sasia * cmimi_unit, i rrumbullakosur në 2 shifra decimale</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Shfaq <strong>zbritja_abs</strong> = vlera absolute e zbritjes (pa shenjën minus)</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Llogarit <strong>totali_neto</strong> = totali + zbritja (zbritja mund të jetë negative!)</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Sorto nga totali_neto nga i larti te i ulëti</span></div>
-      </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp5" rows="7" spellcheck="false" placeholder="SELECT produkti, ROUND(sasia * cmimi_unit, 2) AS totali, ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp5" rows="4" placeholder="SELECT emri, qyteti, nota&#10;FROM students&#10;ORDER BY nota DESC&#10;LIMIT ..."></textarea>
       <div class="btn-row">
         <button class="btn btn-run" onclick="check(5)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(5)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(5)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(5)">↺ Pastro</button>
+        <button class="btn btn-hint" onclick="hint(5)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(5)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(5)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb5"></div>
+      <div class="fb" id="fb5"></div>
     </div>
   </div>
 
-  <!-- ============ SECTION 4 ============ -->
-  <div class="section-div">
-    <div class="section-label"><h2>Tema 4 — Logjika &amp; Kushtet</h2></div>
+</div><!-- /tab0 -->
+
+<!-- ==================== TAB 1: STRINGS ==================== -->
+<div class="section" id="tab1">
+  <div class="section-header">
+    <h2>Strings — Transformim, Kërkim, Validim</h2>
+    <p>Metodat e stringjeve si <code>upper()</code>, <code>replace()</code>, <code>find()</code>, <code>strip()</code> kanë ekuivalentë direkte në SQL.</p>
   </div>
 
-  <!-- EX 6 -->
-  <div class="exercise" id="ex6">
+  <!-- 06 -->
+  <div class="ex" id="ex6">
     <div class="ex-header">
       <div class="ex-num">06</div>
       <div class="ex-meta">
-        <div class="ex-title">Deklaratat me kusht — CASE WHEN</div>
-        <div>
-          <span class="topic-chip">CASE WHEN</span>
-          <span class="topic-chip">if-elif-else</span>
-        </div>
-        <div class="ex-desc">Ekuivalenti i <code>if-elif-else</code> në Python është <code>CASE WHEN ... THEN ... ELSE ... END</code> në SQL. Kategorizo studentët sipas notës.</div>
+        <div class="ex-title">UPPER dhe LOWER — konvertim i case-it <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">UPPER()</span><span class="chip">LOWER()</span></div>
+        <div class="ex-desc"><code>emri.upper()</code> → <code>UPPER(emri)</code> &nbsp;|&nbsp; <code>emri.lower()</code> → <code>LOWER(emri)</code></div>
       </div>
-      <span class="badge badge-medium">Mesatare</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
-      <div class="context-box">
-        <strong>Python if-elif-else → SQL CASE WHEN:</strong><br>
-        <code>if nota >= 9: 'Shkëlqyer'</code><br>
-        <code>elif nota >= 7: 'Mirë'</code><br>
-        <code>else: 'Ka nevojë për përmirësim'</code><br><br>
-        Bëhet: <code>CASE WHEN nota >= 9 THEN 'Shkëlqyer' WHEN nota >= 7 THEN 'Mirë' ELSE 'Ka nevojë' END</code>
+      <div class="schema">
+        <div class="schema-title">Tabela: punonjesit</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>id</td><td>INT</td><td>1</td></tr>
+        <tr><td>emri</td><td>VARCHAR</td><td>'ana BEQA'</td></tr>
+        <tr><td>email</td><td>VARCHAR</td><td>'Ana.Beqa@Firma.com'</td></tr>
+        <tr><td>departamenti</td><td>VARCHAR</td><td>'IT'</td></tr>
+        <tr><td>paga</td><td>DECIMAL</td><td>85000.00</td></tr></table>
       </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Nga <strong>students</strong>, shfaq emri, nota</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Krijo kolonë <strong>kategoria</strong>: nota ≥ 9 → 'Shkëlqyer', nota ≥ 7 → 'Mirë', nota ≥ 5 → 'Kalon', të tjera → 'Nuk kalon'</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Sorto nga nota descending</span></div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq <strong>emri_sakte</strong> = emri me UPPER dhe <strong>email_normalize</strong> = email me LOWER</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq gjithashtu departamenti origjinal</span></div>
       </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp6" rows="10" spellcheck="false" placeholder="SELECT emri, nota,&#10;  CASE&#10;    WHEN nota >= 9 THEN 'Shkëlqyer'&#10;    ...&#10;  END AS kategoria&#10;FROM students&#10;ORDER BY ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp6" rows="5" placeholder="SELECT UPPER(emri) AS emri_sakte, ...&#10;FROM punonjesit;"></textarea>
       <div class="btn-row">
         <button class="btn btn-run" onclick="check(6)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(6)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(6)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(6)">↺ Pastro</button>
+        <button class="btn btn-hint" onclick="hint(6)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(6)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(6)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb6"></div>
+      <div class="fb" id="fb6"></div>
     </div>
   </div>
 
-  <!-- EX 7 -->
-  <div class="exercise" id="ex7">
+  <!-- 07 -->
+  <div class="ex" id="ex7">
     <div class="ex-header">
       <div class="ex-num">07</div>
       <div class="ex-meta">
-        <div class="ex-title">Operatorët logjik dhe IN</div>
-        <div>
-          <span class="topic-chip">AND / OR</span>
-          <span class="topic-chip">IN</span>
-          <span class="topic-chip">NOT IN</span>
-        </div>
-        <div class="ex-desc">Operatorët <code>and</code>, <code>or</code>, dhe operatori i anëtarësimit <code>in / not in</code> të Python korrespondojnë drejtpërsëdrejti me <code>AND</code>, <code>OR</code>, <code>IN</code>, <code>NOT IN</code> të SQL.</div>
+        <div class="ex-title">CONCAT dhe LEN — bashkim dhe gjatësi <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">CONCAT()</span><span class="chip">LEN()</span><span class="chip">LENGTH()</span></div>
+        <div class="ex-desc"><code>'Hello' + ' ' + name</code> → <code>CONCAT('Hello ', emri)</code> &nbsp;|&nbsp; <code>len(x)</code> → <code>LEN(x)</code></div>
       </div>
-      <span class="badge badge-medium">Mesatare</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
-      <div class="context-box">
-        <strong>Python → SQL:</strong><br>
-        <code>qyteti in ['Tiranë', 'Shkodër', 'Vlorë']</code> → <code>qyteti IN ('Tiranë', 'Shkodër', 'Vlorë')</code><br>
-        <code>nota > 8 and mosha &lt; 28</code> → <code>nota > 8 AND mosha &lt; 28</code>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Nga <strong>students</strong>, krijo <strong>profili</strong> = 'Studenti ' + emri + ' nga ' + qyteti</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>gjatesia_emrit</strong> = gjatësia e emrit</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Filtro vetëm studentët ku gjatësia e emrit > 4</span></div>
       </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Selekto <strong>emri, qyteti, nota, mosha</strong> nga <strong>students</strong></span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Ku qyteti është <strong>IN ('Tiranë', 'Durrës', 'Vlorë')</strong></span></div>
-        <div class="task-item"><div class="task-dot"></div><span><strong>AND</strong> nota >= 7.0</span></div>
-        <div class="task-item"><div class="task-dot"></div><span><strong>AND</strong> mosha NOT IN (17, 18)  — (jo minorë që kaluan direkt)</span></div>
-      </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp7" rows="7" spellcheck="false" placeholder="SELECT emri, qyteti, nota, mosha&#10;FROM students&#10;WHERE ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp7" rows="6" placeholder="SELECT CONCAT('Studenti ', emri, ' nga ', qyteti) AS profili, ...&#10;FROM students&#10;WHERE ..."></textarea>
       <div class="btn-row">
         <button class="btn btn-run" onclick="check(7)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(7)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(7)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(7)">↺ Pastro</button>
+        <button class="btn btn-hint" onclick="hint(7)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(7)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(7)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb7"></div>
+      <div class="fb" id="fb7"></div>
     </div>
   </div>
 
-  <!-- ============ SECTION 5 ============ -->
-  <div class="section-div">
-    <div class="section-label"><h2>Tema 5 — Strukturat e të dhënave &amp; Funksionet</h2></div>
-  </div>
-
-  <!-- EX 8 -->
-  <div class="exercise" id="ex8">
+  <!-- 08 -->
+  <div class="ex" id="ex8">
     <div class="ex-header">
       <div class="ex-num">08</div>
       <div class="ex-meta">
-        <div class="ex-title">Grumbullimi — GROUP BY</div>
-        <div>
-          <span class="topic-chip">GROUP BY</span>
-          <span class="topic-chip">COUNT</span>
-          <span class="topic-chip">AVG</span>
-        </div>
-        <div class="ex-desc">Ashtu si <code>Dictionary</code> në Python grupifikon të dhënat sipas çelësit, <code>GROUP BY</code> në SQL grumbullon rreshtat sipas vlerave të një kolone.</div>
+        <div class="ex-title">LIKE — kërkim si find() dhe startswith() <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">LIKE</span><span class="chip">%</span><span class="chip">_</span></div>
+        <div class="ex-desc"><code>'a' in tekst</code> → <code>LIKE '%a%'</code> &nbsp;|&nbsp; <code>startswith('A')</code> → <code>LIKE 'A%'</code></div>
       </div>
-      <span class="badge badge-medium">Mesatare</span>
-    </div>
-    <div class="ex-body">
-      <div class="context-box">
-        <strong>Ideja:</strong> Si do ta bëje në Python me dict: <code>{'Tiranë': [9.5, 8.2, 7.1], 'Durrës': [8.8]}</code><br>
-        Pastaj <code>len()</code>, <code>sum()/len()</code> për statistikat — SQL bën të njëjtën gjë me GROUP BY + COUNT() + AVG().
-      </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Nga <strong>students</strong>, grupo sipas <strong>qyteti</strong></span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Shfaq: qyteti, <strong>nr_studenteve</strong> = COUNT(*), <strong>nota_mesatare</strong> = AVG(nota) me 2 decimale</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Filtro vetëm qytetet me <strong>nr_studenteve >= 2</strong> (HAVING)</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Sorto nga nota_mesatare DESC</span></div>
-      </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp8" rows="8" spellcheck="false" placeholder="SELECT qyteti,&#10;       COUNT(*) AS nr_studenteve,&#10;       ROUND(AVG(nota), 2) AS nota_mesatare&#10;FROM students&#10;GROUP BY ...&#10;HAVING ...&#10;ORDER BY ..."></textarea>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-run" onclick="check(8)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(8)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(8)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(8)">↺ Pastro</button>
-      </div>
-      <div class="feedback" id="fb8"></div>
-    </div>
-  </div>
-
-  <!-- EX 9 -->
-  <div class="exercise" id="ex9">
-    <div class="ex-header">
-      <div class="ex-num">09</div>
-      <div class="ex-meta">
-        <div class="ex-title">Funksioni JOIN — Bashkimi i tabelave</div>
-        <div>
-          <span class="topic-chip">INNER JOIN</span>
-          <span class="topic-chip">LEFT JOIN</span>
-        </div>
-        <div class="ex-desc">Ashtu si <code>zip()</code> bashkon dy lista me pozicion, <code>JOIN</code> bashkon dy tabela me çelës të përbashkët. Kjo është struktura e të dhënave relacionale!</div>
-      </div>
-      <span class="badge badge-hard">E vështirë</span>
+      <span class="badge badge-easy">Lehtë</span>
     </div>
     <div class="ex-body">
       <div class="schema">
         <div class="schema-title">Tabela: kurset</div>
-        <table>
-          <tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
-          <tr><td>kurs_id</td><td>INT</td><td>1</td></tr>
-          <tr><td>emri_kursit</td><td>VARCHAR</td><td>'Python Basics'</td></tr>
-          <tr><td>instruktori</td><td>VARCHAR</td><td>'Baraa'</td></tr>
-          <tr><td>cmimi</td><td>DECIMAL</td><td>99.0</td></tr>
-        </table>
-        <br>
-        <div class="schema-title">Tabela: regjistrime</div>
-        <table>
-          <tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
-          <tr><td>student_id</td><td>INT</td><td>1</td></tr>
-          <tr><td>kurs_id</td><td>INT</td><td>1</td></tr>
-          <tr><td>data_regj</td><td>DATE</td><td>'2026-01-15'</td></tr>
-          <tr><td>perfundoi</td><td>BOOLEAN</td><td>TRUE</td></tr>
-        </table>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>kurs_id</td><td>INT</td><td>1</td></tr>
+        <tr><td>titulli</td><td>VARCHAR</td><td>'Python for Data'</td></tr>
+        <tr><td>kategoria</td><td>VARCHAR</td><td>'Programim'</td></tr>
+        <tr><td>cmimi</td><td>DECIMAL</td><td>79.99</td></tr>
+        <tr><td>instruktori</td><td>VARCHAR</td><td>'Baraa Khatab'</td></tr></table>
       </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Bashko <strong>students</strong> me <strong>regjistrime</strong> me INNER JOIN (student_id)</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Pastaj bashko me <strong>kurset</strong> (kurs_id)</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Shfaq: emri_studenti, emri_kursit, instruktori, data_regj, perfundoi</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Filtro vetëm ata që <strong>perfundoi = TRUE</strong></span></div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Gjej të gjitha kurset ku titulli <strong>përmban 'Data'</strong></span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto sipas cmimi ASC</span></div>
       </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp9" rows="10" spellcheck="false" placeholder="SELECT s.emri AS emri_studenti,&#10;       k.emri_kursit,&#10;       ...&#10;FROM students s&#10;INNER JOIN regjistrime r ON ...&#10;INNER JOIN kurset k ON ...&#10;WHERE ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp8" rows="4" placeholder="SELECT titulli, kategoria, cmimi&#10;FROM kurset&#10;WHERE titulli LIKE ..."></textarea>
       <div class="btn-row">
-        <button class="btn btn-run" onclick="check(9)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(9)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(9)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(9)">↺ Pastro</button>
+        <button class="btn btn-run" onclick="check(8)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(8)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(8)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(8)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb9"></div>
+      <div class="fb" id="fb8"></div>
     </div>
   </div>
 
-  <!-- EX 10 -->
-  <div class="exercise" id="ex10">
+  <!-- 09 -->
+  <div class="ex" id="ex9">
+    <div class="ex-header">
+      <div class="ex-num">09</div>
+      <div class="ex-meta">
+        <div class="ex-title">REPLACE dhe TRIM — pastrim si replace() dhe strip() <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">REPLACE()</span><span class="chip">TRIM()</span><span class="chip">LTRIM()</span><span class="chip">RTRIM()</span></div>
+        <div class="ex-desc"><code>tekst.replace('-','')</code> → <code>REPLACE(tekst,'-','')</code> &nbsp;|&nbsp; <code>tekst.strip()</code> → <code>TRIM(tekst)</code></div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: kontaktet</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>id</td><td>INT</td><td>1</td></tr>
+        <tr><td>emri</td><td>VARCHAR</td><td>'  Ana Beqa  '</td></tr>
+        <tr><td>telefoni</td><td>VARCHAR</td><td>'+355-69-123-4567'</td></tr>
+        <tr><td>email</td><td>VARCHAR</td><td>'  ana@test.com  '</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>emri_pastro</strong> = emri pa hapësirat anash (TRIM)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>telefoni_pastro</strong> = telefoni pa vizat '-' (REPLACE)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>email_pastro</strong> = email pa hapësirat dhe me lowercase</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp9" rows="6" placeholder="SELECT TRIM(emri) AS emri_pastro, ...&#10;FROM kontaktet;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(9)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(9)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(9)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(9)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb9"></div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="ex" id="ex10">
     <div class="ex-header">
       <div class="ex-num">10</div>
       <div class="ex-meta">
-        <div class="ex-title">Subquery — Funksion brenda funksioni</div>
-        <div>
-          <span class="topic-chip">Subquery</span>
-          <span class="topic-chip">CTE</span>
-          <span class="topic-chip">Window Functions</span>
-        </div>
-        <div class="ex-desc">Ashtu si funksionet e ndërlidhura në Python (output i një funksioni si input i tjetrit), subqueries dhe CTEs ju lejojnë të ndërtoni kueriet komplekse hap pas hapi.</div>
+        <div class="ex-title">SUBSTRING — slice i stringut <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">SUBSTRING()</span><span class="chip">LEFT()</span><span class="chip">RIGHT()</span></div>
+        <div class="ex-desc"><code>tekst[0:3]</code> → <code>LEFT(tekst, 3)</code> &nbsp;|&nbsp; <code>tekst[-3:]</code> → <code>RIGHT(tekst, 3)</code> &nbsp;|&nbsp; <code>tekst[2:5]</code> → <code>SUBSTRING(tekst, 3, 3)</code></div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: produktet</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>prod_id</td><td>VARCHAR</td><td>'PRD-2026-001'</td></tr>
+        <tr><td>emri</td><td>VARCHAR</td><td>'Laptop Dell XPS'</td></tr>
+        <tr><td>kategoria_kodi</td><td>VARCHAR</td><td>'EL-COMP-2024'</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Ekstrago <strong>prefiksi</strong> = 3 karakteret e para të prod_id (LEFT)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Ekstrago <strong>viti</strong> = 4 karakteret nga pozicioni 5 i prod_id (SUBSTRING)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Ekstrago <strong>numri</strong> = 3 karakteret e fundit të prod_id (RIGHT)</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp10" rows="6" placeholder="SELECT prod_id,&#10;       LEFT(prod_id, 3) AS prefiksi,&#10;       SUBSTRING(prod_id, ...) AS viti,&#10;       RIGHT(prod_id, 3) AS numri&#10;FROM produktet;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(10)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(10)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(10)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(10)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb10"></div>
+    </div>
+  </div>
+
+</div><!-- /tab1 -->
+
+<!-- ==================== TAB 2: NUMRAT ==================== -->
+<div class="section" id="tab2">
+  <div class="section-header">
+    <h2>Numrat — Llogaritje, Rrumbullakosje, Statistika</h2>
+    <p>Funksionet e numrave si <code>round()</code>, <code>abs()</code>, <code>max()</code>, <code>min()</code>, <code>sum()</code> ekzistojnë drejtpërsëdrejti në SQL.</p>
+  </div>
+
+  <!-- 11 -->
+  <div class="ex" id="ex11">
+    <div class="ex-header">
+      <div class="ex-num">11</div>
+      <div class="ex-meta">
+        <div class="ex-title">Funksionet agregate — sum(), max(), min(), len() <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">SUM</span><span class="chip">AVG</span><span class="chip">MAX</span><span class="chip">MIN</span><span class="chip">COUNT</span></div>
+        <div class="ex-desc">Funksionet built-in të Python për analiza numerike kanë korrespondentë direkte në SQL.</div>
+      </div>
+      <span class="badge badge-easy">Lehtë</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: shitjet</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>shitja_id</td><td>INT</td><td>1</td></tr>
+        <tr><td>produkti</td><td>VARCHAR</td><td>'Kurs Python'</td></tr>
+        <tr><td>sasia</td><td>INT</td><td>5</td></tr>
+        <tr><td>cmimi_unit</td><td>DECIMAL</td><td>29.99</td></tr>
+        <tr><td>data_shitjes</td><td>DATE</td><td>'2026-03-15'</td></tr></table>
+      </div>
+      <div class="ctx">
+        <strong>Python → SQL:</strong><br>
+        <code>sum([s['sasia'] for s in shitjet])</code> → <code>SUM(sasia)</code><br>
+        <code>max([s['cmimi'] for s in shitjet])</code> → <code>MAX(cmimi_unit)</code><br>
+        <code>len(shitjet)</code> → <code>COUNT(*)</code>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit: totali_shitjeve = SUM(sasia * cmimi_unit), shitja_max, shitja_min, mesatarja, numri_rekordeve</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp11" rows="7" placeholder="SELECT SUM(sasia * cmimi_unit) AS totali_shitjeve,&#10;       MAX(cmimi_unit) AS shitja_max,&#10;       ...&#10;FROM shitjet;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(11)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(11)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(11)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(11)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb11"></div>
+    </div>
+  </div>
+
+  <!-- 12 -->
+  <div class="ex" id="ex12">
+    <div class="ex-header">
+      <div class="ex-num">12</div>
+      <div class="ex-meta">
+        <div class="ex-title">ROUND, ABS, CEILING, FLOOR <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">ROUND()</span><span class="chip">ABS()</span><span class="chip">CEILING()</span><span class="chip">FLOOR()</span></div>
+        <div class="ex-desc"><code>round(x,2)</code>→<code>ROUND(x,2)</code> | <code>abs(x)</code>→<code>ABS(x)</code> | <code>math.ceil(x)</code>→<code>CEILING(x)</code> | <code>math.floor(x)</code>→<code>FLOOR(x)</code></div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: faturat</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>fatura_id</td><td>INT</td><td>1</td></tr>
+        <tr><td>shuma_bruto</td><td>DECIMAL</td><td>1234.567</td></tr>
+        <tr><td>tatimi_pct</td><td>DECIMAL</td><td>0.20</td></tr>
+        <tr><td>zbritja</td><td>DECIMAL</td><td>-45.50</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>tatimi</strong> = shuma_bruto * tatimi_pct, ROUND(_, 2)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>zbritja_abs</strong> = ABS(zbritja)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>shuma_ceil</strong> = CEILING(shuma_bruto) dhe <strong>shuma_floor</strong> = FLOOR(shuma_bruto)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>totali_final</strong> = ROUND(shuma_bruto + tatimi + zbritja, 2)</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp12" rows="8" placeholder="SELECT fatura_id,&#10;       ROUND(shuma_bruto * tatimi_pct, 2) AS tatimi,&#10;       ...&#10;FROM faturat;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(12)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(12)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(12)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(12)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb12"></div>
+    </div>
+  </div>
+
+  <!-- 13 -->
+  <div class="ex" id="ex13">
+    <div class="ex-header">
+      <div class="ex-num">13</div>
+      <div class="ex-meta">
+        <div class="ex-title">Llogaritje me kolonat — aritmetikë <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">+ - * /</span><span class="chip">% MOD</span><span class="chip">POWER</span></div>
+        <div class="ex-desc">Operatorët aritmetikë +, -, *, /, //, **, % të Python funksionojnë saktë njëlloj në SQL.</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: inventari</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>produkt_id</td><td>INT</td><td>1</td></tr>
+        <tr><td>emri</td><td>VARCHAR</td><td>'Monitor'</td></tr>
+        <tr><td>sasia_stok</td><td>INT</td><td>47</td></tr>
+        <tr><td>cmimi_bleres</td><td>DECIMAL</td><td>200.00</td></tr>
+        <tr><td>cmimi_shites</td><td>DECIMAL</td><td>280.00</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>fitimi_unit</strong> = cmimi_shites - cmimi_bleres</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>marzhi_pct</strong> = ROUND((fitimi / cmimi_shites) * 100, 1)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>vlera_stoku</strong> = sasia_stok * cmimi_bleres</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>kutite_plot</strong> = sasia_stok / 6 (pa mbetje, div i plotë)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>mbetja</strong> = sasia_stok MOD 6 (% në Python)</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp13" rows="9" placeholder="SELECT emri,&#10;       cmimi_shites - cmimi_bleres AS fitimi_unit,&#10;       ...&#10;FROM inventari;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(13)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(13)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(13)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(13)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb13"></div>
+    </div>
+  </div>
+
+  <!-- 14 -->
+  <div class="ex" id="ex14">
+    <div class="ex-header">
+      <div class="ex-num">14</div>
+      <div class="ex-meta">
+        <div class="ex-title">NULL — si None në Python <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">IS NULL</span><span class="chip">IS NOT NULL</span><span class="chip">COALESCE</span><span class="chip">ISNULL</span></div>
+        <div class="ex-desc"><code>if val is None:</code> → <code>WHERE col IS NULL</code> &nbsp;|&nbsp; <code>val or 'default'</code> → <code>COALESCE(val, 'default')</code></div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: aplikime</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>aplik_id</td><td>INT</td><td>1</td></tr>
+        <tr><td>emri</td><td>VARCHAR</td><td>'Drini'</td></tr>
+        <tr><td>telefoni</td><td>VARCHAR</td><td>NULL</td></tr>
+        <tr><td>linkedin</td><td>VARCHAR</td><td>NULL</td></tr>
+        <tr><td>score</td><td>INT</td><td>NULL</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq emri, telefoni, score për të gjithë aplikuesit</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>tel_display</strong> = COALESCE(telefoni, 'N/A')</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>score_display</strong> = COALESCE(CAST(score AS VARCHAR), 'Pa rezultat')</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Filtro vetëm ata ku linkedin IS NULL</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp14" rows="8" placeholder="SELECT emri,&#10;       COALESCE(telefoni, 'N/A') AS tel_display,&#10;       ...&#10;FROM aplikime&#10;WHERE ..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(14)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(14)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(14)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(14)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb14"></div>
+    </div>
+  </div>
+
+  <!-- 15 -->
+  <div class="ex" id="ex15">
+    <div class="ex-header">
+      <div class="ex-num">15</div>
+      <div class="ex-meta">
+        <div class="ex-title">CAST — konvertim tipi si int(), str(), float() <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">CAST()</span><span class="chip">CONVERT()</span></div>
+        <div class="ex-desc"><code>int('25')</code> → <code>CAST('25' AS INT)</code> &nbsp;|&nbsp; <code>str(25)</code> → <code>CAST(25 AS VARCHAR)</code> &nbsp;|&nbsp; <code>float('3.14')</code> → <code>CAST('3.14' AS FLOAT)</code></div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: te_dhenat_crude</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>id</td><td>INT</td><td>1</td></tr>
+        <tr><td>mosha_txt</td><td>VARCHAR</td><td>'28'</td></tr>
+        <tr><td>paga_txt</td><td>VARCHAR</td><td>'75000.50'</td></tr>
+        <tr><td>aktiv_int</td><td>INT</td><td>1</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Konverto <strong>mosha_txt</strong> → INT dhe quaje <strong>mosha</strong></span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Konverto <strong>paga_txt</strong> → DECIMAL(10,2) dhe quaje <strong>paga</strong></span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Konverto <strong>aktiv_int</strong> → string 'Po' ose 'Jo' me CASE WHEN</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Filtro vetëm ata ku mosha (si INT) > 25</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp15" rows="9" placeholder="SELECT id,&#10;       CAST(mosha_txt AS INT) AS mosha,&#10;       CAST(paga_txt AS DECIMAL(10,2)) AS paga,&#10;       CASE WHEN aktiv_int = 1 THEN 'Po' ELSE 'Jo' END AS aktiv&#10;FROM te_dhenat_crude&#10;WHERE CAST(mosha_txt AS INT) > 25;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(15)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(15)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(15)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(15)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb15"></div>
+    </div>
+  </div>
+
+</div><!-- /tab2 -->
+
+<!-- ==================== TAB 3: LOGJIKA ==================== -->
+<div class="section" id="tab3">
+  <div class="section-header">
+    <h2>Logjika & Kushtet — Operatorët, CASE, Boolean</h2>
+    <p>Operatorët logjik <code>and/or/not</code>, operatori i anëtarësimit <code>in/not in</code>, dhe <code>if-elif-else</code> kanë ekuivalentët e tyre direkte.</p>
+  </div>
+
+  <!-- 16 -->
+  <div class="ex" id="ex16">
+    <div class="ex-header">
+      <div class="ex-num">16</div>
+      <div class="ex-meta">
+        <div class="ex-title">AND / OR / NOT — operatorët logjik <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">AND</span><span class="chip">OR</span><span class="chip">NOT</span></div>
+        <div class="ex-desc"><code>nota > 8 and mosha < 30</code> → <code>WHERE nota > 8 AND mosha < 30</code></div>
+      </div>
+      <span class="badge badge-easy">Lehtë</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Nga <strong>students</strong>, gjej studentët <strong>OSE</strong> nga Tiranë <strong>OSE</strong> me notë >= 9</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Gjithashtu mosha duhet të jetë <strong>NJO</strong> 30 (NOT mosha = 30)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri, qyteti, mosha, nota</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp16" rows="5" placeholder="SELECT emri, qyteti, mosha, nota&#10;FROM students&#10;WHERE (qyteti = 'Tiranë' OR nota >= 9)&#10;  AND NOT mosha = 30;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(16)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(16)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(16)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(16)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb16"></div>
+    </div>
+  </div>
+
+  <!-- 17 -->
+  <div class="ex" id="ex17">
+    <div class="ex-header">
+      <div class="ex-num">17</div>
+      <div class="ex-meta">
+        <div class="ex-title">IN / NOT IN — operatori i anëtarësimit <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">IN</span><span class="chip">NOT IN</span><span class="chip">BETWEEN</span></div>
+        <div class="ex-desc"><code>qyteti in ['Tiranë','Durrës']</code> → <code>WHERE qyteti IN ('Tiranë','Durrës')</code></div>
+      </div>
+      <span class="badge badge-easy">Lehtë</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Gjej studentët nga <strong>Tiranë, Durrës ose Vlorë</strong> (IN)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span><strong>AND</strong> nota BETWEEN 7.0 AND 9.5</span></div>
+        <div class="ti"><div class="ti-dot"></div><span><strong>AND</strong> mosha NOT IN (17, 18, 19) — (jo shumë të rinj)</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp17" rows="6" placeholder="SELECT emri, qyteti, nota, mosha&#10;FROM students&#10;WHERE qyteti IN (...)&#10;  AND nota BETWEEN ...&#10;  AND mosha NOT IN (...);"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(17)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(17)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(17)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(17)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb17"></div>
+    </div>
+  </div>
+
+  <!-- 18 -->
+  <div class="ex" id="ex18">
+    <div class="ex-header">
+      <div class="ex-num">18</div>
+      <div class="ex-meta">
+        <div class="ex-title">CASE WHEN — if / elif / else <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">CASE WHEN</span><span class="chip">THEN</span><span class="chip">ELSE</span><span class="chip">END</span></div>
+        <div class="ex-desc"><code>if n>=9:'Shkëlqyer' elif n>=7:'Mirë' else:'Dobët'</code> → <code>CASE WHEN n>=9 THEN ... END</code></div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Nga <strong>students</strong>, kategorizoji studentët: nota ≥ 9→'Shkëlqyer', ≥7→'Mirë', ≥5→'Kalon', &lt;5→'Nuk kalon'</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>grup_mosha</strong>: mosha &lt; 25→'I ri', 25-35→'Mesatar', >35→'I pjekur'</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto sipas nota DESC</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp18" rows="12" placeholder="SELECT emri, nota, mosha,&#10;  CASE&#10;    WHEN nota >= 9 THEN 'Shkëlqyer'&#10;    WHEN nota >= 7 THEN 'Mirë'&#10;    WHEN nota >= 5 THEN 'Kalon'&#10;    ELSE 'Nuk kalon'&#10;  END AS kategoria,&#10;  CASE&#10;    WHEN mosha < 25 THEN 'I ri'&#10;    ...&#10;  END AS grup_mosha&#10;FROM students ORDER BY nota DESC;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(18)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(18)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(18)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(18)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb18"></div>
+    </div>
+  </div>
+
+  <!-- 19 -->
+  <div class="ex" id="ex19">
+    <div class="ex-header">
+      <div class="ex-num">19</div>
+      <div class="ex-meta">
+        <div class="ex-title">Vlerat Truthy/Falsy — IS NULL, BOOLEAN <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">IS NULL</span><span class="chip">IS NOT NULL</span><span class="chip">WHERE aktiv = 1</span></div>
+        <div class="ex-desc">Ashtu si Python trajton <code>None</code>, <code>0</code>, <code>''</code> si Falsy, SQL ka <code>NULL</code> si vlerën e zbrazët — trajtohet veçmas me IS NULL.</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Nga <strong>punonjesit</strong>, gjej ata ku paga IS NOT NULL dhe departamenti IS NOT NULL</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq <strong>status_aktiv</strong>: nëse paga > 80000→'Senior', nëse paga IS NULL→'Pa të dhëna', të tjera→'Junior'</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto nga paga DESC NULLS LAST</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp19" rows="10" placeholder="SELECT emri, paga, departamenti,&#10;  CASE&#10;    WHEN paga > 80000 THEN 'Senior'&#10;    WHEN paga IS NULL THEN 'Pa të dhëna'&#10;    ELSE 'Junior'&#10;  END AS status_aktiv&#10;FROM punonjesit&#10;WHERE paga IS NOT NULL AND departamenti IS NOT NULL&#10;ORDER BY paga DESC;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(19)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(19)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(19)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(19)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb19"></div>
+    </div>
+  </div>
+
+  <!-- 20 -->
+  <div class="ex" id="ex20">
+    <div class="ex-header">
+      <div class="ex-num">20</div>
+      <div class="ex-meta">
+        <div class="ex-title">IIF / CASE njëvijëshe — Ternary Operator <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">IIF()</span><span class="chip">Inline CASE</span></div>
+        <div class="ex-desc"><code>'Kalon' if nota >= 5 else 'Nuk kalon'</code> → <code>IIF(nota >= 5, 'Kalon', 'Nuk kalon')</code> ose <code>CASE WHEN ... END</code> njëvijëshe</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Nga <strong>shitjet</strong>, shfaq produkti dhe sasia</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>stoku_ok</strong> = IIF(sasia > 0, 'Ka stok', 'Pa stok')</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>prioriteti</strong> = IIF(sasia > 100, 'I lartë', IIF(sasia > 50, 'Mesatar', 'I ulët'))</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp20" rows="6" placeholder="SELECT produkti, sasia,&#10;       IIF(sasia > 0, 'Ka stok', 'Pa stok') AS stoku_ok,&#10;       IIF(sasia > 100, 'I lartë', IIF(sasia > 50, 'Mesatar', 'I ulët')) AS prioriteti&#10;FROM shitjet;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(20)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(20)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(20)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(20)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb20"></div>
+    </div>
+  </div>
+
+</div><!-- /tab3 -->
+
+<!-- ==================== TAB 4: LOOPS & GRUPE ==================== -->
+<div class="section" id="tab4">
+  <div class="section-header">
+    <h2>Loops & Strukturat e të Dhënave — GROUP BY, JOIN, Lists</h2>
+    <p>Loops dhe strukturat e të dhënave si List, Dict, Set kanë korrespondentë direkte në SQL: GROUP BY, JOIN, UNION.</p>
+  </div>
+
+  <!-- 21 -->
+  <div class="ex" id="ex21">
+    <div class="ex-header">
+      <div class="ex-num">21</div>
+      <div class="ex-meta">
+        <div class="ex-title">GROUP BY — grumbullim si Dictionary <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">GROUP BY</span><span class="chip">COUNT</span><span class="chip">AVG</span></div>
+        <div class="ex-desc">Ashtu si grupojmë me dict në Python: <code>{qyteti: [nota1, nota2]}</code>, GROUP BY grumbullon të dhënat sipas një kolone.</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Grupo <strong>students</strong> sipas <strong>qyteti</strong></span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: qyteti, nr_studenteve, nota_mesatare (ROUND 2 dec), nota_max, nota_min</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Filtro vetëm qytetet me >= 2 studentë (HAVING)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto nga nr_studenteve DESC</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp21" rows="8" placeholder="SELECT qyteti,&#10;       COUNT(*) AS nr_studenteve,&#10;       ROUND(AVG(nota), 2) AS nota_mesatare,&#10;       MAX(nota) AS nota_max,&#10;       MIN(nota) AS nota_min&#10;FROM students&#10;GROUP BY qyteti HAVING ... ORDER BY ...;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(21)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(21)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(21)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(21)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb21"></div>
+    </div>
+  </div>
+
+  <!-- 22 -->
+  <div class="ex" id="ex22">
+    <div class="ex-header">
+      <div class="ex-num">22</div>
+      <div class="ex-meta">
+        <div class="ex-title">INNER JOIN — si zip() i dy listave <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">INNER JOIN</span><span class="chip">ON</span></div>
+        <div class="ex-desc"><code>zip(lista1, lista2)</code> bashkon pozicionalisht. INNER JOIN bashkon tabelat me çelës të përbashkët — kthen vetëm matches.</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: regjistrime</div>
+        <table><tr><th>Kolona</th><th>Tipi</th></tr>
+        <tr><td>student_id</td><td>INT (FK → students)</td></tr>
+        <tr><td>kurs_id</td><td>INT (FK → kurset)</td></tr>
+        <tr><td>data_regj</td><td>DATE</td></tr>
+        <tr><td>perfundoi</td><td>BOOLEAN</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Bashko <strong>students</strong> me <strong>regjistrime</strong> (student_id)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Bashko me <strong>kurset</strong> (kurs_id)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri_studenti, titulli_kursit, instruktori, data_regj</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Filtro vetëm ata që perfundoi = TRUE</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp22" rows="8" placeholder="SELECT s.emri AS emri_studenti,&#10;       k.titulli AS titulli_kursit,&#10;       k.instruktori,&#10;       r.data_regj&#10;FROM students s&#10;INNER JOIN regjistrime r ON s.student_id = r.student_id&#10;INNER JOIN kurset k ON r.kurs_id = k.kurs_id&#10;WHERE r.perfundoi = TRUE;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(22)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(22)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(22)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(22)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb22"></div>
+    </div>
+  </div>
+
+  <!-- 23 -->
+  <div class="ex" id="ex23">
+    <div class="ex-header">
+      <div class="ex-num">23</div>
+      <div class="ex-meta">
+        <div class="ex-title">LEFT JOIN — merr të gjitha, edhe pa match <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">LEFT JOIN</span><span class="chip">NULL check</span></div>
+        <div class="ex-desc">INNER JOIN = bashkëprerja e dy setave. LEFT JOIN = gjithçka nga e majta + matches nga e djathta (NULL kur nuk ka match).</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Merr <strong>të gjithë studentët</strong>, edhe ata pa regjistrime (LEFT JOIN)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri, qyteti, titulli_kursit (NULL nëse jo regjistruar)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>status</strong>: IIF(kurs_id IS NULL, 'Pa kurs', 'Regjistruar')</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto: studentët pa kurs të parët</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp23" rows="9" placeholder="SELECT s.emri, s.qyteti,&#10;       k.titulli AS titulli_kursit,&#10;       IIF(r.kurs_id IS NULL, 'Pa kurs', 'Regjistruar') AS status&#10;FROM students s&#10;LEFT JOIN regjistrime r ON s.student_id = r.student_id&#10;LEFT JOIN kurset k ON r.kurs_id = k.kurs_id&#10;ORDER BY status;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(23)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(23)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(23)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(23)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb23"></div>
+    </div>
+  </div>
+
+  <!-- 24 -->
+  <div class="ex" id="ex24">
+    <div class="ex-header">
+      <div class="ex-num">24</div>
+      <div class="ex-meta">
+        <div class="ex-title">UNION — bashkim si extend() të listave <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">UNION</span><span class="chip">UNION ALL</span></div>
+        <div class="ex-desc"><code>lista1 + lista2</code> (me duplikate) → <code>UNION ALL</code> &nbsp;|&nbsp; <code>set(lista1) | set(lista2)</code> (unike) → <code>UNION</code></div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: studentet_vjeter (same schema as students)</div>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Bashko studentët aktualë (<strong>students</strong>) me ata të vjetër (<strong>studentet_vjeter</strong>) duke shtuar kolonën <strong>burimi</strong></span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Burimi = 'Aktual' ose 'I vjetër'</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri, qyteti, nota, burimi</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto sipas nota DESC</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp24" rows="10" placeholder="SELECT emri, qyteti, nota, 'Aktual' AS burimi&#10;FROM students&#10;UNION ALL&#10;SELECT emri, qyteti, nota, 'I vjetër' AS burimi&#10;FROM studentet_vjeter&#10;ORDER BY nota DESC;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(24)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(24)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(24)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(24)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb24"></div>
+    </div>
+  </div>
+
+  <!-- 25 -->
+  <div class="ex" id="ex25">
+    <div class="ex-header">
+      <div class="ex-num">25</div>
+      <div class="ex-meta">
+        <div class="ex-title">GROUP BY me shumë kolona — for i mbivendosur <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">GROUP BY multi</span><span class="chip">ROLLUP</span></div>
+        <div class="ex-desc">Ashtu si for i mbivendosur iteran mbi dy dimensione, GROUP BY me shumë kolona krijon grupe hierarkike.</div>
       </div>
       <span class="badge badge-hard">E vështirë</span>
     </div>
     <div class="ex-body">
-      <div class="context-box">
-        <strong>Koncepti:</strong> Ashtu si <code>filter(lambda x: x > avg(lista), lista)</code> në Python, ne mund të krahasojmë çdo rresht me mesataren e grupit të tij. Kjo quhet Window Function: <code>AVG(nota) OVER (PARTITION BY qyteti)</code>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Nga <strong>students</strong>, grupo sipas <strong>qyteti</strong> dhe <strong>grup_mosha</strong> (krijo me CASE: &lt;25→'I ri', 25-30→'Mesatar', >30→'I pjekur')</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: qyteti, grup_mosha, COUNT(*) AS nr, ROUND(AVG(nota),2) AS avg_nota</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto: qyteti ASC, avg_nota DESC</span></div>
       </div>
-      <div class="tasks">
-        <div class="tasks-title">Çfarë duhet të bësh</div>
-        <div class="task-item"><div class="task-dot"></div><span>Përdor <strong>CTE</strong> (WITH) për të llogaritur mesataren e notave për çdo qytet</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Bashko CTE me students dhe shfaq çdo student me mesataren e qytetit të tij</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Shto kolonën <strong>krahasim</strong>: 'Mbi mesatare' ose 'Nën mesatare' duke krahasuar notën individuale me mesataren e qytetit</span></div>
-        <div class="task-item"><div class="task-dot"></div><span>Sorto sipas qyteti, pastaj nota DESC</span></div>
-      </div>
-      <div class="editor-label">Shkruaj SQL-in tënd</div>
-      <div class="editor-wrap">
-        <textarea class="sql-input" id="inp10" rows="14" spellcheck="false" placeholder="WITH mesataret_qytetit AS (&#10;  SELECT qyteti,&#10;         AVG(nota) AS avg_nota&#10;  FROM students&#10;  GROUP BY qyteti&#10;)&#10;SELECT s.emri, s.qyteti, s.nota,&#10;       ROUND(m.avg_nota, 2) AS avg_qyteti,&#10;       CASE WHEN s.nota >= m.avg_nota THEN 'Mbi mesatare'&#10;            ELSE 'Nën mesatare'&#10;       END AS krahasim&#10;FROM students s&#10;JOIN mesataret_qytetit m ON ...&#10;ORDER BY ..."></textarea>
-      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp25" rows="14" placeholder="SELECT qyteti,&#10;  CASE&#10;    WHEN mosha < 25 THEN 'I ri'&#10;    WHEN mosha <= 30 THEN 'Mesatar'&#10;    ELSE 'I pjekur'&#10;  END AS grup_mosha,&#10;  COUNT(*) AS nr,&#10;  ROUND(AVG(nota), 2) AS avg_nota&#10;FROM students&#10;GROUP BY qyteti, grup_mosha&#10;ORDER BY qyteti, avg_nota DESC;"></textarea>
       <div class="btn-row">
-        <button class="btn btn-run" onclick="check(10)">▶ Ekzekuto</button>
-        <button class="btn btn-hint" onclick="showHint(10)">? Ndihmë</button>
-        <button class="btn btn-answer" onclick="showAnswer(10)">✓ Zgjidhja</button>
-        <button class="btn btn-reset" onclick="reset(10)">↺ Pastro</button>
+        <button class="btn btn-run" onclick="check(25)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(25)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(25)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(25)">↺ Pastro</button>
       </div>
-      <div class="feedback" id="fb10"></div>
+      <div class="fb" id="fb25"></div>
     </div>
   </div>
 
+</div><!-- /tab4 -->
+
+<!-- ==================== TAB 5: FUNKSIONET ==================== -->
+<div class="section" id="tab5">
+  <div class="section-header">
+    <h2>Funksionet SQL — Transformim, Validim, Orkestrues</h2>
+    <p>SQL ka funksione të ndërtuara si ekuivalentë të funksioneve të Python: transformim, validim, dhe orkestrues (subqueries, CTEs).</p>
+  </div>
+
+  <!-- 26 -->
+  <div class="ex" id="ex26">
+    <div class="ex-header">
+      <div class="ex-num">26</div>
+      <div class="ex-meta">
+        <div class="ex-title">Funksionet e datës — datetime në Python <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">YEAR()</span><span class="chip">MONTH()</span><span class="chip">DAY()</span><span class="chip">DATEDIFF()</span></div>
+        <div class="ex-desc">Si <code>datetime.year</code>, <code>datetime.month</code> dhe <code>(d2-d1).days</code> në Python, SQL ka YEAR(), MONTH(), DATEDIFF().</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: porositë</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>porosia_id</td><td>INT</td><td>1</td></tr>
+        <tr><td>klienti</td><td>VARCHAR</td><td>'Arta Sela'</td></tr>
+        <tr><td>data_porosise</td><td>DATE</td><td>'2026-01-15'</td></tr>
+        <tr><td>data_dergimit</td><td>DATE</td><td>'2026-01-20'</td></tr>
+        <tr><td>shuma</td><td>DECIMAL</td><td>149.99</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq klienti, data_porosise, YEAR dhe MONTH të porosisë</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>dite_dergim</strong> = DATEDIFF(day, data_porosise, data_dergimit)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>shpejtesia</strong>: dite_dergim &lt;= 3 → 'Shpejt', &lt;= 7 → 'Normal', të tjera → 'Vonë'</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Filtro vetëm porositë nga viti 2026</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp26" rows="10" placeholder="SELECT klienti, data_porosise,&#10;       YEAR(data_porosise) AS viti,&#10;       MONTH(data_porosise) AS muaji,&#10;       DATEDIFF(day, data_porosise, data_dergimit) AS dite_dergim,&#10;       CASE WHEN DATEDIFF(...) <= 3 THEN 'Shpejt' ...&#10;       END AS shpejtesia&#10;FROM porosite&#10;WHERE YEAR(data_porosise) = 2026;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(26)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(26)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(26)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(26)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb26"></div>
+    </div>
+  </div>
+
+  <!-- 27 -->
+  <div class="ex" id="ex27">
+    <div class="ex-header">
+      <div class="ex-num">27</div>
+      <div class="ex-meta">
+        <div class="ex-title">Subquery — funksion brenda funksioni <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">Subquery</span><span class="chip">SELECT brenda WHERE</span></div>
+        <div class="ex-desc">Ashtu si kalojmë rezultatin e një funksioni si argument i tjetrit: <code>max(filter(lambda x: x>5, lista))</code>, subquery vendos rezultatin e njërit SELECT brenda tjetrit.</div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Gjej studentët me notë <strong>mbi mesataren globale</strong> të të gjithë studentëve</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri, qyteti, nota, dhe <strong>diff_nga_mesatarja</strong> = ROUND(nota - mesatarja, 2)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto nga diff_nga_mesatarja DESC</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp27" rows="8" placeholder="SELECT emri, qyteti, nota,&#10;       ROUND(nota - (SELECT AVG(nota) FROM students), 2) AS diff_nga_mesatarja&#10;FROM students&#10;WHERE nota > (SELECT AVG(nota) FROM students)&#10;ORDER BY diff_nga_mesatarja DESC;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(27)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(27)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(27)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(27)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb27"></div>
+    </div>
+  </div>
+
+  <!-- 28 -->
+  <div class="ex" id="ex28">
+    <div class="ex-header">
+      <div class="ex-num">28</div>
+      <div class="ex-meta">
+        <div class="ex-title">CTE (WITH) — funksion transformimi modular <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">WITH</span><span class="chip">CTE</span><span class="chip">Modularity</span></div>
+        <div class="ex-desc">Si funksionet modularë të Python ndajnë problemin e madh, CTEs ndajnë kueriet komplekse në hapa të qartë e të rilexueshëm.</div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>CTE 1 <strong>stats_qyteti</strong>: llogarit COUNT, AVG(nota) per qytet</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Bashko CTE me students (ON qyteti)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri, qyteti, nota, avg_qyteti, <strong>krahasim</strong> = 'Mbi mesatare' ose 'Nën mesatare'</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto: qyteti ASC, nota DESC</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp28" rows="14" placeholder="WITH stats_qyteti AS (&#10;  SELECT qyteti,&#10;         COUNT(*) AS nr,&#10;         ROUND(AVG(nota), 2) AS avg_nota&#10;  FROM students&#10;  GROUP BY qyteti&#10;)&#10;SELECT s.emri, s.qyteti, s.nota,&#10;       c.avg_nota AS avg_qyteti,&#10;       CASE WHEN s.nota >= c.avg_nota THEN 'Mbi mesatare'&#10;            ELSE 'Nën mesatare' END AS krahasim&#10;FROM students s&#10;JOIN stats_qyteti c ON s.qyteti = c.qyteti&#10;ORDER BY s.qyteti, s.nota DESC;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(28)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(28)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(28)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(28)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb28"></div>
+    </div>
+  </div>
+
+  <!-- 29 -->
+  <div class="ex" id="ex29">
+    <div class="ex-header">
+      <div class="ex-num">29</div>
+      <div class="ex-meta">
+        <div class="ex-title">EXISTS — si any() i Python <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">EXISTS</span><span class="chip">NOT EXISTS</span></div>
+        <div class="ex-desc"><code>any(r['student_id'] == sid for r in regjistrime)</code> → <code>WHERE EXISTS (SELECT 1 FROM regjistrime WHERE student_id = s.student_id)</code></div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Gjej studentët të cilët <strong>KANË</strong> të paktën një regjistrim (EXISTS)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Gjej gjithashtu studentët që <strong>NUK KANË</strong> asnjë regjistrim (NOT EXISTS)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq të dyja grupet me kolonën <strong>statusi</strong> = 'Me kurs' / 'Pa kurs'</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Bashkoji me UNION ALL</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp29" rows="12" placeholder="SELECT emri, qyteti, 'Me kurs' AS statusi&#10;FROM students s&#10;WHERE EXISTS (SELECT 1 FROM regjistrime r WHERE r.student_id = s.student_id)&#10;UNION ALL&#10;SELECT emri, qyteti, 'Pa kurs' AS statusi&#10;FROM students s&#10;WHERE NOT EXISTS (SELECT 1 FROM regjistrime r WHERE r.student_id = s.student_id)&#10;ORDER BY statusi;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(29)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(29)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(29)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(29)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb29"></div>
+    </div>
+  </div>
+
+  <!-- 30 -->
+  <div class="ex" id="ex30">
+    <div class="ex-header">
+      <div class="ex-num">30</div>
+      <div class="ex-meta">
+        <div class="ex-title">INSERT, UPDATE, DELETE — CRUD operacionet <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">INSERT</span><span class="chip">UPDATE</span><span class="chip">DELETE</span></div>
+        <div class="ex-desc">Ashtu si modifikojmë lista në Python me <code>append()</code>, <code>list[i]=x</code>, <code>remove()</code>, SQL ka INSERT, UPDATE, DELETE.</div>
+      </div>
+      <span class="badge badge-med">Mesatare</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Shkruaj <strong>INSERT</strong> për të shtuar studentin: Arben, 27 vjeç, nga Korça, nota 8.7</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shkruaj <strong>UPDATE</strong> për të ndryshuar notën e studentit me emrin 'Baraa' në 9.8</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shkruaj <strong>DELETE</strong> për të fshirë studentët me nota < 5.0</span></div>
+      </div>
+      <div class="el">SQL-i yt (shkruaj të tre operacionet)</div>
+      <textarea class="sq" id="inp30" rows="10" placeholder="-- INSERT&#10;INSERT INTO students (emri, mosha, qyteti, nota)&#10;VALUES ('Arben', 27, 'Korçë', 8.7);&#10;&#10;-- UPDATE&#10;UPDATE students&#10;SET nota = 9.8&#10;WHERE emri = 'Baraa';&#10;&#10;-- DELETE&#10;DELETE FROM students WHERE nota < 5.0;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(30)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(30)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(30)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(30)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb30"></div>
+    </div>
+  </div>
+
+</div><!-- /tab5 -->
+
+<!-- ==================== TAB 6: AVANCUAR ==================== -->
+<div class="section" id="tab6">
+  <div class="section-header">
+    <h2>SQL i Avancuar — Window Functions, Optimizim, Dizajn</h2>
+    <p>Koncepte avancuare SQL si Window Functions, indekset, dhe pastrimi i të dhënave — ekuivalentë të map(), filter(), iteratorëve të Python.</p>
+  </div>
+
+  <!-- 31 -->
+  <div class="ex" id="ex31">
+    <div class="ex-header">
+      <div class="ex-num">31</div>
+      <div class="ex-meta">
+        <div class="ex-title">ROW_NUMBER — enumerate() i Python <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">ROW_NUMBER()</span><span class="chip">OVER</span><span class="chip">PARTITION BY</span></div>
+        <div class="ex-desc"><code>enumerate(lista)</code> shton indeks çdo elementi. <code>ROW_NUMBER() OVER (ORDER BY...)</code> bën të njëjtën në SQL.</div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Nga <strong>students</strong>, shto <strong>renditja_globale</strong> = ROW_NUMBER sipas nota DESC</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shto <strong>renditja_per_qytet</strong> = ROW_NUMBER OVER PARTITION BY qyteti, ORDER BY nota DESC</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: emri, qyteti, nota, renditja_globale, renditja_per_qytet</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Sorto sipas renditja_globale</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp31" rows="9" placeholder="SELECT emri, qyteti, nota,&#10;       ROW_NUMBER() OVER (ORDER BY nota DESC) AS renditja_globale,&#10;       ROW_NUMBER() OVER (PARTITION BY qyteti ORDER BY nota DESC) AS renditja_per_qytet&#10;FROM students&#10;ORDER BY renditja_globale;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(31)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(31)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(31)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(31)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb31"></div>
+    </div>
+  </div>
+
+  <!-- 32 -->
+  <div class="ex" id="ex32">
+    <div class="ex-header">
+      <div class="ex-num">32</div>
+      <div class="ex-meta">
+        <div class="ex-title">RANK dhe DENSE_RANK — renditje me barazime <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">RANK()</span><span class="chip">DENSE_RANK()</span><span class="chip">NTILE()</span></div>
+        <div class="ex-desc">RANK() lë boshllëqe si renditja olimpike (1,2,2,4). DENSE_RANK() nuk lë boshllëqe (1,2,2,3). NTILE(4) ndan në kuartile si np.percentile.</div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq emri, nota, RANK(), DENSE_RANK() sipas nota DESC</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shto <strong>kuartili</strong> = NTILE(4) OVER (ORDER BY nota DESC)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>grupi</strong>: kuartil 1→'Top 25%', 2→'Mesatar Lartë', 3→'Mesatar Poshtë', 4→'Poshtë'</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp32" rows="12" placeholder="SELECT emri, nota,&#10;       RANK() OVER (ORDER BY nota DESC) AS renditja,&#10;       DENSE_RANK() OVER (ORDER BY nota DESC) AS renditja_dense,&#10;       NTILE(4) OVER (ORDER BY nota DESC) AS kuartili,&#10;       CASE NTILE(4) OVER (ORDER BY nota DESC)&#10;         WHEN 1 THEN 'Top 25%'&#10;         WHEN 2 THEN 'Mesatar Lartë'&#10;         WHEN 3 THEN 'Mesatar Poshtë'&#10;         ELSE 'Poshtë'&#10;       END AS grupi&#10;FROM students;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(32)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(32)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(32)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(32)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb32"></div>
+    </div>
+  </div>
+
+  <!-- 33 -->
+  <div class="ex" id="ex33">
+    <div class="ex-header">
+      <div class="ex-num">33</div>
+      <div class="ex-meta">
+        <div class="ex-title">LAG dhe LEAD — vlerat pararendëse dhe pasuese <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">LAG()</span><span class="chip">LEAD()</span><span class="chip">Series Analysis</span></div>
+        <div class="ex-desc">Si aksesojmë <code>lista[i-1]</code> dhe <code>lista[i+1]</code> brenda një loop, LAG dhe LEAD aksesojnë rreshtat e mëparshëm dhe pasues.</div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: shitjet_mujore</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Shembull</th></tr>
+        <tr><td>muaji</td><td>INT</td><td>1</td></tr>
+        <tr><td>viti</td><td>INT</td><td>2026</td></tr>
+        <tr><td>totali</td><td>DECIMAL</td><td>15000.00</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq muaji, viti, totali</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shto <strong>muaji_pare</strong> = totali i muajit të kaluar (LAG)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Llogarit <strong>ndryshimi_pct</strong> = ROUND((totali - muaji_pare) / muaji_pare * 100, 1)</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Krijo <strong>trendi</strong>: ndryshimi > 0 → '↑ Rritje', < 0 → '↓ Rënie', = 0 → '→ Njëlloj'</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp33" rows="13" placeholder="SELECT muaji, viti, totali,&#10;       LAG(totali) OVER (ORDER BY viti, muaji) AS muaji_pare,&#10;       ROUND((totali - LAG(totali) OVER (ORDER BY viti, muaji))&#10;             / LAG(totali) OVER (ORDER BY viti, muaji) * 100, 1) AS ndryshimi_pct,&#10;       CASE&#10;         WHEN totali > LAG(totali) OVER (ORDER BY viti, muaji) THEN '↑ Rritje'&#10;         WHEN totali < LAG(totali) OVER (ORDER BY viti, muaji) THEN '↓ Rënie'&#10;         ELSE '→ Njëlloj'&#10;       END AS trendi&#10;FROM shitjet_mujore&#10;ORDER BY viti, muaji;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(33)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(33)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(33)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(33)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb33"></div>
+    </div>
+  </div>
+
+  <!-- 34 -->
+  <div class="ex" id="ex34">
+    <div class="ex-header">
+      <div class="ex-num">34</div>
+      <div class="ex-meta">
+        <div class="ex-title">Pastrimi i të dhënave — Funksionet e Transformimit <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">REPLACE</span><span class="chip">TRIM</span><span class="chip">COALESCE</span><span class="chip">CASE</span></div>
+        <div class="ex-desc">Kombinim i metodave të stringut, NULL handling dhe CASE — si funksioni transformim i Python që pastron të dhënat përpara analizës.</div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="schema">
+        <div class="schema-title">Tabela: te_dhenat_dirty</div>
+        <table><tr><th>Kolona</th><th>Tipi</th><th>Problemi</th></tr>
+        <tr><td>id</td><td>INT</td><td>—</td></tr>
+        <tr><td>emri_raw</td><td>VARCHAR</td><td>'  ANA beqa  ' (hapësira, case i gabuar)</td></tr>
+        <tr><td>tel_raw</td><td>VARCHAR</td><td>'+355-69.123 4567' (karaktere të ndryshme)</td></tr>
+        <tr><td>statusi_raw</td><td>VARCHAR</td><td>'aktiv', 'AKTIV', 'Aktiv', NULL</td></tr></table>
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span><strong>emri_clean</strong>: TRIM + UPPER të parës + LOWER të tjerat — ose thjesht TRIM + capitalize manual</span></div>
+        <div class="ti"><div class="ti-dot"></div><span><strong>tel_clean</strong>: hiq '-', '.', ' ' me REPLACE të mbivendosur</span></div>
+        <div class="ti"><div class="ti-dot"></div><span><strong>statusi_clean</strong>: COALESCE + UPPER → nëse UPPER = 'AKTIV' → 1, tjera → 0</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp34" rows="10" placeholder="SELECT id,&#10;       TRIM(UPPER(emri_raw)) AS emri_clean,&#10;       REPLACE(REPLACE(REPLACE(tel_raw, '-', ''), '.', ''), ' ', '') AS tel_clean,&#10;       CASE WHEN UPPER(COALESCE(statusi_raw, '')) = 'AKTIV' THEN 1 ELSE 0&#10;       END AS statusi_clean&#10;FROM te_dhenat_dirty;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(34)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(34)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(34)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(34)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb34"></div>
+    </div>
+  </div>
+
+  <!-- 35 -->
+  <div class="ex" id="ex35">
+    <div class="ex-header">
+      <div class="ex-num">35</div>
+      <div class="ex-meta">
+        <div class="ex-title">Raport i Plotë — Orkestrues si funksioni orchestrator <span class="solved-badge">✓ zgjidhur</span></div>
+        <div class="chips"><span class="chip">Multi-CTE</span><span class="chip">JOIN</span><span class="chip">Window Fn</span><span class="chip">CASE</span></div>
+        <div class="ex-desc">Si funksioni orchestrator koordinon funksionet e tjera, ky kueri kompleks koordinon CTE-të, JOIN-et dhe Window Functions për një raport të plotë.</div>
+      </div>
+      <span class="badge badge-hard">E vështirë</span>
+    </div>
+    <div class="ex-body">
+      <div class="ctx">
+        <strong>Sfida finale:</strong> Ndërto një raport menaxherial për studentët që tregon notat, renditjen, krahasimin me mesataren e qytetit, dhe statusin e regjistrimit — gjithçka në një kueri me CTEs.
+      </div>
+      <div class="tasks"><div class="tasks-title">Detyra</div>
+        <div class="ti"><div class="ti-dot"></div><span>CTE 1 <strong>qyteti_stats</strong>: AVG(nota), COUNT per qytet</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>CTE 2 <strong>student_ranked</strong>: students + ROW_NUMBER() OVER ORDER BY nota DESC AS renditja</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Query finale: bashko të dyja CTEs, shto krahasim me avg_qytetit, shto LEFT JOIN regjistrime për count kurset</span></div>
+        <div class="ti"><div class="ti-dot"></div><span>Shfaq: renditja, emri, qyteti, nota, avg_qyteti, krahasim, nr_kurset, statusi (Me kurs/Pa kurs)</span></div>
+      </div>
+      <div class="el">SQL-i yt</div>
+      <textarea class="sq" id="inp35" rows="20" placeholder="WITH qyteti_stats AS (&#10;  SELECT qyteti, ROUND(AVG(nota),2) AS avg_nota, COUNT(*) AS nr_students&#10;  FROM students GROUP BY qyteti&#10;),&#10;student_ranked AS (&#10;  SELECT *, ROW_NUMBER() OVER (ORDER BY nota DESC) AS renditja&#10;  FROM students&#10;)&#10;SELECT sr.renditja, sr.emri, sr.qyteti, sr.nota,&#10;       qs.avg_nota AS avg_qyteti,&#10;       CASE WHEN sr.nota >= qs.avg_nota THEN 'Mbi mesatare' ELSE 'Nën mesatare' END AS krahasim,&#10;       COUNT(r.kurs_id) AS nr_kurset,&#10;       IIF(COUNT(r.kurs_id) > 0, 'Me kurs', 'Pa kurs') AS statusi&#10;FROM student_ranked sr&#10;JOIN qyteti_stats qs ON sr.qyteti = qs.qyteti&#10;LEFT JOIN regjistrime r ON sr.student_id = r.student_id&#10;GROUP BY sr.renditja, sr.emri, sr.qyteti, sr.nota, qs.avg_nota&#10;ORDER BY sr.renditja;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-run" onclick="check(35)">▶ Ekzekuto</button>
+        <button class="btn btn-hint" onclick="hint(35)">? Ndihmë</button>
+        <button class="btn btn-ans" onclick="ans(35)">✓ Zgjidhja</button>
+        <button class="btn btn-reset" onclick="rst(35)">↺ Pastro</button>
+      </div>
+      <div class="fb" id="fb35"></div>
+    </div>
+  </div>
+
+</div><!-- /tab6 -->
 </div><!-- /wrap -->
 
 <script>
-const answers = {
-  1: {
-    keywords: ['select', '*', 'from', 'students'],
-    must: [['select'], ['from', 'students']],
-    hint: 'Përdor SELECT * FROM emri_tabeles',
-    answer: 'SELECT *\nFROM students;',
-    ok: '✓ Saktë! SELECT * kthen të gjitha kolonat nga tabela. Ylli (*) është si "të gjithë" — ekuivalenti i for item in list në Python.',
-    result: {
-      headers: ['student_id','emri','mosha','qyteti','nota'],
-      rows: [
-        [1,'Baraa',25,'Tiranë',9.5],[2,'Arta',22,'Durrës',8.2],
-        [3,'Genti',28,'Vlorë',7.1],[4,'Lira',21,'Tiranë',9.1],
-        [5,'Drini',30,'Shkodër',6.8]
-      ]
-    }
-  },
-  2: {
-    must: [['select'],['from','students'],['where'],['nota','>','8'],['and'],['mosha','<','30']],
-    hint: 'WHERE nota > 8.0 AND mosha < 30',
-    answer: 'SELECT emri, mosha, nota\nFROM students\nWHERE nota > 8.0\n  AND mosha < 30;',
-    ok: '✓ Saktë! WHERE filtron rreshtat — si if statement. AND kërkon që të dy kushtet të jenë True njëkohësisht.',
-  },
-  3: {
-    must: [['select'],['from','produktet'],['like'],['%data%'],['order by'],['cmimi']],
-    hint: "Përdor: WHERE emri LIKE '%Data%' — shenjat % janë si * në regex, dmth 'çdo gjë'",
-    answer: "SELECT emri, kategoria, cmimi\nFROM produktet\nWHERE emri LIKE '%Data%'\nORDER BY cmimi ASC;",
-    ok: '✓ Saktë! LIKE me % është si "in" ose find() në Python. % do të thotë "çdo karakter, çdo numër".'
-  },
-  4: {
-    must: [['select'],['upper'],['lower','concat','len','length'],['from','students']],
-    hint: 'Funksionet: UPPER(emri), CONCAT(emri, \' nga \', qyteti), LEN(emri) ose LENGTH(emri)',
-    answer: "SELECT UPPER(emri) AS emri_madh,\n       CONCAT(emri, ' nga ', qyteti) AS profili,\n       LEN(emri) AS gjatesia\nFROM students\nWHERE LEN(emri) > 4;",
-    ok: '✓ Saktë! UPPER() = .upper() në Python, CONCAT() = operatori + për strings, LEN() = len() në Python.'
-  },
-  5: {
-    must: [['select'],['round'],['abs'],['from','shitjet'],['order by']],
-    hint: 'ROUND(shprehja, 2), ABS(zbritja), totali = sasia * cmimi_unit',
-    answer: "SELECT produkti,\n       ROUND(sasia * cmimi_unit, 2) AS totali,\n       ABS(zbritja) AS zbritja_abs,\n       ROUND(sasia * cmimi_unit + zbritja, 2) AS totali_neto\nFROM shitjet\nORDER BY totali_neto DESC;",
-    ok: '✓ Saktë! ROUND() = round() në Python. ABS() = abs(). Kujdes: zbritja mund të jetë negative, kështu + zbritja e pakëson totalin.'
-  },
-  6: {
-    must: [['select'],['case'],['when'],['then'],['end'],['from','students'],['order by']],
-    hint: "Struktura: CASE WHEN kushti THEN 'vlera' WHEN ... ELSE 'default' END AS emri_kolones",
-    answer: "SELECT emri, nota,\n  CASE\n    WHEN nota >= 9 THEN 'Shkëlqyer'\n    WHEN nota >= 7 THEN 'Mirë'\n    WHEN nota >= 5 THEN 'Kalon'\n    ELSE 'Nuk kalon'\n  END AS kategoria\nFROM students\nORDER BY nota DESC;",
-    ok: '✓ Saktë! CASE WHEN = if-elif-else. Python kalon rreshtat nga lart-poshtë dhe ndalon kur gjen kushtin e parë True — SQL bën të njëjtën.'
-  },
-  7: {
-    must: [['select'],['from','students'],['where'],['in'],['not in'],['and']],
-    hint: "WHERE qyteti IN ('Tiranë','Durrës','Vlorë') AND nota >= 7.0 AND mosha NOT IN (17, 18)",
-    answer: "SELECT emri, qyteti, nota, mosha\nFROM students\nWHERE qyteti IN ('Tiranë', 'Durrës', 'Vlorë')\n  AND nota >= 7.0\n  AND mosha NOT IN (17, 18);",
-    ok: "✓ Saktë! IN ('a','b','c') = 'a' in lista në Python. NOT IN = 'not in'. AND lidh kushtet si operatori and."
-  },
-  8: {
-    must: [['select'],['count'],['avg'],['from','students'],['group by','qyteti'],['having'],['order by']],
-    hint: "GROUP BY qyteti — HAVING COUNT(*) >= 2 (filtron grupet, jo rreshtat!)",
-    answer: "SELECT qyteti,\n       COUNT(*) AS nr_studenteve,\n       ROUND(AVG(nota), 2) AS nota_mesatare\nFROM students\nGROUP BY qyteti\nHAVING COUNT(*) >= 2\nORDER BY nota_mesatare DESC;",
-    ok: '✓ Saktë! GROUP BY = dictionary grumbullimi. HAVING filtron grupet (si filter pas grupimit). WHERE filtron rreshtat, HAVING filtron grupet.'
-  },
-  9: {
-    must: [['select'],['from','students'],['join','regjistrime'],['join','kurset'],['on'],['where'],['perfundoi']],
-    hint: "INNER JOIN regjistrime r ON s.student_id = r.student_id\nINNER JOIN kurset k ON r.kurs_id = k.kurs_id",
-    answer: "SELECT s.emri AS emri_studenti,\n       k.emri_kursit,\n       k.instruktori,\n       r.data_regj,\n       r.perfundoi\nFROM students s\nINNER JOIN regjistrime r ON s.student_id = r.student_id\nINNER JOIN kurset k ON r.kurs_id = k.kurs_id\nWHERE r.perfundoi = TRUE;",
-    ok: '✓ Saktë! JOIN = zip() i SQL. Bashkon tabela sipas çelësit të përbashkët. INNER JOIN kthen vetëm çiftet që gjenden në të dyja tabelat.'
-  },
-  10: {
-    must: [['with'],['select'],['from','students'],['join'],['on'],['case','when'],['order by']],
-    hint: "WITH cte AS (SELECT qyteti, AVG(nota)... GROUP BY qyteti)\nSELECT ... FROM students s JOIN cte m ON s.qyteti = m.qyteti",
-    answer: "WITH mesataret_qytetit AS (\n  SELECT qyteti,\n         AVG(nota) AS avg_nota\n  FROM students\n  GROUP BY qyteti\n)\nSELECT s.emri, s.qyteti, s.nota,\n       ROUND(m.avg_nota, 2) AS avg_qyteti,\n       CASE WHEN s.nota >= m.avg_nota THEN 'Mbi mesatare'\n            ELSE 'Nën mesatare'\n       END AS krahasim\nFROM students s\nJOIN mesataret_qytetit m ON s.qyteti = m.qyteti\nORDER BY s.qyteti, s.nota DESC;",
-    ok: '✓ Saktë! CTE (WITH) = ndaje problemin kompleks në funksione të vogla — si modularity në Python. Çdo CTE është si një funksion transformimi i pavarur.'
-  }
-};
-
+const TOTAL = 35;
 const solved = new Set();
 
-function normalize(sql) {
-  return sql.toLowerCase().replace(/\s+/g, ' ').trim();
-}
+// ---- Answer configs ----
+const cfg = {
+  1:{must:[['select'],['*'],['from','students']],hint:'SELECT * FROM students;',answer:'SELECT *\nFROM students;',ok:'✓ Saktë! SELECT * kthen të gjitha kolonat. Ylli (*) = "të gjithë" — si print(lista) shfaq gjithçka.'},
+  2:{must:[['select'],['emri'],['qyteti','nota'],['from','students'],['order by','emri']],hint:'SELECT emri, qyteti, nota FROM students ORDER BY emri ASC;',answer:'SELECT emri, qyteti, nota\nFROM students\nORDER BY emri ASC;',ok:'✓ Saktë! Specificojmë kolonat e dëshiruara. ORDER BY emri ASC = alfabetikisht.'},
+  3:{must:[['select'],['from','students'],['where'],['nota'],['>=','> 7','> 8'],['order by']],hint:'WHERE nota >= 8.0 ORDER BY nota DESC',answer:'SELECT emri, mosha, nota\nFROM students\nWHERE nota >= 8.0\nORDER BY nota DESC;',ok:'✓ Saktë! WHERE filtroni rreshtat si kushti if. >= 8.0 = True vetëm për notat mbi 8.'},
+  4:{must:[['select'],['distinct'],['qyteti'],['from','students'],['order by']],hint:'SELECT DISTINCT qyteti FROM students ORDER BY qyteti;',answer:'SELECT DISTINCT qyteti\nFROM students\nORDER BY qyteti;',ok:'✓ Saktë! DISTINCT = set() — heq duplikatet automatikisht.'},
+  5:{must:[['select'],['from','students'],['order by','nota desc'],['limit','top']],hint:'ORDER BY nota DESC LIMIT 3 (ose TOP 3 para SELECT)',answer:'SELECT emri, qyteti, nota\nFROM students\nORDER BY nota DESC\nLIMIT 3;',ok:'✓ Saktë! LIMIT 3 = lista[:3] — merr vetëm 3 rreshtat e parë pas ORDER BY.'},
+  6:{must:[['select'],['upper'],['lower'],['from','punonjesit']],hint:'SELECT UPPER(emri) AS emri_sakte, LOWER(email) AS email_normalize, departamenti FROM punonjesit;',answer:'SELECT UPPER(emri) AS emri_sakte,\n       LOWER(email) AS email_normalize,\n       departamenti\nFROM punonjesit;',ok:'✓ Saktë! UPPER() = .upper(), LOWER() = .lower(). Nuk ndikojnë te numrat dhe simbolet.'},
+  7:{must:[['select'],['concat'],['len','length'],['from','students'],['where']],hint:"CONCAT('Studenti ', emri, ' nga ', qyteti) — LEN(emri) > 4",answer:"SELECT CONCAT('Studenti ', emri, ' nga ', qyteti) AS profili,\n       LEN(emri) AS gjatesia_emrit\nFROM students\nWHERE LEN(emri) > 4;",ok:'✓ Saktë! CONCAT = operatori + për strings. LEN() = len(). Rezultati filtrohet me WHERE.'},
+  8:{must:[['select'],['from','kurset'],['where'],['like'],['%data%','%Data%']],hint:"WHERE titulli LIKE '%Data%' ORDER BY cmimi ASC",answer:"SELECT titulli, kategoria, cmimi\nFROM kurset\nWHERE titulli LIKE '%Data%'\nORDER BY cmimi ASC;",ok:"✓ Saktë! LIKE '%Data%' = 'Data' in titulli. Shenjat % janë si * në regex, kuptojnë 'çdo gjë'."},
+  9:{must:[['select'],['trim'],['replace'],['from','kontaktet']],hint:'TRIM(emri), REPLACE(tel,\'-\',\'\'), LOWER(TRIM(email))',answer:"SELECT TRIM(emri) AS emri_pastro,\n       REPLACE(telefoni, '-', '') AS telefoni_pastro,\n       LOWER(TRIM(email)) AS email_pastro\nFROM kontaktet;",ok:'✓ Saktë! TRIM = .strip(). REPLACE = .replace(). Mund ti mbivendosim si LOWER(TRIM(email)).'},
+  10:{must:[['select'],['left','substring'],['right'],['from','produktet']],hint:'LEFT(prod_id,3), SUBSTRING(prod_id,5,4), RIGHT(prod_id,3)',answer:"SELECT prod_id,\n       LEFT(prod_id, 3) AS prefiksi,\n       SUBSTRING(prod_id, 5, 4) AS viti,\n       RIGHT(prod_id, 3) AS numri\nFROM produktet;",ok:'✓ Saktë! LEFT(x,n) = x[:n]. RIGHT(x,n) = x[-n:]. SUBSTRING(x,start,len) = x[start-1:start-1+len].'},
+  11:{must:[['select'],['sum'],['max'],['min'],['count'],['from','shitjet']],hint:'SELECT SUM(...), MAX(cmimi_unit), MIN(cmimi_unit), AVG(cmimi_unit), COUNT(*) FROM shitjet;',answer:'SELECT SUM(sasia * cmimi_unit) AS totali_shitjeve,\n       MAX(cmimi_unit) AS shitja_max,\n       MIN(cmimi_unit) AS shitja_min,\n       ROUND(AVG(cmimi_unit), 2) AS mesatarja,\n       COUNT(*) AS numri_rekordeve\nFROM shitjet;',ok:'✓ Saktë! SUM=sum(), MAX=max(), MIN=min(), AVG=sum()/len(), COUNT=len(). Funksione të ndërtuara builtin!'},
+  12:{must:[['select'],['round'],['abs'],['ceiling','ceil'],['floor'],['from','faturat']],hint:'ROUND(x*y, 2), ABS(zbritja), CEILING(shuma_bruto), FLOOR(shuma_bruto)',answer:'SELECT fatura_id,\n       ROUND(shuma_bruto * tatimi_pct, 2) AS tatimi,\n       ABS(zbritja) AS zbritja_abs,\n       CEILING(shuma_bruto) AS shuma_ceil,\n       FLOOR(shuma_bruto) AS shuma_floor,\n       ROUND(shuma_bruto + shuma_bruto*tatimi_pct + zbritja, 2) AS totali_final\nFROM faturat;',ok:'✓ Saktë! ROUND=round(), ABS=abs(), CEILING=math.ceil(), FLOOR=math.floor(). Identike me Python!'},
+  13:{must:[['select'],['from','inventari'],['-'],['*'],['/','//'],['%','mod']],hint:'fitimi_unit = cmimi_shites - cmimi_bleres, marzhi_pct = ROUND((fitim/cmimi_shites)*100,1), kutite_plot = sasia_stok/6, mbetja = sasia_stok % 6',answer:'SELECT emri,\n       cmimi_shites - cmimi_bleres AS fitimi_unit,\n       ROUND((cmimi_shites-cmimi_bleres)/cmimi_shites*100, 1) AS marzhi_pct,\n       sasia_stok * cmimi_bleres AS vlera_stoku,\n       sasia_stok / 6 AS kutite_plot,\n       sasia_stok % 6 AS mbetja\nFROM inventari;',ok:'✓ Saktë! Operatorët aritmetikë +,-,*,/,% funksionojnë njëlloj si në Python. // (div i plotë) = / kur kolonat janë INT.'},
+  14:{must:[['select'],['coalesce','isnull'],['from','aplikime'],['is null']],hint:'COALESCE(telefoni, \'N/A\'), COALESCE(CAST(score AS VARCHAR), \'Pa rezultat\'), WHERE linkedin IS NULL',answer:"SELECT emri, telefoni, score,\n       COALESCE(telefoni, 'N/A') AS tel_display,\n       COALESCE(CAST(score AS VARCHAR), 'Pa rezultat') AS score_display\nFROM aplikime\nWHERE linkedin IS NULL;",ok:'✓ Saktë! COALESCE = val or \'default\'. IS NULL = is None. Kurrë mos përdor = NULL — kurrë nuk funksionon!'},
+  15:{must:[['select'],['cast'],['from','te_dhenat_crude'],['where'],['int','decimal']],hint:'CAST(mosha_txt AS INT), CAST(paga_txt AS DECIMAL(10,2)), WHERE CAST(mosha_txt AS INT) > 25',answer:"SELECT id,\n       CAST(mosha_txt AS INT) AS mosha,\n       CAST(paga_txt AS DECIMAL(10,2)) AS paga,\n       CASE WHEN aktiv_int = 1 THEN 'Po' ELSE 'Jo' END AS aktiv\nFROM te_dhenat_crude\nWHERE CAST(mosha_txt AS INT) > 25;",ok:'✓ Saktë! CAST() = int(), float(), str() të Python. Konverton midis tipeve — kritike për pastrimin e të dhënave.'},
+  16:{must:[['select'],['from','students'],['where'],['or'],['not']],hint:"WHERE (qyteti = 'Tiranë' OR nota >= 9) AND NOT mosha = 30",answer:"SELECT emri, qyteti, mosha, nota\nFROM students\nWHERE (qyteti = 'Tiranë' OR nota >= 9)\n  AND NOT mosha = 30;",ok:'✓ Saktë! AND=and, OR=or, NOT=not. Kllapat ( ) kontrollojnë prioritetin si në Python.'},
+  17:{must:[['select'],['from','students'],['where'],['in'],['not in'],['between']],hint:"WHERE qyteti IN ('Tiranë','Durrës','Vlorë') AND nota BETWEEN 7.0 AND 9.5 AND mosha NOT IN (17,18,19)",answer:"SELECT emri, qyteti, nota, mosha\nFROM students\nWHERE qyteti IN ('Tiranë', 'Durrës', 'Vlorë')\n  AND nota BETWEEN 7.0 AND 9.5\n  AND mosha NOT IN (17, 18, 19);",ok:"✓ Saktë! IN('a','b') = 'a' in lista. BETWEEN x AND y = x <= val <= y. NOT IN = not in."},
+  18:{must:[['select'],['case'],['when'],['then'],['end'],['from','students'],['order by']],hint:"CASE WHEN nota>=9 THEN 'Shkëlqyer' WHEN nota>=7 THEN 'Mirë' WHEN nota>=5 THEN 'Kalon' ELSE 'Nuk kalon' END",answer:"SELECT emri, nota, mosha,\n  CASE WHEN nota >= 9 THEN 'Shkëlqyer'\n       WHEN nota >= 7 THEN 'Mirë'\n       WHEN nota >= 5 THEN 'Kalon'\n       ELSE 'Nuk kalon'\n  END AS kategoria,\n  CASE WHEN mosha < 25 THEN 'I ri'\n       WHEN mosha <= 35 THEN 'Mesatar'\n       ELSE 'I pjekur'\n  END AS grup_mosha\nFROM students\nORDER BY nota DESC;",ok:'✓ Saktë! CASE WHEN = if-elif-else. SQL shkon nga lart-poshtë dhe ndalon te kushti i parë True.'},
+  19:{must:[['select'],['from','punonjesit'],['is not null'],['case'],['when']],hint:'WHERE paga IS NOT NULL AND departamenti IS NOT NULL, CASE WHEN paga>80000 THEN \'Senior\' WHEN paga IS NULL...',answer:"SELECT emri, paga, departamenti,\n  CASE WHEN paga > 80000 THEN 'Senior'\n       WHEN paga IS NULL THEN 'Pa të dhëna'\n       ELSE 'Junior'\n  END AS status_aktiv\nFROM punonjesit\nWHERE paga IS NOT NULL AND departamenti IS NOT NULL\nORDER BY paga DESC;",ok:'✓ Saktë! IS NOT NULL = is not None. NULL është trajtuar veçmas — nuk mund ta krahasosh me =.'},
+  20:{must:[['select'],['iif','case'],['from','shitjet']],hint:"IIF(sasia > 0, 'Ka stok', 'Pa stok'), IIF(sasia>100,'I lartë', IIF(sasia>50,'Mesatar','I ulët'))",answer:"SELECT produkti, sasia,\n       IIF(sasia > 0, 'Ka stok', 'Pa stok') AS stoku_ok,\n       IIF(sasia > 100, 'I lartë', IIF(sasia > 50, 'Mesatar', 'I ulët')) AS prioriteti\nFROM shitjet;",ok:"✓ Saktë! IIF(kusht, val_true, val_false) = 'a' if kusht else 'b'. IIF i mbivendosur = if-elif."},
+  21:{must:[['select'],['count'],['avg'],['max'],['min'],['from','students'],['group by'],['having'],['order by']],hint:'GROUP BY qyteti HAVING COUNT(*) >= 2 ORDER BY nr_studenteve DESC',answer:'SELECT qyteti,\n       COUNT(*) AS nr_studenteve,\n       ROUND(AVG(nota), 2) AS nota_mesatare,\n       MAX(nota) AS nota_max,\n       MIN(nota) AS nota_min\nFROM students\nGROUP BY qyteti\nHAVING COUNT(*) >= 2\nORDER BY nr_studenteve DESC;',ok:'✓ Saktë! GROUP BY = groupBy() i dictionary. HAVING filtron grupet (jo rreshtat). WHERE vjen para GROUP BY, HAVING pas.'},
+  22:{must:[['select'],['from','students'],['inner join','join'],['regjistrime'],['kurset'],['on'],['where','perfundoi']],hint:'INNER JOIN regjistrime r ON s.student_id = r.student_id, INNER JOIN kurset k ON r.kurs_id = k.kurs_id',answer:"SELECT s.emri AS emri_studenti,\n       k.titulli AS titulli_kursit,\n       k.instruktori,\n       r.data_regj\nFROM students s\nINNER JOIN regjistrime r ON s.student_id = r.student_id\nINNER JOIN kurset k ON r.kurs_id = k.kurs_id\nWHERE r.perfundoi = TRUE;",ok:'✓ Saktë! INNER JOIN = bashkëprerja e setave. ON = çelësi i lidhjes. Alias (s, r, k) shmangim ambiguitete.'},
+  23:{must:[['select'],['from','students'],['left join'],['regjistrime'],['is null','iif','case']],hint:'LEFT JOIN regjistrime r ON s.student_id = r.student_id — LEFT JOIN kurset k ON r.kurs_id = k.kurs_id',answer:"SELECT s.emri, s.qyteti,\n       k.titulli AS titulli_kursit,\n       IIF(r.kurs_id IS NULL, 'Pa kurs', 'Regjistruar') AS status\nFROM students s\nLEFT JOIN regjistrime r ON s.student_id = r.student_id\nLEFT JOIN kurset k ON r.kurs_id = k.kurs_id\nORDER BY status;",ok:'✓ Saktë! LEFT JOIN = merr TË GJITHË nga e majta + matches nga e djathta. Kur nuk ka match → NULL.'},
+  24:{must:[['select'],['from','students'],['union'],['from','studentet_vjeter'],['order by']],hint:"SELECT emri,...,'Aktual' AS burimi FROM students UNION ALL SELECT emri,...,'I vjetër' FROM studentet_vjeter",answer:"SELECT emri, qyteti, nota, 'Aktual' AS burimi\nFROM students\nUNION ALL\nSELECT emri, qyteti, nota, 'I vjetër' AS burimi\nFROM studentet_vjeter\nORDER BY nota DESC;",ok:'✓ Saktë! UNION ALL = lista1 + lista2 (me duplikate). UNION = set(lista1) | set(lista2) (vetëm unike).'},
+  25:{must:[['select'],['case'],['when'],['group by'],['order by'],['count'],['avg']],hint:'GROUP BY qyteti, CASE WHEN mosha < 25... END (duhet alias ose rishkrim)',answer:"SELECT qyteti,\n  CASE WHEN mosha < 25 THEN 'I ri'\n       WHEN mosha <= 30 THEN 'Mesatar'\n       ELSE 'I pjekur'\n  END AS grup_mosha,\n  COUNT(*) AS nr,\n  ROUND(AVG(nota), 2) AS avg_nota\nFROM students\nGROUP BY qyteti,\n  CASE WHEN mosha < 25 THEN 'I ri'\n       WHEN mosha <= 30 THEN 'Mesatar'\n       ELSE 'I pjekur'\n  END\nORDER BY qyteti, avg_nota DESC;",ok:'✓ Saktë! GROUP BY me shumë kolona = for i mbivendosur. CASE brenda GROUP BY duhet rishkruar (jo alias).'},
+  26:{must:[['select'],['year'],['month'],['datediff'],['case'],['from','porosite'],['where']],hint:'YEAR(data_porosise), MONTH(), DATEDIFF(day, data_porosise, data_dergimit), WHERE YEAR()=2026',answer:"SELECT klienti, data_porosise,\n       YEAR(data_porosise) AS viti,\n       MONTH(data_porosise) AS muaji,\n       DATEDIFF(day, data_porosise, data_dergimit) AS dite_dergim,\n       CASE WHEN DATEDIFF(day,data_porosise,data_dergimit) <= 3 THEN 'Shpejt'\n            WHEN DATEDIFF(day,data_porosise,data_dergimit) <= 7 THEN 'Normal'\n            ELSE 'Vonë'\n       END AS shpejtesia\nFROM porosite\nWHERE YEAR(data_porosise) = 2026;",ok:'✓ Saktë! YEAR() = datetime.year, MONTH() = datetime.month, DATEDIFF = (d2-d1).days.'},
+  27:{must:[['select'],['from','students'],['where'],['select avg','(select'],['avg']],hint:'WHERE nota > (SELECT AVG(nota) FROM students) — subquery brenda WHERE',answer:'SELECT emri, qyteti, nota,\n       ROUND(nota - (SELECT AVG(nota) FROM students), 2) AS diff_nga_mesatarja\nFROM students\nWHERE nota > (SELECT AVG(nota) FROM students)\nORDER BY diff_nga_mesatarja DESC;',ok:'✓ Saktë! Subquery = funksion brenda funksioni. (SELECT AVG...) llogaritet fillimisht dhe rezultati përdoret si vlerë.'},
+  28:{must:[['with'],['select'],['from','students'],['join'],['on'],['case','when'],['order by']],hint:'WITH stats_qyteti AS (SELECT qyteti, AVG(nota)... GROUP BY qyteti)\nSELECT...JOIN stats_qyteti ON s.qyteti = c.qyteti',answer:"WITH stats_qyteti AS (\n  SELECT qyteti, ROUND(AVG(nota),2) AS avg_nota, COUNT(*) AS nr\n  FROM students GROUP BY qyteti\n)\nSELECT s.emri, s.qyteti, s.nota,\n       c.avg_nota AS avg_qyteti,\n       CASE WHEN s.nota >= c.avg_nota THEN 'Mbi mesatare'\n            ELSE 'Nën mesatare' END AS krahasim\nFROM students s\nJOIN stats_qyteti c ON s.qyteti = c.qyteti\nORDER BY s.qyteti, s.nota DESC;",ok:'✓ Saktë! WITH (CTE) = funksion modular. Ndan problemin kompleks në hapa — si principi i modularity në Python.'},
+  29:{must:[['select'],['from','students'],['exists','not exists'],['union'],['regjistrime']],hint:"WHERE EXISTS (SELECT 1 FROM regjistrime r WHERE r.student_id = s.student_id)",answer:"SELECT emri, qyteti, 'Me kurs' AS statusi\nFROM students s\nWHERE EXISTS (SELECT 1 FROM regjistrime r WHERE r.student_id = s.student_id)\nUNION ALL\nSELECT emri, qyteti, 'Pa kurs' AS statusi\nFROM students s\nWHERE NOT EXISTS (SELECT 1 FROM regjistrime r WHERE r.student_id = s.student_id)\nORDER BY statusi;",ok:'✓ Saktë! EXISTS = any(). NOT EXISTS = not any(). Ndalon kërkimin sapo gjen njërin match — efiçiente!'},
+  30:{must:[['insert','update','delete'],['into','set','from']],hint:'INSERT INTO tbl (col1,...) VALUES (...); UPDATE tbl SET col=val WHERE ...; DELETE FROM tbl WHERE ...;',answer:"INSERT INTO students (emri, mosha, qyteti, nota)\nVALUES ('Arben', 27, 'Korçë', 8.7);\n\nUPDATE students\nSET nota = 9.8\nWHERE emri = 'Baraa';\n\nDELETE FROM students\nWHERE nota < 5.0;",ok:'✓ Saktë! INSERT=append(), UPDATE=list[i]=x, DELETE=remove(). Kujdes: DELETE pa WHERE fshin TË GJITHA rreshtat!'},
+  31:{must:[['select'],['row_number'],['over'],['order by'],['partition by'],['from','students']],hint:'ROW_NUMBER() OVER (ORDER BY nota DESC), ROW_NUMBER() OVER (PARTITION BY qyteti ORDER BY nota DESC)',answer:'SELECT emri, qyteti, nota,\n       ROW_NUMBER() OVER (ORDER BY nota DESC) AS renditja_globale,\n       ROW_NUMBER() OVER (PARTITION BY qyteti ORDER BY nota DESC) AS renditja_per_qytet\nFROM students\nORDER BY renditja_globale;',ok:'✓ Saktë! ROW_NUMBER() = enumerate(). PARTITION BY = enumerate per grup. Window Functions nuk grupin rreshtat — si map() nuk filtroi.'},
+  32:{must:[['select'],['rank'],['dense_rank'],['ntile'],['over'],['from','students']],hint:'RANK() OVER (ORDER BY nota DESC), DENSE_RANK() OVER (...), NTILE(4) OVER (...)',answer:"SELECT emri, nota,\n       RANK() OVER (ORDER BY nota DESC) AS renditja,\n       DENSE_RANK() OVER (ORDER BY nota DESC) AS renditja_dense,\n       NTILE(4) OVER (ORDER BY nota DESC) AS kuartili,\n       CASE NTILE(4) OVER (ORDER BY nota DESC)\n         WHEN 1 THEN 'Top 25%'\n         WHEN 2 THEN 'Mesatar Lartë'\n         WHEN 3 THEN 'Mesatar Poshtë'\n         ELSE 'Poshtë'\n       END AS grupi\nFROM students;",ok:'✓ Saktë! RANK: 1,2,2,4 (lë boshllëqe). DENSE_RANK: 1,2,2,3 (nuk lë). NTILE(4) ndan në 4 grupe të barabarta.'},
+  33:{must:[['select'],['lag'],['over'],['order by'],['from','shitjet_mujore']],hint:'LAG(totali) OVER (ORDER BY viti, muaji) AS muaji_pare',answer:"SELECT muaji, viti, totali,\n       LAG(totali) OVER (ORDER BY viti, muaji) AS muaji_pare,\n       ROUND((totali - LAG(totali) OVER (ORDER BY viti, muaji))\n             / LAG(totali) OVER (ORDER BY viti, muaji) * 100, 1) AS ndryshimi_pct,\n       CASE WHEN totali > LAG(totali) OVER (ORDER BY viti, muaji) THEN '↑ Rritje'\n            WHEN totali < LAG(totali) OVER (ORDER BY viti, muaji) THEN '↓ Rënie'\n            ELSE '→ Njëlloj'\n       END AS trendi\nFROM shitjet_mujore\nORDER BY viti, muaji;",ok:'✓ Saktë! LAG() = lista[i-1]. LEAD() = lista[i+1]. Jashtëzakonisht e dobishme për analizën e serive kohore.'},
+  34:{must:[['select'],['trim'],['replace'],['coalesce','upper'],['from','te_dhenat_dirty']],hint:"TRIM(UPPER(emri_raw)), REPLACE(REPLACE(REPLACE(tel,'-',''),'.',' '),' ','')",answer:"SELECT id,\n       TRIM(UPPER(emri_raw)) AS emri_clean,\n       REPLACE(REPLACE(REPLACE(tel_raw, '-', ''), '.', ''), ' ', '') AS tel_clean,\n       CASE WHEN UPPER(COALESCE(statusi_raw, '')) = 'AKTIV' THEN 1 ELSE 0\n       END AS statusi_clean\nFROM te_dhenat_dirty;",ok:'✓ Saktë! REPLACE mbivendosur = replace chainim si Python. COALESCE para UPPER mbron nga NULL errors.'},
+  35:{must:[['with'],['select'],['row_number'],['over'],['join'],['count'],['group by'],['order by']],hint:'WITH qyteti_stats AS (...), student_ranked AS (...) SELECT... JOIN...JOIN regjistrime GROUP BY...',answer:"WITH qyteti_stats AS (\n  SELECT qyteti, ROUND(AVG(nota),2) AS avg_nota\n  FROM students GROUP BY qyteti\n),\nstudent_ranked AS (\n  SELECT *, ROW_NUMBER() OVER (ORDER BY nota DESC) AS renditja\n  FROM students\n)\nSELECT sr.renditja, sr.emri, sr.qyteti, sr.nota,\n       qs.avg_nota AS avg_qyteti,\n       CASE WHEN sr.nota >= qs.avg_nota THEN 'Mbi mesatare' ELSE 'Nën mesatare' END AS krahasim,\n       COUNT(r.kurs_id) AS nr_kurset,\n       IIF(COUNT(r.kurs_id) > 0, 'Me kurs', 'Pa kurs') AS statusi\nFROM student_ranked sr\nJOIN qyteti_stats qs ON sr.qyteti = qs.qyteti\nLEFT JOIN regjistrime r ON sr.student_id = r.student_id\nGROUP BY sr.renditja, sr.emri, sr.qyteti, sr.nota, qs.avg_nota\nORDER BY sr.renditja;",ok:'✓ Bravo! Sfida finale e kompletuar! Multi-CTE + Window Functions + JOIN + CASE = SQL i nivelit profesional.'}
+};
 
-function check(n) {
-  const inp = document.getElementById('inp' + n).value;
+function normalize(sql){ return sql.toLowerCase().replace(/\s+/g,' ').trim(); }
+
+function check(n){
+  const inp = document.getElementById('inp'+n).value;
   const sql = normalize(inp);
-  const fb = document.getElementById('fb' + n);
-  const cfg = answers[n];
-
-  if (!sql || sql.length < 5) {
-    fb.className = 'feedback show err';
-    fb.textContent = '✗ Shkruaj SQL-in fillimisht!';
-    return;
-  }
-
+  const fb = document.getElementById('fb'+n);
+  const c = cfg[n];
+  if(!sql || sql.length < 5){ fb.className='fb show err'; fb.textContent='✗ Shkruaj SQL-in fillimisht!'; return; }
   let passed = true;
-  for (const group of cfg.must) {
-    const groupOk = group.some(kw => sql.includes(kw));
-    if (!groupOk) { passed = false; break; }
+  for(const group of c.must){
+    if(!group.some(kw => sql.includes(kw))){ passed=false; break; }
   }
-
-  if (passed) {
-    fb.className = 'feedback show ok';
-    fb.textContent = cfg.ok;
-    if (!solved.has(n)) {
-      solved.add(n);
-      updateProgress();
-    }
-    if (cfg.result) showResultTable(n, cfg.result);
+  if(passed){
+    fb.className='fb show ok'; fb.textContent=c.ok;
+    if(!solved.has(n)){ solved.add(n); updateProgress(); }
+    document.getElementById('ex'+n).classList.add('is-solved');
   } else {
-    fb.className = 'feedback show err';
-    fb.textContent = '✗ Kueria nuk duket e plotë. Kontrollo klauzolat e nevojshme. Provo ndihmën!';
+    fb.className='fb show err'; fb.textContent='✗ Kueria nuk është e plotë. Kontrollo klauzolat e nevojshme dhe provo ndihmën!';
   }
 }
 
-function showResultTable(n, data) {
-  const rt = document.getElementById('rt' + n);
-  if (!rt) return;
-  let html = '<div style="margin-top:12px;"><div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em;">Rezultati i pritur</div>';
-  html += '<div class="result-table-wrap"><table class="result-table"><thead><tr>';
-  data.headers.forEach(h => html += `<th>${h}</th>`);
-  html += '</tr></thead><tbody>';
-  data.rows.forEach(row => {
-    html += '<tr>';
-    row.forEach(cell => html += `<td>${cell}</td>`);
-    html += '</tr>';
-  });
-  html += '</tbody></table></div></div>';
-  rt.innerHTML = html;
-  rt.style.display = 'block';
-}
+function hint(n){ const fb=document.getElementById('fb'+n); fb.className='fb show hint'; fb.textContent='💡 Ndihmë:\n'+cfg[n].hint; }
+function ans(n){ const fb=document.getElementById('fb'+n); fb.className='fb show ans'; fb.textContent='✓ Zgjidhja:\n\n'+cfg[n].answer; }
+function rst(n){ document.getElementById('inp'+n).value=''; const fb=document.getElementById('fb'+n); fb.className='fb'; fb.textContent=''; }
 
-function showHint(n) {
-  const fb = document.getElementById('fb' + n);
-  fb.className = 'feedback show hint';
-  fb.textContent = '💡 Ndihmë: ' + answers[n].hint;
-}
-
-function showAnswer(n) {
-  const fb = document.getElementById('fb' + n);
-  fb.className = 'feedback show ans';
-  fb.textContent = '✓ Zgjidhja:\n\n' + answers[n].answer;
-}
-
-function reset(n) {
-  document.getElementById('inp' + n).value = '';
-  const fb = document.getElementById('fb' + n);
-  fb.className = 'feedback';
-  fb.textContent = '';
-  const rt = document.getElementById('rt' + n);
-  if (rt) { rt.style.display = 'none'; rt.innerHTML = ''; }
-}
-
-function updateProgress() {
-  const total = 10;
+function updateProgress(){
   const done = solved.size;
-  const pct = (done / total) * 100;
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressText').textContent = done + ' / ' + total + ' detyra të zgjidhura';
+  document.getElementById('progressBar').style.width = (done/TOTAL*100)+'%';
+  document.getElementById('progressText').textContent = done+' / '+TOTAL+' detyra të zgjidhura';
+  document.getElementById('solvedCount').textContent = done;
+}
+
+function showTab(i){
+  document.querySelectorAll('.section').forEach((s,j)=>{ s.classList.toggle('active', j===i); });
+  document.querySelectorAll('.nav-tab').forEach((t,j)=>{ t.classList.toggle('active', j===i); });
 }
 </script>
 </body>
