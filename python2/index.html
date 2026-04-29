@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Detyra — Data With Baraa</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #14171f;
+    --surface2: #1c2030;
+    --border: #252a38;
+    --accent: #00e5a0;
+    --accent2: #7c6fff;
+    --accent3: #ff6b6b;
+    --accent4: #ffc857;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --code-bg: #0a0c10;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+  .progress-bar-wrapper { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 3px; background: var(--border); }
+  #global-progress { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0%; transition: width 0.4s ease; }
+  .score-panel { position: fixed; right: 24px; bottom: 24px; z-index: 50; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,0.5); min-width: 140px; }
+  .score-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  #score-display { font-size: 32px; font-weight: 800; color: var(--accent); }
+  .score-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); }
+  header { position: relative; z-index: 10; padding: 60px 40px 40px; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(0,229,160,0.04) 0%, transparent 100%); }
+  .header-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); border: 1px solid rgba(0,229,160,0.3); padding: 6px 16px; border-radius: 2px; margin-bottom: 24px; background: rgba(0,229,160,0.05); }
+  h1 { font-size: clamp(36px, 6vw, 72px); font-weight: 800; letter-spacing: -2px; line-height: 1; margin-bottom: 16px; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--muted); margin-bottom: 40px; }
+  .stats { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 800; color: var(--accent); display: block; }
+  .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .filters { position: relative; z-index: 10; padding: 24px 40px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; border-bottom: 1px solid var(--border); }
+  .filter-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 8px 18px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,229,160,0.05); }
+  main { position: relative; z-index: 10; padding: 40px; max-width: 1400px; margin: 0 auto; }
+  .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; margin-top: 48px; }
+  .section-header:first-child { margin-top: 0; }
+  .section-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 4px 12px; border-radius: 2px; white-space: nowrap; }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 16px; margin-bottom: 8px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.2s, transform 0.2s; animation: fadeIn 0.4s ease both; }
+  .card:hover { border-color: rgba(0,229,160,0.2); transform: translateY(-2px); }
+  .card.solved { border-color: rgba(0,229,160,0.4); }
+  .card.wrong { border-color: rgba(255,107,107,0.3); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .card-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .card-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--muted); min-width: 28px; }
+  .card-title { font-size: 14px; font-weight: 700; flex: 1; letter-spacing: -0.3px; }
+  .card-diff { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
+  .easy { background: rgba(0,229,160,0.1); color: var(--accent); }
+  .medium { background: rgba(255,200,87,0.1); color: var(--accent4); }
+  .hard { background: rgba(255,107,107,0.1); color: var(--accent3); }
+  .card-body { padding: 18px; }
+  .question { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 16px; }
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; margin-bottom: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.8; overflow-x: auto; white-space: pre; }
+  .code-block .kw { color: #c792ea; }
+  .code-block .fn { color: #82aaff; }
+  .code-block .str { color: #c3e88d; }
+  .code-block .num { color: #f78c6c; }
+  .code-block .cm { color: #546e7a; font-style: italic; }
+  .code-block .op { color: var(--accent); }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .opt-btn { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; padding: 10px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; text-align: left; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
+  .opt-btn:hover:not(:disabled) { border-color: var(--accent2); background: rgba(124,111,255,0.08); color: var(--accent2); }
+  .opt-btn.correct { border-color: var(--accent) !important; background: rgba(0,229,160,0.12) !important; color: var(--accent) !important; }
+  .opt-btn.wrong-ans { border-color: var(--accent3) !important; background: rgba(255,107,107,0.12) !important; color: var(--accent3) !important; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; opacity: 0.5; }
+  .feedback { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 10px 14px; border-radius: 4px; display: none; line-height: 1.6; }
+  .feedback.show { display: block; animation: slideIn 0.3s ease; }
+  .feedback.correct-fb { background: rgba(0,229,160,0.08); color: var(--accent); border-left: 3px solid var(--accent); }
+  .feedback.wrong-fb { background: rgba(255,107,107,0.08); color: var(--accent3); border-left: 3px solid var(--accent3); }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .status-icon { font-size: 14px; margin-left: auto; opacity: 0; transition: opacity 0.3s; }
+  .card.solved .status-icon, .card.wrong .status-icon { opacity: 1; }
+  .topic-intro { color: var(--accent); background: rgba(0,229,160,0.1); }
+  .topic-strings { color: var(--accent2); background: rgba(124,111,255,0.1); }
+  .topic-numbers { color: var(--accent4); background: rgba(255,200,87,0.1); }
+  .topic-logic { color: #61dafb; background: rgba(97,218,251,0.1); }
+  .topic-loops { color: #ff9f7f; background: rgba(255,159,127,0.1); }
+  .topic-structures { color: #a8ff78; background: rgba(168,255,120,0.1); }
+  .topic-functions { color: #f794c1; background: rgba(247,148,193,0.1); }
+  .reset-btn { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 8px 20px; border-radius: 2px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s; display: block; margin: 8px auto 0; width: 100%; }
+  .reset-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+  footer { position: relative; z-index: 10; text-align: center; padding: 40px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  footer span { color: var(--accent); }
+  @media (max-width: 768px) { header { padding: 40px 20px 30px; } main { padding: 24px 16px; } .filters { padding: 16px; } .card-grid { grid-template-columns: 1fr; } .options { grid-template-columns: 1fr; } .stats { gap: 20px; } .score-panel { right: 12px; bottom: 12px; padding: 12px 16px; } }
+</style>
+</head>
+<body>
+
+<div class="progress-bar-wrapper"><div id="global-progress"></div></div>
+
+<div class="score-panel">
+  <div class="score-label">Pikët</div>
+  <div id="score-display">0</div>
+  <div class="score-sub">nga 35</div>
+</div>
+
+<header>
+  <div class="header-badge">// Python Detyra 2026</div>
+  <h1>Python<br><span>Sfida</span></h1>
+  <p class="subtitle">// 35 detyra me kod · testo njohuritë e tua</p>
+  <div class="stats">
+    <div class="stat"><span class="stat-num">35</span><span class="stat-label">Detyra</span></div>
+    <div class="stat"><span class="stat-num">7</span><span class="stat-label">Tema</span></div>
+    <div class="stat"><span class="stat-num" id="solved-count">0</span><span class="stat-label">Zgjidhur</span></div>
+  </div>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filter('all',this)">Të Gjitha</button>
+  <button class="filter-btn" onclick="filter('intro',this)">Hyrje</button>
+  <button class="filter-btn" onclick="filter('strings',this)">Strings</button>
+  <button class="filter-btn" onclick="filter('numbers',this)">Numrat</button>
+  <button class="filter-btn" onclick="filter('logic',this)">Logjika</button>
+  <button class="filter-btn" onclick="filter('loops',this)">Loops</button>
+  <button class="filter-btn" onclick="filter('structures',this)">Strukturat</button>
+  <button class="filter-btn" onclick="filter('functions',this)">Funksionet</button>
+</div>
+
+<main id="main-content"></main>
+
+<footer>Data With Baraa &middot; Python Course <span>2026</span> &middot; Të gjitha të drejtat e rezervuara</footer>
+
+<script>
+const Q = [
+  // HYRJE
+  {id:1,t:'intro',d:'easy',title:'Funksioni print()',q:'Cili do të jetë outputi i këtij kodi?',
+   code:'<span class="fn">print</span>(<span class="str">"Pershendetje"</span>, <span class="str">"Bote"</span>)',
+   opts:['Pershendetje,Bote','PershendetetjeBote','Pershendetje Bote','Error'],ans:2,
+   exp:'print() me dy argumente i ndan me hapësirë automatikisht.'},
+  {id:2,t:'intro',d:'easy',title:'Komentet',q:'Cili është outputi i këtij kodi?',
+   code:'<span class="cm"># kjo eshte nje koment</span>\n<span class="fn">print</span>(<span class="str">"Python"</span>)',
+   opts:['# kjo eshte nje koment','Python','Asgjë nuk printohet','Error'],ans:1,
+   exp:'Komentet injorohen nga Python. Vetëm print("Python") ekzekutohet.'},
+  {id:3,t:'intro',d:'easy',title:'Riassignimi i Variablës',q:'Cili do të jetë outputi i këtij kodi?',
+   code:'x = <span class="num">10</span>\nx = <span class="num">20</span>\n<span class="fn">print</span>(x)',
+   opts:['10','20','10 20','Error'],ans:1,
+   exp:'Variabla x riassignohet me 20. Python printon vlerën e fundit të ruajtur.'},
+  {id:4,t:'intro',d:'medium',title:'Escape Sequences \\n',q:'Sa rreshta do të shfaqen në ekran?',
+   code:'<span class="fn">print</span>(<span class="str">"Linja 1\\nLinja 2\\nLinja 3"</span>)',
+   opts:['1 rresht','2 rreshta','3 rreshta','Error'],ans:2,
+   exp:'\\n është newline. Kemi 2 \\n brenda stringut → krijohen 3 rreshta.'},
+  {id:5,t:'intro',d:'medium',title:'Tipi i input()',q:'Çfarë tipi kthen gjithmonë input()?',
+   code:'x = <span class="fn">input</span>(<span class="str">"Jep nje numer: "</span>)\n<span class="fn">print</span>(<span class="fn">type</span>(x))',
+   opts:['int','float','str','Varet nga inputi'],ans:2,
+   exp:'input() gjithmonë kthen str, edhe nëse përdoruesi shkruan numër.'},
+
+  // STRINGS
+  {id:6,t:'strings',d:'easy',title:'len() dhe count()',q:'Cili do të jetë outputi?',
+   code:'tekst = <span class="str">"banana"</span>\n<span class="fn">print</span>(<span class="fn">len</span>(tekst), tekst.<span class="fn">count</span>(<span class="str">"a"</span>))',
+   opts:['6 2','6 3','5 3','6 4'],ans:1,
+   exp:'"banana" ka 6 karaktere. Shkronja "a" shfaqet 3 herë: b-A-n-A-n-A.'},
+  {id:7,t:'strings',d:'easy',title:'lower() dhe upper()',q:'Cili do të jetë outputi?',
+   code:'s = <span class="str">"PyThOn"</span>\n<span class="fn">print</span>(s.<span class="fn">lower</span>())',
+   opts:['PYTHON','PyThOn','python','Python'],ans:2,
+   exp:'lower() konverton të gjitha shkronjat në minuskule.'},
+  {id:8,t:'strings',d:'easy',title:'Indexing Pozitiv & Negativ',q:'Cili do të jetë outputi?',
+   code:'s = <span class="str">"Python"</span>\n<span class="fn">print</span>(s[<span class="num">0</span>], s[-<span class="num">1</span>])',
+   opts:['P n','P t','y n','P o'],ans:0,
+   exp:'s[0] = "P" (karakteri i parë). s[-1] = "n" (karakteri i fundit).'},
+  {id:9,t:'strings',d:'medium',title:'Slicing',q:'Cili do të jetë outputi?',
+   code:'s = <span class="str">"Programming"</span>\n<span class="fn">print</span>(s[<span class="num">0</span>:<span class="num">4</span>])',
+   opts:['Prog','rogr','Progr','Prom'],ans:0,
+   exp:'s[0:4] merr pozicionet 0,1,2,3 (4 nuk përfshihet) → "Prog".'},
+  {id:10,t:'strings',d:'medium',title:'strip() dhe replace()',q:'Cili do të jetë outputi?',
+   code:'s = <span class="str">"  hello world  "</span>\n<span class="fn">print</span>(s.<span class="fn">strip</span>().<span class="fn">replace</span>(<span class="str">"world"</span>, <span class="str">"Python"</span>))',
+   opts:['hello Python','  hello Python  ','hello world','Error'],ans:0,
+   exp:'strip() heq hapësirat anash. replace() zëvendëson "world" me "Python".'},
+  {id:11,t:'strings',d:'medium',title:'split() dhe len()',q:'Cili do të jetë outputi?',
+   code:'s = <span class="str">"a,b,c,d"</span>\nresult = s.<span class="fn">split</span>(<span class="str">","</span>)\n<span class="fn">print</span>(<span class="fn">len</span>(result))',
+   opts:['3','4','7','Error'],ans:1,
+   exp:'split(",") krijon ["a","b","c","d"] → lista ka 4 elemente.'},
+  {id:12,t:'strings',d:'hard',title:'find() dhe startswith()',q:'Cili do të jetë outputi?',
+   code:'s = <span class="str">"data science"</span>\n<span class="fn">print</span>(s.<span class="fn">find</span>(<span class="str">"sci"</span>), s.<span class="fn">startswith</span>(<span class="str">"dat"</span>))',
+   opts:['4 False','5 True','5 False','4 True'],ans:1,
+   exp:'"sci" fillon në pozicionin 5 (d-a-t-a-space=5). "data" fillon me "dat" → True.'},
+  {id:13,t:'strings',d:'hard',title:'isalpha() dhe isnumeric()',q:'Cili do të jetë outputi?',
+   code:'<span class="fn">print</span>(<span class="str">"Maria12"</span>.<span class="fn">isalpha</span>())\n<span class="fn">print</span>(<span class="str">"123"</span>.<span class="fn">isnumeric</span>())',
+   opts:['True True','False True','True False','False False'],ans:1,
+   exp:'"Maria12" ka numra → isalpha()=False. "123" janë vetëm numra → isnumeric()=True.'},
+
+  // NUMRAT
+  {id:14,t:'numbers',d:'easy',title:'Operatori // dhe %',q:'Cili do të jetë outputi?',
+   code:'<span class="fn">print</span>(<span class="num">10</span> <span class="op">//</span> <span class="num">3</span>, <span class="num">10</span> <span class="op">%</span> <span class="num">3</span>)',
+   opts:['3 1','3.33 1','4 1','3 0'],ans:0,
+   exp:'// është pjesëtim i plotë (3). % kthen mbetjen: 10 = 3×3 + 1.'},
+  {id:15,t:'numbers',d:'easy',title:'round() dhe abs()',q:'Cili do të jetë outputi?',
+   code:'<span class="fn">print</span>(<span class="fn">round</span>(<span class="num">3.7</span>), <span class="fn">abs</span>(-<span class="num">15</span>))',
+   opts:['3 15','4 15','4 -15','3 -15'],ans:1,
+   exp:'round(3.7) = 4 (rrumbullakësohet lart). abs(-15) = 15 (vlera absolute, pa shenjë).'},
+  {id:16,t:'numbers',d:'medium',title:'Fuqizimi ** dhe prioriteti',q:'Cili do të jetë outputi?',
+   code:'x = <span class="num">2</span> <span class="op">**</span> <span class="num">3</span> <span class="op">**</span> <span class="num">2</span>\n<span class="fn">print</span>(x)',
+   opts:['64','512','8','36'],ans:1,
+   exp:'** evaluohet nga e djathta (right-associative): 3**2=9, pastaj 2**9=512.'},
+  {id:17,t:'numbers',d:'medium',title:'int() dhe float()',q:'Cili do të jetë outputi?',
+   code:'<span class="fn">print</span>(<span class="fn">int</span>(<span class="num">3.9</span>), <span class="fn">float</span>(<span class="str">"7"</span>))',
+   opts:['4 7.0','3 7.0','3 7','4 7'],ans:1,
+   exp:'int() heq pjesën dhjetore pa rrumbullakësuar → 3. float("7") → 7.0.'},
+  {id:18,t:'numbers',d:'hard',title:'math.ceil() dhe floor()',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">import</span> math\n<span class="fn">print</span>(math.<span class="fn">ceil</span>(<span class="num">4.1</span>), math.<span class="fn">floor</span>(<span class="num">4.9</span>))',
+   opts:['4 4','5 4','4 5','5 5'],ans:1,
+   exp:'ceil(4.1)=5 (rrumbullakëson lart). floor(4.9)=4 (rrumbullakëson poshtë). Nuk është round()!'},
+
+  // LOGJIKA
+  {id:19,t:'logic',d:'easy',title:'Operatorët Krahasues',q:'Cili do të jetë outputi?',
+   code:'<span class="fn">print</span>(<span class="num">5</span> <span class="op">==</span> <span class="num">5</span>, <span class="num">5</span> <span class="op">!=</span> <span class="num">3</span>, <span class="num">4</span> <span class="op">></span> <span class="num">10</span>)',
+   opts:['True True False','True False True','False True True','True True True'],ans:0,
+   exp:'5==5 → True. 5!=3 → True. 4>10 → False. Çdo krahasim kthen True ose False.'},
+  {id:20,t:'logic',d:'easy',title:'and / or / not',q:'Cili do të jetë outputi?',
+   code:'<span class="fn">print</span>(<span class="kw">True</span> <span class="kw">and</span> <span class="kw">False</span>)\n<span class="fn">print</span>(<span class="kw">True</span> <span class="kw">or</span> <span class="kw">False</span>)',
+   opts:['False True','True False','False False','True True'],ans:0,
+   exp:'and kërkon të dy True → False. or kërkon të paktën një True → True.'},
+  {id:21,t:'logic',d:'medium',title:'any() dhe all()',q:'Cili do të jetë outputi?',
+   code:'vlerat = [<span class="num">0</span>, <span class="str">""</span>, <span class="kw">None</span>, <span class="num">1</span>, <span class="str">"hi"</span>]\n<span class="fn">print</span>(<span class="fn">any</span>(vlerat), <span class="fn">all</span>(vlerat))',
+   opts:['True True','False True','True False','False False'],ans:2,
+   exp:'any()=True (1 dhe "hi" janë truthy). all()=False (0, "", None janë falsy).'},
+  {id:22,t:'logic',d:'medium',title:'in dhe not in',q:'Cili do të jetë outputi?',
+   code:'fruta = [<span class="str">"molle"</span>, <span class="str">"dardhe"</span>, <span class="str">"kumbull"</span>]\n<span class="fn">print</span>(<span class="str">"molle"</span> <span class="kw">in</span> fruta, <span class="str">"rrush"</span> <span class="kw">not in</span> fruta)',
+   opts:['True True','False True','True False','False False'],ans:0,
+   exp:'"molle" ekziston në listë → True. "rrush" nuk ekziston → not in = True.'},
+  {id:23,t:'logic',d:'hard',title:'Prioriteti i Operatorëve Logjikë',q:'Cili do të jetë outputi?',
+   code:'x = <span class="num">5</span>\nresult = x <span class="op">></span> <span class="num">3</span> <span class="kw">and</span> x <span class="op"><</span> <span class="num">10</span> <span class="kw">or</span> x <span class="op">==</span> <span class="num">5</span>\n<span class="fn">print</span>(result)',
+   opts:['False','True','Error','None'],ans:1,
+   exp:'and evaluohet para or: (5>3 and 5<10)=True. True or True=True.'},
+
+  // LOOPS
+  {id:24,t:'loops',d:'easy',title:'for Loop me range()',q:'Sa herë printohet "Python"?',
+   code:'<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>):\n    <span class="fn">print</span>(<span class="str">"Python"</span>)',
+   opts:['2 herë','3 herë','4 herë','1 herë'],ans:1,
+   exp:'range(3) gjeneron [0,1,2] → 3 iterime → "Python" printohet 3 herë.'},
+  {id:25,t:'loops',d:'easy',title:'break',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):\n    <span class="kw">if</span> i <span class="op">==</span> <span class="num">3</span>:\n        <span class="kw">break</span>\n    <span class="fn">print</span>(i)',
+   opts:['0 1 2 3','0 1 2','1 2 3','0 1 2 3 4'],ans:1,
+   exp:'Kur i=3, break ndalon loop-in menjëherë. Printojmë vetëm 0, 1, 2.'},
+  {id:26,t:'loops',d:'medium',title:'continue - Kalo Çiftet',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):\n    <span class="kw">if</span> i <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>:\n        <span class="kw">continue</span>\n    <span class="fn">print</span>(i)',
+   opts:['0 2 4','1 3','1 2 3 4 5','0 1 2 3 4'],ans:1,
+   exp:'continue kalon numrat çift (i%2==0). Printohen vetëm tek: 1, 3.'},
+  {id:27,t:'loops',d:'medium',title:'while Loop',q:'Cili do të jetë vlera finale e x?',
+   code:'x = <span class="num">1</span>\n<span class="kw">while</span> x <span class="op"><</span> <span class="num">16</span>:\n    x = x <span class="op">*</span> <span class="num">2</span>\n<span class="fn">print</span>(x)',
+   opts:['8','16','32','64'],ans:1,
+   exp:'x: 1→2→4→8→16. Kur x=16, kushti x<16 bëhet False. Printohet 16.'},
+  {id:28,t:'loops',d:'hard',title:'for-else',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">for</span> i <span class="kw">in</span> [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>]:\n    <span class="kw">if</span> i <span class="op">==</span> <span class="num">5</span>:\n        <span class="kw">break</span>\n<span class="kw">else</span>:\n    <span class="fn">print</span>(<span class="str">"Nuk u gjet"</span>)',
+   opts:['Asgjë','Nuk u gjet','Error','5'],ans:1,
+   exp:'Loop përfundoi pa break (5 nuk ndodhet). Klauzola else ekzekutohet vetëm pa break.'},
+
+  // STRUKTURAT
+  {id:29,t:'structures',d:'easy',title:'Lista - append() dhe len()',q:'Cili do të jetë outputi?',
+   code:'lista = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]\nlista.<span class="fn">append</span>(<span class="num">4</span>)\n<span class="fn">print</span>(<span class="fn">len</span>(lista))',
+   opts:['3','4','5','Error'],ans:1,
+   exp:'append(4) shton 4 në fund. Lista bëhet [1,2,3,4] → len=4.'},
+  {id:30,t:'structures',d:'medium',title:'Dictionary - get()',q:'Cili do të jetë outputi?',
+   code:'person = {<span class="str">"emri"</span>: <span class="str">"Ana"</span>, <span class="str">"mosha"</span>: <span class="num">25</span>}\n<span class="fn">print</span>(person[<span class="str">"emri"</span>], person.<span class="fn">get</span>(<span class="str">"qyteti"</span>, <span class="str">"N/A"</span>))',
+   opts:['Ana 25','Ana N/A','Ana Error','Ana None'],ans:1,
+   exp:'person["emri"]="Ana". get() me default kthen "N/A" nëse çelësi mungon.'},
+  {id:31,t:'structures',d:'medium',title:'Set - Unikiteti',q:'Cili do të jetë outputi?',
+   code:'s = {<span class="num">1</span>, <span class="num">2</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">3</span>, <span class="num">3</span>}\n<span class="fn">print</span>(<span class="fn">len</span>(s))',
+   opts:['6','3','4','2'],ans:1,
+   exp:'Set heq duplikatet automatikisht. {1,2,3} → len=3.'},
+  {id:32,t:'structures',d:'hard',title:'List Comprehension me filtër',q:'Cili do të jetë outputi?',
+   code:'result = [x<span class="op">**</span><span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>) <span class="kw">if</span> x <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>]\n<span class="fn">print</span>(result)',
+   opts:['[0, 4, 16]','[1, 9, 25]','[0, 2, 4]','[4, 16]'],ans:0,
+   exp:'Numrat çift në range(5): 0,2,4. Katrorët: 0²=0, 2²=4, 4²=16 → [0,4,16].'},
+  {id:33,t:'structures',d:'hard',title:'Tuple Immutability',q:'Cili do të jetë outputi?',
+   code:'t = (<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>)\n<span class="kw">try</span>:\n    t[<span class="num">0</span>] = <span class="num">99</span>\n<span class="kw">except</span> TypeError:\n    <span class="fn">print</span>(<span class="str">"Immutable!"</span>)',
+   opts:['(99, 2, 3)','(1, 2, 3)','Immutable!','Error pa mesazh'],ans:2,
+   exp:'Tuple është immutable. Modifikimi hedh TypeError. except e kap dhe printon.'},
+
+  // FUNKSIONET
+  {id:34,t:'functions',d:'easy',title:'Definimi dhe Thirrja',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">def</span> <span class="fn">persehendetje</span>(emri):\n    <span class="fn">print</span>(<span class="str">f"Pershendetje, {emri}!"</span>)\n\n<span class="fn">persehendetje</span>(<span class="str">"Baraa"</span>)',
+   opts:['emri','Pershendetje, emri!','Pershendetje, Baraa!','Error'],ans:2,
+   exp:'f-string zëvendëson {emri} me vlerën e argumentit "Baraa".'},
+  {id:35,t:'functions',d:'medium',title:'return vs print()',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">def</span> <span class="fn">katrori</span>(x):\n    <span class="kw">return</span> x <span class="op">**</span> <span class="num">2</span>\n\nresult = <span class="fn">katrori</span>(<span class="num">5</span>)\n<span class="fn">print</span>(result <span class="op">+</span> <span class="num">1</span>)',
+   opts:['25','26','None','Error'],ans:1,
+   exp:'katrori(5) kthen 25 me return. 25+1=26. return lejon ripërdorimin e vlerës.'},
+  {id:36,t:'functions',d:'medium',title:'Parametra Default',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">def</span> <span class="fn">shendet</span>(emri, gjuha=<span class="str">"Shqip"</span>):\n    <span class="fn">print</span>(emri, gjuha)\n\n<span class="fn">shendet</span>(<span class="str">"Ana"</span>)\n<span class="fn">shendet</span>(<span class="str">"Ben"</span>, <span class="str">"Anglisht"</span>)',
+   opts:['Ana Shqip\nBen Anglisht','Ana\nBen Anglisht','Error','Ana Gjuha\nBen Anglisht'],ans:0,
+   exp:'Thirrja e parë përdor default "Shqip". E dyta e mbishkruan me "Anglisht".'},
+  {id:37,t:'functions',d:'hard',title:'*args - Argumente të Shumta',q:'Cili do të jetë outputi?',
+   code:'<span class="kw">def</span> <span class="fn">shuma</span>(*args):\n    <span class="kw">return</span> <span class="fn">sum</span>(args)\n\n<span class="fn">print</span>(<span class="fn">shuma</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>))',
+   opts:['None','(1,2,3,4,5)','15','Error'],ans:2,
+   exp:'*args mbledh të gjitha argumentet si tuple (1,2,3,4,5). sum() = 15.'},
+  {id:38,t:'functions',d:'hard',title:'Scope - Variablat Lokale vs Globale',q:'Cili do të jetë outputi?',
+   code:'x = <span class="str">"global"</span>\n<span class="kw">def</span> <span class="fn">testo</span>():\n    x = <span class="str">"lokal"</span>\n    <span class="fn">print</span>(x)\n\n<span class="fn">testo</span>()\n<span class="fn">print</span>(x)',
+   opts:['lokal\nlokal','global\nglobal','lokal\nglobal','global\nlokal'],ans:2,
+   exp:'Brenda funksionit x="lokal" është variabël lokale. Jashtë, x="global" mbetet e pandryshuar.'}
+];
+
+const TOPICS = {
+  intro:      {label:'Hyrje në Python',       tag:'topic-intro'},
+  strings:    {label:'Strings',               tag:'topic-strings'},
+  numbers:    {label:'Numrat',                tag:'topic-numbers'},
+  logic:      {label:'Logjika & Operatorët',  tag:'topic-logic'},
+  loops:      {label:'Loops',                 tag:'topic-loops'},
+  structures: {label:'Strukturat e të Dhënave',tag:'topic-structures'},
+  functions:  {label:'Funksionet',            tag:'topic-functions'},
+};
+
+const DIFF = {easy:'Lehtë', medium:'Mesatare', hard:'Vështirë'};
+let state={}, score=0, solved=0;
+const TOTAL = Q.length;
+
+function buildCard(q){
+  const labels=['A','B','C','D'];
+  const opts=q.opts.map((o,i)=>`<button class="opt-btn" onclick="answer(${q.id},${i})" id="opt-${q.id}-${i}"><span class="opt-label">${labels[i]}</span>${o}</button>`).join('');
+  return `<div class="card" id="card-${q.id}" data-topic="${q.t}">
+    <div class="card-header">
+      <span class="card-num">#${String(q.id).padStart(2,'0')}</span>
+      <span class="card-title">${q.title}</span>
+      <span class="card-diff ${q.d}">${DIFF[q.d]}</span>
+      <span class="status-icon" id="icon-${q.id}">○</span>
+    </div>
+    <div class="card-body">
+      <p class="question">${q.q}</p>
+      <div class="code-block">${q.code}</div>
+      <div class="options">${opts}</div>
+      <div class="feedback" id="fb-${q.id}"></div>
+      <button class="reset-btn" onclick="resetCard(${q.id})" id="reset-${q.id}" style="display:none">↺ Provo sërish</button>
+    </div>
+  </div>`;
+}
+
+function buildUI(){
+  const main=document.getElementById('main-content');
+  const order=['intro','strings','numbers','logic','loops','structures','functions'];
+  let html='';
+  order.forEach(topic=>{
+    const qs=Q.filter(q=>q.t===topic);
+    if(!qs.length) return;
+    const t=TOPICS[topic];
+    html+=`<div class="section-header" data-section="${topic}">
+      <span class="section-tag ${t.tag}">${t.label}</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="card-grid" data-grid="${topic}">${qs.map(buildCard).join('')}</div>`;
+  });
+  main.innerHTML=html;
+  document.getElementById('score-sub') && (document.querySelector('.score-sub').textContent='nga '+TOTAL);
+}
+
+function answer(id,chosen){
+  if(state[id]) return;
+  const q=Q.find(x=>x.id===id);
+  const card=document.getElementById('card-'+id);
+  const fb=document.getElementById('fb-'+id);
+  const icon=document.getElementById('icon-'+id);
+  const resetBtn=document.getElementById('reset-'+id);
+  const correct=q.ans===chosen;
+  for(let i=0;i<q.opts.length;i++){
+    const btn=document.getElementById('opt-'+id+'-'+i);
+    btn.disabled=true;
+    if(i===q.ans) btn.classList.add('correct');
+    if(i===chosen&&!correct) btn.classList.add('wrong-ans');
+  }
+  fb.textContent=(correct?'✓ Saktë! ':'✗ Jo saktë. ')+q.exp;
+  fb.className='feedback show '+(correct?'correct-fb':'wrong-fb');
+  card.classList.add(correct?'solved':'wrong');
+  icon.textContent=correct?'✓':'✗';
+  icon.style.color=correct?'var(--accent)':'var(--accent3)';
+  resetBtn.style.display='block';
+  state[id]={correct};
+  if(correct) score++;
+  solved++;
+  updateProgress();
+}
+
+function resetCard(id){
+  const q=Q.find(x=>x.id===id);
+  if(state[id]?.correct) score--;
+  if(state[id]) solved--;
+  delete state[id];
+  for(let i=0;i<q.opts.length;i++){
+    const btn=document.getElementById('opt-'+id+'-'+i);
+    btn.disabled=false;
+    btn.className='opt-btn';
+  }
+  document.getElementById('fb-'+id).className='feedback';
+  const card=document.getElementById('card-'+id);
+  card.className='card';
+  document.getElementById('icon-'+id).textContent='○';
+  document.getElementById('icon-'+id).style.color='';
+  document.getElementById('reset-'+id).style.display='none';
+  updateProgress();
+}
+
+function updateProgress(){
+  document.getElementById('score-display').textContent=score;
+  document.getElementById('solved-count').textContent=solved;
+  document.getElementById('global-progress').style.width=(solved/TOTAL*100)+'%';
+}
+
+function filter(topic,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('[data-section]').forEach(s=>{
+    const t=s.dataset.section;
+    const show=topic==='all'||t===topic;
+    s.style.display=show?'':'none';
+    const grid=document.querySelector('[data-grid="'+t+'"]');
+    if(grid) grid.style.display=show?'':'none';
+  });
+}
+
+buildUI();
+</script>
+</body>
+</html>
