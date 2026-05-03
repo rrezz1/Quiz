@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL 100 Detyra</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050d0a;
+    --card: #0a1610;
+    --border: #0f2318;
+    --accent: #4ecca3;
+    --accent2: #a8ff78;
+    --text: #e0f0e8;
+    --muted: #4a7a60;
+    --easy: #4ecca3;
+    --mid: #f7c948;
+    --code-bg: #040c08;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(78,204,163,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index:1; }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  h1 { font-size: clamp(36px, 6vw, 72px); font-weight: 800; line-height: 1; letter-spacing: -2px; margin-bottom: 12px; }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 16px; }
+  .stats { display: flex; gap: 32px; margin-top: 28px; flex-wrap: wrap; }
+  .stat { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.easy { background: var(--easy); }
+  .dot.mid { background: var(--mid); }
+  .stat-label { font-size: 13px; color: var(--muted); }
+  .stat-val { font-size: 13px; font-weight: 700; }
+
+  .filters {
+    padding: 24px 40px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    max-width: 1200px; margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    font-family: 'Syne', sans-serif; font-size: 13px; padding: 8px 18px;
+    border-radius: 4px; cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(78,204,163,0.06); }
+  .search-box {
+    margin-left: auto; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px;
+    padding: 8px 16px; border-radius: 4px; width: 220px; outline: none;
+  }
+  .search-box:focus { border-color: var(--accent); }
+  .search-box::placeholder { color: var(--muted); }
+
+  .progress-bar { height: 3px; background: var(--border); position: sticky; top: 0; z-index: 10; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; width: 0%; }
+
+  main {
+    max-width: 1200px; margin: 0 auto; padding: 40px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden; transition: border-color 0.2s, transform 0.2s; display: flex; flex-direction: column;
+  }
+  .card:hover { border-color: rgba(78,204,163,0.3); transform: translateY(-2px); }
+  .card.solved { border-color: rgba(78,204,163,0.5); }
+  .card-header { padding: 16px 20px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .card-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); flex-shrink: 0; margin-top: 3px; }
+  .card-title { font-size: 14px; font-weight: 700; line-height: 1.4; flex: 1; }
+  .level-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; flex-shrink: 0; }
+  .level-easy { background: rgba(78,204,163,0.15); color: var(--easy); }
+  .level-mid { background: rgba(247,201,72,0.15); color: var(--mid); }
+
+  .code-area { margin: 0 16px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .code-label { padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+  textarea.code-input {
+    width: 100%; background: transparent; border: none; color: var(--accent);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 12px 14px;
+    resize: vertical; min-height: 80px; outline: none; line-height: 1.6;
+  }
+  .card-footer { padding: 12px 16px 16px; display: flex; gap: 8px; align-items: center; margin-top: auto; }
+  .run-btn {
+    background: var(--accent); color: #000; border: none;
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    padding: 8px 18px; border-radius: 4px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px;
+  }
+  .run-btn:hover { background: #6fffd4; transform: scale(1.03); }
+  .reset-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    font-family: 'Syne', sans-serif; font-size: 12px; padding: 8px 14px;
+    border-radius: 4px; cursor: pointer; transition: all 0.15s;
+  }
+  .reset-btn:hover { border-color: var(--muted); color: var(--text); }
+  .solved-badge { margin-left: auto; font-size: 11px; color: var(--easy); display: none; align-items: center; gap: 4px; }
+  .card.solved .solved-badge { display: flex; }
+
+  .output-area { margin: 0 16px 16px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: none; }
+  .output-area.visible { display: block; }
+  .output-label { padding: 6px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .output-content { padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; white-space: pre; overflow-x: auto; max-height: 200px; overflow-y: auto; }
+  .output-content.success { color: var(--easy); }
+  .output-content.error { color: #ff6b6b; }
+
+  table.sql-table { border-collapse: collapse; min-width: 100%; font-size: 11px; }
+  table.sql-table th { background: rgba(78,204,163,0.15); color: var(--accent); padding: 6px 12px; text-align: left; border: 1px solid var(--border); font-weight: 700; }
+  table.sql-table td { padding: 5px 12px; border: 1px solid var(--border); color: var(--text); }
+  table.sql-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .no-results { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--muted); font-size: 18px; display: none; }
+
+  footer { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); margin-top: 20px; }
+  footer a { color: var(--accent); text-decoration: none; }
+  @media(max-width:600px){ header, .filters, main { padding-left: 20px; padding-right: 20px; } main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header>
+  <div class="header-inner">
+    <div class="badge">🗄️ SQL</div>
+    <h1>100 <span>Detyra</span></h1>
+    <p class="subtitle">Nga Easy deri në Mid — ekzekuto SQL direkt në browser</p>
+    <div class="stats">
+      <div class="stat"><div class="dot easy"></div><span class="stat-label">Easy:</span><span class="stat-val">50 detyra</span></div>
+      <div class="stat"><div class="dot mid"></div><span class="stat-label">Mid:</span><span class="stat-val">50 detyra</span></div>
+      <div class="stat"><span class="stat-label">✅ Zgjidhur:</span><span class="stat-val" id="solvedCount">0</span>/100</div>
+    </div>
+  </div>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterCards('all', this)">Të gjitha</button>
+  <button class="filter-btn" onclick="filterCards('easy', this)">Easy</button>
+  <button class="filter-btn" onclick="filterCards('mid', this)">Mid</button>
+  <button class="filter-btn" onclick="filterCards('solved', this)">✅ Zgjidhur</button>
+  <input class="search-box" id="searchBox" placeholder="🔍 Kërko detyrë..." oninput="searchCards()">
+</div>
+
+<main id="cardsGrid"></main>
+<div class="no-results" id="noResults">Asnjë detyrë nuk u gjet 😕</div>
+
+<footer>
+  <a href="python100.html">🐍 Shko te Python 100 Detyra →</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.2/dist/sql-wasm.js"></script>
+<script>
+let db;
+let solved = JSON.parse(localStorage.getItem('sql_solved') || '[]');
+let activeFilter = 'all';
+
+const SQL_INIT = `
+CREATE TABLE punonjesit (
+  id INTEGER PRIMARY KEY,
+  emri TEXT,
+  mbiemri TEXT,
+  departamenti TEXT,
+  paga REAL,
+  data_punesimit TEXT,
+  menaxher_id INTEGER,
+  qyteti TEXT,
+  aktiv INTEGER
+);
+INSERT INTO punonjesit VALUES
+(1,'Andi','Gashi','IT',85000,'2020-01-15',NULL,'Tirane',1),
+(2,'Besa','Koci','HR',72000,'2019-03-20',1,'Durres',1),
+(3,'Genci','Hoxha','IT',92000,'2018-06-01',1,'Tirane',1),
+(4,'Drita','Leka','Finance',78000,'2021-09-10',1,'Vlore',1),
+(5,'Erion','Meta','Marketing',68000,'2022-02-28',2,'Tirane',0),
+(6,'Fjolla','Rama','IT',95000,'2017-11-05',1,'Tirane',1),
+(7,'Gjergj','Basha','HR',65000,'2023-01-01',2,'Shkoder',1),
+(8,'Hana','Doda','Finance',82000,'2020-07-15',4,'Durres',1),
+(9,'Ilir','Zeqiri','Marketing',71000,'2021-05-20',5,'Tirane',1),
+(10,'Jona','Gjoka','IT',88000,'2019-12-10',3,'Tirane',1),
+(11,'Klea','Marku','HR',69000,'2022-08-01',2,'Vlore',0),
+(12,'Liri','Sefa','Finance',76000,'2020-04-25',4,'Tirane',1),
+(13,'Mirela','Tafa','IT',91000,'2018-09-15',1,'Durres',1),
+(14,'Niko','Vata','Marketing',63000,'2023-03-10',5,'Tirane',1),
+(15,'Ora','Xhafa','Finance',84000,'2019-07-20',4,'Shkoder',1);
+
+CREATE TABLE departamentet (
+  id INTEGER PRIMARY KEY,
+  emri TEXT,
+  buxheti REAL,
+  lokacioni TEXT
+);
+INSERT INTO departamentet VALUES
+(1,'IT',500000,'Tirane'),
+(2,'HR',200000,'Tirane'),
+(3,'Finance',350000,'Durres'),
+(4,'Marketing',250000,'Vlore');
+
+CREATE TABLE projektet (
+  id INTEGER PRIMARY KEY,
+  emri TEXT,
+  departamenti TEXT,
+  buxheti REAL,
+  statusi TEXT,
+  data_fillimit TEXT
+);
+INSERT INTO projektet VALUES
+(1,'Platforma Web','IT',120000,'aktiv','2023-01-01'),
+(2,'Sistemi HR','HR',45000,'perfunduar','2022-06-01'),
+(3,'Raport Financiar','Finance',30000,'aktiv','2023-03-15'),
+(4,'Kampanja Verore','Marketing',25000,'aktiv','2023-05-01'),
+(5,'App Mobile','IT',95000,'aktiv','2023-02-01'),
+(6,'Trajnim Punonjesish','HR',15000,'perfunduar','2022-09-01'),
+(7,'Auditim','Finance',22000,'aktiv','2023-04-01'),
+(8,'SEO Optimizim','Marketing',18000,'ne_pritje','2023-06-01');
+
+CREATE TABLE shitjet (
+  id INTEGER PRIMARY KEY,
+  produkti TEXT,
+  sasia INTEGER,
+  cmimi REAL,
+  data TEXT,
+  rajoni TEXT
+);
+INSERT INTO shitjet VALUES
+(1,'Laptop',5,1200,'2023-01-15','Tirane'),
+(2,'Mouse',20,25,'2023-01-20','Durres'),
+(3,'Keyboard',15,45,'2023-02-10','Tirane'),
+(4,'Monitor',8,350,'2023-02-15','Vlore'),
+(5,'Laptop',3,1200,'2023-03-01','Tirane'),
+(6,'Headphones',12,80,'2023-03-20','Shkoder'),
+(7,'Webcam',10,60,'2023-04-05','Tirane'),
+(8,'USB Hub',25,30,'2023-04-15','Durres'),
+(9,'Laptop',7,1250,'2023-05-01','Tirane'),
+(10,'Mouse',30,25,'2023-05-10','Vlore'),
+(11,'Monitor',5,380,'2023-06-01','Tirane'),
+(12,'Keyboard',20,45,'2023-06-15','Durres');
+`;
+
+const tasks = [
+  // ===== EASY (1-50) =====
+  {n:1, title:"SELECT të gjitha kolonat nga punonjesit", level:"easy", code:`SELECT * FROM punonjesit;`},
+  {n:2, title:"SELECT vetëm emrin dhe mbiemrin", level:"easy", code:`SELECT emri, mbiemri FROM punonjesit;`},
+  {n:3, title:"SELECT emri, paga nga punonjesit", level:"easy", code:`SELECT emri, paga FROM punonjesit;`},
+  {n:4, title:"SELECT DISTINCT departamentet", level:"easy", code:`SELECT DISTINCT departamenti FROM punonjesit;`},
+  {n:5, title:"WHERE - paga mbi 80000", level:"easy", code:`SELECT emri, paga FROM punonjesit WHERE paga > 80000;`},
+  {n:6, title:"WHERE - departamenti IT", level:"easy", code:`SELECT * FROM punonjesit WHERE departamenti = 'IT';`},
+  {n:7, title:"WHERE - punonjësit aktivë", level:"easy", code:`SELECT emri, departamenti FROM punonjesit WHERE aktiv = 1;`},
+  {n:8, title:"ORDER BY paga DESC", level:"easy", code:`SELECT emri, paga FROM punonjesit ORDER BY paga DESC;`},
+  {n:9, title:"ORDER BY emri ASC", level:"easy", code:`SELECT emri, mbiemri FROM punonjesit ORDER BY emri ASC;`},
+  {n:10, title:"LIMIT - 5 punonjësit e parë", level:"easy", code:`SELECT emri, paga FROM punonjesit LIMIT 5;`},
+  {n:11, title:"COUNT - numri total i punonjësve", level:"easy", code:`SELECT COUNT(*) AS total FROM punonjesit;`},
+  {n:12, title:"SUM - shuma e pagave", level:"easy", code:`SELECT SUM(paga) AS shuma_pagave FROM punonjesit;`},
+  {n:13, title:"AVG - mesatarja e pagave", level:"easy", code:`SELECT AVG(paga) AS mesatare FROM punonjesit;`},
+  {n:14, title:"MAX dhe MIN paga", level:"easy", code:`SELECT MAX(paga) AS max_paga, MIN(paga) AS min_paga FROM punonjesit;`},
+  {n:15, title:"WHERE me AND - IT dhe aktiv", level:"easy", code:`SELECT emri, departamenti, paga FROM punonjesit WHERE departamenti = 'IT' AND aktiv = 1;`},
+  {n:16, title:"WHERE me OR - IT ose HR", level:"easy", code:`SELECT emri, departamenti FROM punonjesit WHERE departamenti = 'IT' OR departamenti = 'HR';`},
+  {n:17, title:"WHERE me NOT", level:"easy", code:`SELECT emri, departamenti FROM punonjesit WHERE NOT departamenti = 'IT';`},
+  {n:18, title:"BETWEEN - paga 70000 dhe 90000", level:"easy", code:`SELECT emri, paga FROM punonjesit WHERE paga BETWEEN 70000 AND 90000;`},
+  {n:19, title:"IN - departamentet IT, HR", level:"easy", code:`SELECT emri, departamenti FROM punonjesit WHERE departamenti IN ('IT', 'HR');`},
+  {n:20, title:"LIKE - emrat që fillojnë me A", level:"easy", code:`SELECT emri FROM punonjesit WHERE emri LIKE 'A%';`},
+  {n:21, title:"LIKE - emrat me 4 shkronja", level:"easy", code:`SELECT emri FROM punonjesit WHERE emri LIKE '____';`},
+  {n:22, title:"IS NULL - menaxheri i panjohur", level:"easy", code:`SELECT emri FROM punonjesit WHERE menaxher_id IS NULL;`},
+  {n:23, title:"IS NOT NULL - kanë menaxher", level:"easy", code:`SELECT emri, menaxher_id FROM punonjesit WHERE menaxher_id IS NOT NULL LIMIT 5;`},
+  {n:24, title:"GROUP BY departamenti", level:"easy", code:`SELECT departamenti, COUNT(*) AS total FROM punonjesit GROUP BY departamenti;`},
+  {n:25, title:"GROUP BY me AVG paga", level:"easy", code:`SELECT departamenti, AVG(paga) AS mesatare_paga FROM punonjesit GROUP BY departamenti;`},
+  {n:26, title:"HAVING - departamente me > 3 punonjës", level:"easy", code:`SELECT departamenti, COUNT(*) AS total FROM punonjesit GROUP BY departamenti HAVING total > 3;`},
+  {n:27, title:"AS - alias për kolona", level:"easy", code:`SELECT emri AS Emri_Punonjesit, paga AS Paga_Mujore FROM punonjesit LIMIT 5;`},
+  {n:28, title:"SELECT nga projektet", level:"easy", code:`SELECT * FROM projektet;`},
+  {n:29, title:"WHERE statusi aktiv - projekte", level:"easy", code:`SELECT emri, buxheti FROM projektet WHERE statusi = 'aktiv';`},
+  {n:30, title:"ORDER BY buxheti DESC - projekte", level:"easy", code:`SELECT emri, buxheti FROM projektet ORDER BY buxheti DESC;`},
+  {n:31, title:"SUM buxheti i projekteve", level:"easy", code:`SELECT SUM(buxheti) AS total_buxheti FROM projektet;`},
+  {n:32, title:"COUNT projekte sipas statusit", level:"easy", code:`SELECT statusi, COUNT(*) AS total FROM projektet GROUP BY statusi;`},
+  {n:33, title:"SELECT nga shitjet", level:"easy", code:`SELECT * FROM shitjet LIMIT 8;`},
+  {n:34, title:"SUM shitjet totale (sasia*cmimi)", level:"easy", code:`SELECT produkti, SUM(sasia * cmimi) AS totali FROM shitjet GROUP BY produkti;`},
+  {n:35, title:"TOP 5 shitjet sipas vlerës", level:"easy", code:`SELECT produkti, sasia * cmimi AS vlera FROM shitjet ORDER BY vlera DESC LIMIT 5;`},
+  {n:36, title:"DISTINCT produktet e shitura", level:"easy", code:`SELECT DISTINCT produkti FROM shitjet ORDER BY produkti;`},
+  {n:37, title:"WHERE rajoni Tirane - shitjet", level:"easy", code:`SELECT * FROM shitjet WHERE rajoni = 'Tirane';`},
+  {n:38, title:"COUNT shitjet sipas rajonit", level:"easy", code:`SELECT rajoni, COUNT(*) AS total FROM shitjet GROUP BY rajoni;`},
+  {n:39, title:"SELECT nga departamentet", level:"easy", code:`SELECT * FROM departamentet;`},
+  {n:40, title:"MAX buxheti departamenti", level:"easy", code:`SELECT emri, MAX(buxheti) AS max_buxheti FROM departamentet;`},
+  {n:41, title:"UPPER emri", level:"easy", code:`SELECT UPPER(emri) AS emri_caps FROM punonjesit LIMIT 5;`},
+  {n:42, title:"LOWER departamenti", level:"easy", code:`SELECT LOWER(departamenti) AS dept FROM punonjesit LIMIT 5;`},
+  {n:43, title:"LENGTH - gjatësia e emrit", level:"easy", code:`SELECT emri, LENGTH(emri) AS gjatesia FROM punonjesit ORDER BY gjatesia DESC LIMIT 5;`},
+  {n:44, title:"SUBSTR - 3 shkronjat e para", level:"easy", code:`SELECT emri, SUBSTR(emri, 1, 3) AS shkurtesa FROM punonjesit;`},
+  {n:45, title:"CONCAT emri + mbiemri", level:"easy", code:`SELECT emri || ' ' || mbiemri AS emri_plote FROM punonjesit;`},
+  {n:46, title:"ROUND paga/12 = mujore", level:"easy", code:`SELECT emri, ROUND(paga/12, 2) AS paga_mujore FROM punonjesit;`},
+  {n:47, title:"Punonjësit e qytetit Tiranë", level:"easy", code:`SELECT emri, qyteti, departamenti FROM punonjesit WHERE qyteti = 'Tirane';`},
+  {n:48, title:"Punonjësit me paga nën mesatare", level:"easy", code:`SELECT emri, paga FROM punonjesit WHERE paga < (SELECT AVG(paga) FROM punonjesit);`},
+  {n:49, title:"WHERE LIKE - emrat me 'a'", level:"easy", code:`SELECT emri FROM punonjesit WHERE emri LIKE '%a%';`},
+  {n:50, title:"LIMIT me OFFSET (faqe 2)", level:"easy", code:`SELECT emri, paga FROM punonjesit ORDER BY paga DESC LIMIT 5 OFFSET 5;`},
+
+  // ===== MID (51-100) =====
+  {n:51, title:"INNER JOIN punonjës + departamente", level:"mid", code:`SELECT p.emri, p.departamenti, d.buxheti\nFROM punonjesit p\nINNER JOIN departamentet d ON p.departamenti = d.emri\nLIMIT 8;`},
+  {n:52, title:"LEFT JOIN - të gjithë punonjësit", level:"mid", code:`SELECT p.emri, p.departamenti, d.lokacioni\nFROM punonjesit p\nLEFT JOIN departamentet d ON p.departamenti = d.emri;`},
+  {n:53, title:"Self JOIN - punonjës + menaxher", level:"mid", code:`SELECT p.emri AS punonjes, m.emri AS menaxher\nFROM punonjesit p\nLEFT JOIN punonjesit m ON p.menaxher_id = m.id;`},
+  {n:54, title:"GROUP BY + HAVING paga mesatare > 80000", level:"mid", code:`SELECT departamenti, AVG(paga) AS mesatare\nFROM punonjesit\nGROUP BY departamenti\nHAVING AVG(paga) > 80000;`},
+  {n:55, title:"Subquery - punonjësit me pagën max", level:"mid", code:`SELECT emri, paga\nFROM punonjesit\nWHERE paga = (SELECT MAX(paga) FROM punonjesit);`},
+  {n:56, title:"Subquery IN - punonjës me projekte IT", level:"mid", code:`SELECT emri, departamenti FROM punonjesit\nWHERE departamenti IN (\n  SELECT departamenti FROM projektet WHERE statusi = 'aktiv'\n);`},
+  {n:57, title:"EXISTS - departamente me punonjës", level:"mid", code:`SELECT emri FROM departamentet d\nWHERE EXISTS (\n  SELECT 1 FROM punonjesit p WHERE p.departamenti = d.emri\n);`},
+  {n:58, title:"CASE WHEN - kategori pagash", level:"mid", code:`SELECT emri, paga,\n  CASE\n    WHEN paga > 90000 THEN 'Senior'\n    WHEN paga > 75000 THEN 'Mid'\n    ELSE 'Junior'\n  END AS niveli\nFROM punonjesit;`},
+  {n:59, title:"CASE WHEN - statusi shqip", level:"mid", code:`SELECT emri,\n  CASE aktiv\n    WHEN 1 THEN 'Aktiv'\n    ELSE 'Joaktiv'\n  END AS statusi\nFROM punonjesit;`},
+  {n:60, title:"Window RANK() sipas pagës", level:"mid", code:`SELECT emri, paga,\n  RANK() OVER (ORDER BY paga DESC) AS renditja\nFROM punonjesit;`},
+  {n:61, title:"Window ROW_NUMBER() sipas dept", level:"mid", code:`SELECT emri, departamenti, paga,\n  ROW_NUMBER() OVER (PARTITION BY departamenti ORDER BY paga DESC) AS nr\nFROM punonjesit;`},
+  {n:62, title:"Window DENSE_RANK() pagave", level:"mid", code:`SELECT emri, paga,\n  DENSE_RANK() OVER (ORDER BY paga DESC) AS rank_dense\nFROM punonjesit;`},
+  {n:63, title:"CTE - me WITH", level:"mid", code:`WITH pagat_larta AS (\n  SELECT emri, paga, departamenti\n  FROM punonjesit\n  WHERE paga > 80000\n)\nSELECT * FROM pagat_larta ORDER BY paga DESC;`},
+  {n:64, title:"CTE + GROUP BY", level:"mid", code:`WITH statistika AS (\n  SELECT departamenti, COUNT(*) as total, AVG(paga) as mesatare\n  FROM punonjesit\n  GROUP BY departamenti\n)\nSELECT * FROM statistika ORDER BY mesatare DESC;`},
+  {n:65, title:"UNION dy queries", level:"mid", code:`SELECT emri, 'Punonjes' AS tipi FROM punonjesit WHERE paga > 85000\nUNION\nSELECT emri, 'Projekt' AS tipi FROM projektet WHERE buxheti > 50000;`},
+  {n:66, title:"Shitjet mujore (GROUP BY muaj)", level:"mid", code:`SELECT\n  SUBSTR(data, 1, 7) AS muaji,\n  SUM(sasia * cmimi) AS totali\nFROM shitjet\nGROUP BY muaji\nORDER BY muaji;`},
+  {n:67, title:"Produkti me shitjet më të larta", level:"mid", code:`SELECT produkti, SUM(sasia * cmimi) AS totali\nFROM shitjet\nGROUP BY produkti\nORDER BY totali DESC\nLIMIT 1;`},
+  {n:68, title:"Rajoni me shitjet më të larta", level:"mid", code:`SELECT rajoni, SUM(sasia * cmimi) AS totali\nFROM shitjet\nGROUP BY rajoni\nORDER BY totali DESC;`},
+  {n:69, title:"HAVING COUNT > 1 (produktet e ripërsëritura)", level:"mid", code:`SELECT produkti, COUNT(*) AS here\nFROM shitjet\nGROUP BY produkti\nHAVING COUNT(*) > 1;`},
+  {n:70, title:"Punonjësit punësuar pas 2020", level:"mid", code:`SELECT emri, data_punesimit\nFROM punonjesit\nWHERE data_punesimit > '2020-01-01'\nORDER BY data_punesimit;`},
+  {n:71, title:"Punonjësit me pagë mbi mesataren e departamentit", level:"mid", code:`SELECT p.emri, p.departamenti, p.paga\nFROM punonjesit p\nWHERE p.paga > (\n  SELECT AVG(p2.paga)\n  FROM punonjesit p2\n  WHERE p2.departamenti = p.departamenti\n);`},
+  {n:72, title:"COUNT punonjës aktiv vs joaktiv", level:"mid", code:`SELECT\n  SUM(CASE WHEN aktiv = 1 THEN 1 ELSE 0 END) AS aktiv,\n  SUM(CASE WHEN aktiv = 0 THEN 1 ELSE 0 END) AS joaktiv\nFROM punonjesit;`},
+  {n:73, title:"Paga totale sipas qytetit", level:"mid", code:`SELECT qyteti, SUM(paga) AS total_paga, COUNT(*) AS punonjes\nFROM punonjesit\nGROUP BY qyteti\nORDER BY total_paga DESC;`},
+  {n:74, title:"Projektet me buxhetin mbi mesatare", level:"mid", code:`SELECT emri, buxheti\nFROM projektet\nWHERE buxheti > (SELECT AVG(buxheti) FROM projektet)\nORDER BY buxheti DESC;`},
+  {n:75, title:"JOIN shitjet + statistika departamenti", level:"mid", code:`SELECT p.departamenti, d.buxheti, COUNT(p.id) as punonjes, AVG(p.paga) as paga_mesatare\nFROM punonjesit p\nJOIN departamentet d ON p.departamenti = d.emri\nGROUP BY p.departamenti;`},
+  {n:76, title:"Numëro projekte sipas departamentit", level:"mid", code:`SELECT departamenti, COUNT(*) AS total, SUM(buxheti) AS buxheti_total\nFROM projektet\nGROUP BY departamenti;`},
+  {n:77, title:"Punonjësit pa menaxher (drejtues)", level:"mid", code:`SELECT emri, departamenti\nFROM punonjesit\nWHERE menaxher_id IS NULL;`},
+  {n:78, title:"Sa punonjës menaxhon secili", level:"mid", code:`SELECT m.emri AS menaxher, COUNT(p.id) AS ekipi\nFROM punonjesit p\nJOIN punonjesit m ON p.menaxher_id = m.id\nGROUP BY m.id\nORDER BY ekipi DESC;`},
+  {n:79, title:"COALESCE - vlera default nëse NULL", level:"mid", code:`SELECT emri, COALESCE(CAST(menaxher_id AS TEXT), 'Pa Menaxher') AS menaxheri\nFROM punonjesit;`},
+  {n:80, title:"NTILE - ndaj punonjësit në 3 grupe", level:"mid", code:`SELECT emri, paga,\n  NTILE(3) OVER (ORDER BY paga DESC) AS grupi\nFROM punonjesit;`},
+  {n:81, title:"LAG - paga e punonjësit paraardhës", level:"mid", code:`SELECT emri, paga,\n  LAG(paga) OVER (ORDER BY paga) AS paga_para\nFROM punonjesit;`},
+  {n:82, title:"LEAD - paga e punonjësit pasardhës", level:"mid", code:`SELECT emri, paga,\n  LEAD(paga) OVER (ORDER BY paga) AS paga_pas\nFROM punonjesit;`},
+  {n:83, title:"SUM OVER - paga kumulative", level:"mid", code:`SELECT emri, paga,\n  SUM(paga) OVER (ORDER BY paga) AS kumulativi\nFROM punonjesit;`},
+  {n:84, title:"AVG OVER partition departamenti", level:"mid", code:`SELECT emri, departamenti, paga,\n  ROUND(AVG(paga) OVER (PARTITION BY departamenti), 0) AS avg_dept\nFROM punonjesit;`},
+  {n:85, title:"FIRST_VALUE dhe LAST_VALUE", level:"mid", code:`SELECT emri, paga,\n  FIRST_VALUE(emri) OVER (ORDER BY paga DESC) AS me_i_larti\nFROM punonjesit;`},
+  {n:86, title:"Ndryshimi % nga mesatarja", level:"mid", code:`SELECT emri, paga,\n  ROUND((paga - AVG(paga) OVER()) * 100.0 / AVG(paga) OVER(), 1) AS ndryshimi_pct\nFROM punonjesit\nORDER BY ndryshimi_pct DESC;`},
+  {n:87, title:"Shitjet me vlerë mbi mesatare globale", level:"mid", code:`SELECT produkti, sasia, cmimi, sasia * cmimi AS vlera\nFROM shitjet\nWHERE sasia * cmimi > (SELECT AVG(sasia * cmimi) FROM shitjet)\nORDER BY vlera DESC;`},
+  {n:88, title:"INSERT dhe SELECT (simulim)", level:"mid", code:`CREATE TEMP TABLE temp_punonjesit AS\nSELECT emri, departamenti, paga\nFROM punonjesit WHERE paga > 85000;\n\nSELECT * FROM temp_punonjesit;`},
+  {n:89, title:"UPDATE simulim me SELECT", level:"mid", code:`SELECT emri, paga, paga * 1.1 AS paga_e_re\nFROM punonjesit\nWHERE departamenti = 'IT'\nORDER BY paga DESC;`},
+  {n:90, title:"DELETE simulim - gjej joaktivët", level:"mid", code:`SELECT COUNT(*) AS do_fshihen\nFROM punonjesit WHERE aktiv = 0;`},
+  {n:91, title:"Punonjësi me pagën më të lartë për departament", level:"mid", code:`SELECT departamenti, emri, paga\nFROM (\n  SELECT departamenti, emri, paga,\n    RANK() OVER (PARTITION BY departamenti ORDER BY paga DESC) AS r\n  FROM punonjesit\n)\nWHERE r = 1;`},
+  {n:92, title:"Shitjet kumuluative sipas datës", level:"mid", code:`SELECT data, produkti,\n  SUM(sasia * cmimi) OVER (ORDER BY data) AS kumulativi\nFROM shitjet\nORDER BY data;`},
+  {n:93, title:"Pearson Correlation simulim (paga vs id)", level:"mid", code:`SELECT\n  ROUND((\n    COUNT(*) * SUM(id * paga) - SUM(id) * SUM(paga)\n  ) / (\n    SQRT(COUNT(*) * SUM(id*id) - SUM(id)*SUM(id)) *\n    SQRT(COUNT(*) * SUM(paga*paga) - SUM(paga)*SUM(paga))\n  ), 4) AS korrelacioni\nFROM punonjesit;`},
+  {n:94, title:"Pivot simulim - count per dept & city", level:"mid", code:`SELECT\n  departamenti,\n  SUM(CASE WHEN qyteti='Tirane' THEN 1 ELSE 0 END) AS Tirane,\n  SUM(CASE WHEN qyteti='Durres' THEN 1 ELSE 0 END) AS Durres,\n  SUM(CASE WHEN qyteti='Vlore' THEN 1 ELSE 0 END) AS Vlore\nFROM punonjesit\nGROUP BY departamenti;`},
+  {n:95, title:"Running total shitje sipas produktit", level:"mid", code:`SELECT produkti, data, sasia * cmimi AS vlera,\n  SUM(sasia * cmimi) OVER (PARTITION BY produkti ORDER BY data) AS kumulativi\nFROM shitjet\nORDER BY produkti, data;`},
+  {n:96, title:"Diferenca pagash midis dept", level:"mid", code:`WITH avg_dept AS (\n  SELECT departamenti, AVG(paga) AS avg_paga\n  FROM punonjesit GROUP BY departamenti\n)\nSELECT a.departamenti,\n  ROUND(a.avg_paga,0) AS avg_paga,\n  ROUND(a.avg_paga - (SELECT AVG(paga) FROM punonjesit), 0) AS diff_global\nFROM avg_dept a\nORDER BY diff_global DESC;`},
+  {n:97, title:"Produkti i shitur në të gjitha rajonet", level:"mid", code:`SELECT produkti\nFROM shitjet\nGROUP BY produkti\nHAVING COUNT(DISTINCT rajoni) = (SELECT COUNT(DISTINCT rajoni) FROM shitjet);`},
+  {n:98, title:"Punonjësi i 3-të sipas pagës", level:"mid", code:`SELECT emri, paga\nFROM (\n  SELECT emri, paga,\n    DENSE_RANK() OVER (ORDER BY paga DESC) AS r\n  FROM punonjesit\n)\nWHERE r = 3;`},
+  {n:99, title:"Tabela përmbledhëse e plotë", level:"mid", code:`SELECT\n  p.departamenti,\n  COUNT(p.id) AS punonjes,\n  ROUND(AVG(p.paga), 0) AS paga_avg,\n  MAX(p.paga) AS paga_max,\n  MIN(p.paga) AS paga_min,\n  d.buxheti AS buxheti_dept,\n  COUNT(pr.id) AS projekte\nFROM punonjesit p\nLEFT JOIN departamentet d ON p.departamenti = d.emri\nLEFT JOIN projektet pr ON p.departamenti = pr.departamenti\nGROUP BY p.departamenti;`},
+  {n:100, title:"Analiza e plotë: TOP punonjës + rank + mesatare", level:"mid", code:`SELECT\n  emri,\n  departamenti,\n  paga,\n  RANK() OVER (ORDER BY paga DESC) AS rank_global,\n  RANK() OVER (PARTITION BY departamenti ORDER BY paga DESC) AS rank_dept,\n  ROUND(AVG(paga) OVER (PARTITION BY departamenti), 0) AS avg_dept,\n  ROUND(paga - AVG(paga) OVER (PARTITION BY departamenti), 0) AS diff_avg,\n  CASE\n    WHEN RANK() OVER (PARTITION BY departamenti ORDER BY paga DESC) = 1 THEN 'Top'\n    WHEN paga > AVG(paga) OVER (PARTITION BY departamenti) THEN 'Mbi mesatare'\n    ELSE 'Nën mesatare'\n  END AS kategoria\nFROM punonjesit\nORDER BY rank_global;`},
+];
+
+async function initDB() {
+  const SQL = await initSqlJs({ locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.10.2/dist/${file}` });
+  db = new SQL.Database();
+  db.run(SQL_INIT);
+}
+
+function runSQL(n, query) {
+  const outputDiv = document.getElementById(`out-${n}`);
+  const outputContent = document.getElementById(`out-content-${n}`);
+  outputDiv.classList.add('visible');
+  
+  try {
+    const results = db.exec(query);
+    if (!results || results.length === 0) {
+      outputContent.innerHTML = '<span style="color:var(--muted)">Query ekzekutuar. Asnjë rresht.</span>';
+      outputContent.className = 'output-content success';
+    } else {
+      let html = '';
+      results.forEach(res => {
+        html += '<table class="sql-table"><thead><tr>';
+        res.columns.forEach(col => { html += `<th>${col}</th>`; });
+        html += '</tr></thead><tbody>';
+        res.values.forEach(row => {
+          html += '<tr>';
+          row.forEach(val => { html += `<td>${val === null ? '<span style="color:var(--muted)">NULL</span>' : val}</td>`; });
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+      });
+      outputContent.innerHTML = html;
+      outputContent.className = 'output-content success';
+    }
+    if (!solved.includes(n)) {
+      solved.push(n);
+      localStorage.setItem('sql_solved', JSON.stringify(solved));
+      document.getElementById(`card-${n}`).classList.add('solved');
+      updateProgress();
+    }
+  } catch(err) {
+    outputContent.innerHTML = '';
+    outputContent.textContent = '❌ ' + err.message;
+    outputContent.className = 'output-content error';
+  }
+}
+
+function resetCard(n, origCode) {
+  document.getElementById(`code-${n}`).value = origCode;
+  document.getElementById(`out-${n}`).classList.remove('visible');
+}
+
+function renderCards(list) {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  const noRes = document.getElementById('noResults');
+  if (list.length === 0) { noRes.style.display = 'block'; return; }
+  noRes.style.display = 'none';
+  list.forEach(t => {
+    const isSolved = solved.includes(t.n);
+    const card = document.createElement('div');
+    card.className = 'card' + (isSolved ? ' solved' : '');
+    card.id = `card-${t.n}`;
+    const escapedCode = t.code.replace(/`/g, '\\`').replace(/\\/g, '\\\\').replace(/`/g, '\\`');
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-num">#${String(t.n).padStart(2,'0')}</span>
+        <span class="card-title">${t.title}</span>
+        <span class="level-tag level-${t.level}">${t.level}</span>
+      </div>
+      <div class="code-area">
+        <div class="code-label"><span>sql</span><span>edito & ekzekuto</span></div>
+        <textarea class="code-input" id="code-${t.n}" spellcheck="false">${t.code}</textarea>
+      </div>
+      <div class="output-area" id="out-${t.n}">
+        <div class="output-label">rezultati</div>
+        <div class="output-content" id="out-content-${t.n}"></div>
+      </div>
+      <div class="card-footer">
+        <button class="run-btn" onclick="runSQL(${t.n}, document.getElementById('code-${t.n}').value)">▶ Run</button>
+        <button class="reset-btn" onclick="document.getElementById('code-${t.n}').value = tasks.find(x=>x.n===${t.n}).code; document.getElementById('out-${t.n}').classList.remove('visible')">↺ Reset</button>
+        <span class="solved-badge">✓ Zgjidhur</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function updateProgress() {
+  const pct = (solved.length / 100) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('solvedCount').textContent = solved.length;
+}
+
+function filterCards(type, btn) {
+  activeFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function searchCards() { applyFilters(); }
+function applyFilters() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  let list = tasks;
+  if (activeFilter === 'easy') list = list.filter(t => t.level === 'easy');
+  else if (activeFilter === 'mid') list = list.filter(t => t.level === 'mid');
+  else if (activeFilter === 'solved') list = list.filter(t => solved.includes(t.n));
+  if (q) list = list.filter(t => t.title.toLowerCase().includes(q) || String(t.n).includes(q));
+  renderCards(list);
+}
+
+renderCards(tasks);
+updateProgress();
+initDB().catch(e => console.error(e));
+</script>
+</body>
+</html>
