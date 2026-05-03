@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 100 Detyra</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #111118;
+    --border: #1e1e2e;
+    --accent: #f7c948;
+    --accent2: #4ecca3;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --easy: #4ecca3;
+    --mid: #f7c948;
+    --hard: #ff6b6b;
+    --code-bg: #0d0d15;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(247,201,72,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(78,204,163,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index:1; }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    margin-bottom: 12px;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 16px; }
+  .stats {
+    display: flex; gap: 32px; margin-top: 28px; flex-wrap: wrap;
+  }
+  .stat { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.easy { background: var(--easy); }
+  .dot.mid { background: var(--mid); }
+  .stat-label { font-size: 13px; color: var(--muted); }
+  .stat-val { font-size: 13px; font-weight: 700; }
+
+  .filters {
+    padding: 24px 40px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    max-width: 1200px; margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(247,201,72,0.06);
+  }
+  .search-box {
+    margin-left: auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    width: 220px;
+    outline: none;
+  }
+  .search-box:focus { border-color: var(--accent2); }
+  .search-box::placeholder { color: var(--muted); }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    display: flex; flex-direction: column;
+  }
+  .card:hover { border-color: rgba(247,201,72,0.3); transform: translateY(-2px); }
+  .card.solved { border-color: rgba(78,204,163,0.4); }
+  .card-header {
+    padding: 16px 20px 12px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  }
+  .card-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    flex: 1;
+  }
+  .level-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .level-easy { background: rgba(78,204,163,0.15); color: var(--easy); }
+  .level-mid { background: rgba(247,201,72,0.15); color: var(--mid); }
+
+  .code-area {
+    margin: 0 16px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .code-label {
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+  }
+  textarea.code-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    line-height: 1.6;
+  }
+  .card-footer {
+    padding: 12px 16px 16px;
+    display: flex; gap: 8px; align-items: center;
+    margin-top: auto;
+  }
+  .run-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .run-btn:hover { background: #ffd966; transform: scale(1.03); }
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .reset-btn:hover { border-color: var(--muted); color: var(--text); }
+  .solved-badge {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--easy);
+    display: none;
+    align-items: center; gap: 4px;
+  }
+  .card.solved .solved-badge { display: flex; }
+
+  .output-area {
+    margin: 0 16px 16px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    display: none;
+  }
+  .output-area.visible { display: block; }
+  .output-label {
+    padding: 6px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .output-content {
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  .output-content.success { color: var(--easy); }
+  .output-content.error { color: var(--hard); }
+
+  .no-results {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-size: 18px;
+    display: none;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  @media(max-width:600px){
+    header, .filters, main { padding-left: 20px; padding-right: 20px; }
+    main { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<header>
+  <div class="header-inner">
+    <div class="badge">🐍 Python</div>
+    <h1>100 <span>Detyra</span></h1>
+    <p class="subtitle">Nga Easy deri në Mid — ekzekuto direkt në browser</p>
+    <div class="stats">
+      <div class="stat"><div class="dot easy"></div><span class="stat-label">Easy:</span><span class="stat-val">50 detyra</span></div>
+      <div class="stat"><div class="dot mid"></div><span class="stat-label">Mid:</span><span class="stat-val">50 detyra</span></div>
+      <div class="stat" id="solvedStat"><span class="stat-label">✅ Zgjidhur:</span><span class="stat-val" id="solvedCount">0</span>/100</div>
+    </div>
+  </div>
+</header>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterCards('all', this)">Të gjitha</button>
+  <button class="filter-btn" onclick="filterCards('easy', this)">Easy</button>
+  <button class="filter-btn" onclick="filterCards('mid', this)">Mid</button>
+  <button class="filter-btn" onclick="filterCards('solved', this)">✅ Zgjidhur</button>
+  <input class="search-box" id="searchBox" placeholder="🔍 Kërko detyrë..." oninput="searchCards()">
+</div>
+
+<main id="cardsGrid"></main>
+<div class="no-results" id="noResults">Asnjë detyrë nuk u gjet 😕</div>
+
+<footer>
+  <a href="sql100.html">🗄️ Shko te SQL 100 Detyra →</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script>
+const tasks = [
+  // ======= EASY (1-50) =======
+  {n:1, title:"Shtyp 'Pershendetje Bote'", level:"easy", code:`print("Pershendetje Bote!")`, solution:`print("Pershendetje Bote!")`},
+  {n:2, title:"Mbledh dy numra", level:"easy", code:`a = 5\nb = 3\nprint(a + b)`, solution:`a = 5\nb = 3\nprint(a + b)`},
+  {n:3, title:"Zbrit dy numra", level:"easy", code:`a = 10\nb = 4\nprint(a - b)`, solution:`a = 10\nb = 4\nprint(a - b)`},
+  {n:4, title:"Shumëzo dy numra", level:"easy", code:`a = 6\nb = 7\nprint(a * b)`, solution:`a = 6\nb = 7\nprint(a * b)`},
+  {n:5, title:"Pjesëto dy numra", level:"easy", code:`a = 20\nb = 4\nprint(a / b)`, solution:`a = 20\nb = 4\nprint(a / b)`},
+  {n:6, title:"Fuqi e numrit (2^10)", level:"easy", code:`print(2 ** 10)`, solution:`print(2 ** 10)`},
+  {n:7, title:"Mbetja e pjesëtimit", level:"easy", code:`print(17 % 5)`, solution:`print(17 % 5)`},
+  {n:8, title:"Pjesëtim i plotë", level:"easy", code:`print(17 // 5)`, solution:`print(17 // 5)`},
+  {n:9, title:"Shtyp tipet e të dhënave", level:"easy", code:`print(type(42))\nprint(type(3.14))\nprint(type("hello"))\nprint(type(True))`, solution:`print(type(42))\nprint(type(3.14))\nprint(type("hello"))\nprint(type(True))`},
+  {n:10, title:"Konverto int në float", level:"easy", code:`x = 5\nprint(float(x))`, solution:`x = 5\nprint(float(x))`},
+  {n:11, title:"Gjatësia e një stringu", level:"easy", code:`s = "Pershendetje"\nprint(len(s))`, solution:`s = "Pershendetje"\nprint(len(s))`},
+  {n:12, title:"Uppercase dhe Lowercase", level:"easy", code:`s = "Python"\nprint(s.upper())\nprint(s.lower())`, solution:`s = "Python"\nprint(s.upper())\nprint(s.lower())`},
+  {n:13, title:"Bashko dy stringje", level:"easy", code:`a = "Hello"\nb = " World"\nprint(a + b)`, solution:`a = "Hello"\nb = " World"\nprint(a + b)`},
+  {n:14, title:"Shtimi i elementeve në listë", level:"easy", code:`lst = [1, 2, 3]\nlst.append(4)\nprint(lst)`, solution:`lst = [1, 2, 3]\nlst.append(4)\nprint(lst)`},
+  {n:15, title:"Gjatësia e listës", level:"easy", code:`lst = [10, 20, 30, 40, 50]\nprint(len(lst))`, solution:`lst = [10, 20, 30, 40, 50]\nprint(len(lst))`},
+  {n:16, title:"Akseso elementin e parë dhe të fundit", level:"easy", code:`lst = [5, 10, 15, 20]\nprint(lst[0])\nprint(lst[-1])`, solution:`lst = [5, 10, 15, 20]\nprint(lst[0])\nprint(lst[-1])`},
+  {n:17, title:"Kalo nëpër listë me for", level:"easy", code:`lst = [1, 2, 3, 4, 5]\nfor x in lst:\n    print(x)`, solution:`lst = [1, 2, 3, 4, 5]\nfor x in lst:\n    print(x)`},
+  {n:18, title:"Shuma e elementeve të listës", level:"easy", code:`lst = [1, 2, 3, 4, 5]\nprint(sum(lst))`, solution:`lst = [1, 2, 3, 4, 5]\nprint(sum(lst))`},
+  {n:19, title:"Max dhe Min i listës", level:"easy", code:`lst = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(max(lst))\nprint(min(lst))`, solution:`lst = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(max(lst))\nprint(min(lst))`},
+  {n:20, title:"Rendit listën", level:"easy", code:`lst = [3, 1, 4, 1, 5, 9]\nlst.sort()\nprint(lst)`, solution:`lst = [3, 1, 4, 1, 5, 9]\nlst.sort()\nprint(lst)`},
+  {n:21, title:"If-else i thjeshtë", level:"easy", code:`x = 10\nif x > 5:\n    print("Madh")\nelse:\n    print("Vogel")`, solution:`x = 10\nif x > 5:\n    print("Madh")\nelse:\n    print("Vogel")`},
+  {n:22, title:"Numër çift apo tek", level:"easy", code:`n = 7\nif n % 2 == 0:\n    print("Cift")\nelse:\n    print("Tek")`, solution:`n = 7\nif n % 2 == 0:\n    print("Cift")\nelse:\n    print("Tek")`},
+  {n:23, title:"While loop - numëro 1-5", level:"easy", code:`i = 1\nwhile i <= 5:\n    print(i)\n    i += 1`, solution:`i = 1\nwhile i <= 5:\n    print(i)\n    i += 1`},
+  {n:24, title:"For me range()", level:"easy", code:`for i in range(1, 6):\n    print(i)`, solution:`for i in range(1, 6):\n    print(i)`},
+  {n:25, title:"Funksion i thjeshtë", level:"easy", code:`def persehendetje(emri):\n    print("Pershendetje, " + emri + "!")\n\npersehendetje("Genci")`, solution:`def persehendetje(emri):\n    print("Pershendetje, " + emri + "!")\n\npersehendetje("Genci")`},
+  {n:26, title:"Funksion me return", level:"easy", code:`def katrori(x):\n    return x * x\n\nprint(katrori(7))`, solution:`def katrori(x):\n    return x * x\n\nprint(katrori(7))`},
+  {n:27, title:"Dictionary - krijo dhe akseso", level:"easy", code:`person = {"emri": "Andi", "mosha": 25}\nprint(person["emri"])\nprint(person["mosha"])`, solution:`person = {"emri": "Andi", "mosha": 25}\nprint(person["emri"])\nprint(person["mosha"])`},
+  {n:28, title:"Shto çelës në dictionary", level:"easy", code:`d = {"a": 1}\nd["b"] = 2\nprint(d)`, solution:`d = {"a": 1}\nd["b"] = 2\nprint(d)`},
+  {n:29, title:"Kontrollo nëse çelësi ekziston", level:"easy", code:`d = {"x": 10, "y": 20}\nprint("x" in d)\nprint("z" in d)`, solution:`d = {"x": 10, "y": 20}\nprint("x" in d)\nprint("z" in d)`},
+  {n:30, title:"Tuple - krijo dhe akseso", level:"easy", code:`t = (1, 2, 3)\nprint(t[0])\nprint(t[-1])`, solution:`t = (1, 2, 3)\nprint(t[0])\nprint(t[-1])`},
+  {n:31, title:"Set - elementa unikë", level:"easy", code:`s = {1, 2, 2, 3, 3, 4}\nprint(s)`, solution:`s = {1, 2, 2, 3, 3, 4}\nprint(s)`},
+  {n:32, title:"String format me f-string", level:"easy", code:`emri = "Besa"\nmosha = 22\nprint(f"Emri im eshte {emri} dhe jam {mosha} vjec.")`, solution:`emri = "Besa"\nmosha = 22\nprint(f"Emri im eshte {emri} dhe jam {mosha} vjec.")`},
+  {n:33, title:"Slice i listës", level:"easy", code:`lst = [0, 1, 2, 3, 4, 5]\nprint(lst[1:4])\nprint(lst[:3])\nprint(lst[3:])`, solution:`lst = [0, 1, 2, 3, 4, 5]\nprint(lst[1:4])\nprint(lst[:3])\nprint(lst[3:])`},
+  {n:34, title:"String replace", level:"easy", code:`s = "Hello World"\nprint(s.replace("World", "Python"))`, solution:`s = "Hello World"\nprint(s.replace("World", "Python"))`},
+  {n:35, title:"Split stringu", level:"easy", code:`s = "molla,portokall,banane"\nfrutat = s.split(",")\nprint(frutat)`, solution:`s = "molla,portokall,banane"\nfrutat = s.split(",")\nprint(frutat)`},
+  {n:36, title:"Join listës në string", level:"easy", code:`lst = ["Python", "eshte", "shume", "mire"]\nprint(" ".join(lst))`, solution:`lst = ["Python", "eshte", "shume", "mire"]\nprint(" ".join(lst))`},
+  {n:37, title:"Kontrollo nëse string fillon me", level:"easy", code:`s = "Pershendetje"\nprint(s.startswith("Persh"))\nprint(s.endswith("tje"))`, solution:`s = "Pershendetje"\nprint(s.startswith("Persh"))\nprint(s.endswith("tje"))`},
+  {n:38, title:"Enumerate - indeks + vlerë", level:"easy", code:`frutat = ["molle", "portokall", "banane"]\nfor i, f in enumerate(frutat):\n    print(i, f)`, solution:`frutat = ["molle", "portokall", "banane"]\nfor i, f in enumerate(frutat):\n    print(i, f)`},
+  {n:39, title:"Zip dy lista", level:"easy", code:`emrat = ["Andi", "Besa"]\nmosha = [25, 22]\nfor e, m in zip(emrat, mosha):\n    print(e, m)`, solution:`emrat = ["Andi", "Besa"]\nmosha = [25, 22]\nfor e, m in zip(emrat, mosha):\n    print(e, m)`},
+  {n:40, title:"Llogarit mesataren", level:"easy", code:`lst = [10, 20, 30, 40, 50]\nmesatare = sum(lst) / len(lst)\nprint(mesatare)`, solution:`lst = [10, 20, 30, 40, 50]\nmesatare = sum(lst) / len(lst)\nprint(mesatare)`},
+  {n:41, title:"Ktheje listën përmbys", level:"easy", code:`lst = [1, 2, 3, 4, 5]\nprint(lst[::-1])`, solution:`lst = [1, 2, 3, 4, 5]\nprint(lst[::-1])`},
+  {n:42, title:"Kontrollo nëse listë është bosh", level:"easy", code:`lst = []\nif not lst:\n    print("Lista eshte boshe")\nelse:\n    print("Lista ka elemente")`, solution:`lst = []\nif not lst:\n    print("Lista eshte boshe")\nelse:\n    print("Lista ka elemente")`},
+  {n:43, title:"Fshi element nga lista", level:"easy", code:`lst = [1, 2, 3, 4, 5]\nlst.remove(3)\nprint(lst)`, solution:`lst = [1, 2, 3, 4, 5]\nlst.remove(3)\nprint(lst)`},
+  {n:44, title:"Count - sa herë shfaqet elementi", level:"easy", code:`lst = [1, 2, 2, 3, 2, 4]\nprint(lst.count(2))`, solution:`lst = [1, 2, 2, 3, 2, 4]\nprint(lst.count(2))`},
+  {n:45, title:"Boolean operators", level:"easy", code:`print(True and False)\nprint(True or False)\nprint(not True)`, solution:`print(True and False)\nprint(True or False)\nprint(not True)`},
+  {n:46, title:"None - vlera boshe", level:"easy", code:`x = None\nif x is None:\n    print("x eshte None")\nelse:\n    print("x ka vlere")`, solution:`x = None\nif x is None:\n    print("x eshte None")\nelse:\n    print("x ka vlere")`},
+  {n:47, title:"Abs - vlera absolute", level:"easy", code:`print(abs(-15))\nprint(abs(7))`, solution:`print(abs(-15))\nprint(abs(7))`},
+  {n:48, title:"Round - rrumbullakoso", level:"easy", code:`print(round(3.7))\nprint(round(3.14159, 2))`, solution:`print(round(3.7))\nprint(round(3.14159, 2))`},
+  {n:49, title:"Input dhe output (simulim)", level:"easy", code:`emri = "Andi"\nprint("Emri yt eshte:", emri)`, solution:`emri = "Andi"\nprint("Emri yt eshte:", emri)`},
+  {n:50, title:"Shumëzimi i stringut", level:"easy", code:`print("*" * 20)\nprint("Python " * 3)`, solution:`print("*" * 20)\nprint("Python " * 3)`},
+
+  // ======= MID (51-100) =======
+  {n:51, title:"List comprehension - katrori", level:"mid", code:`katrore = [x**2 for x in range(1, 11)]\nprint(katrore)`, solution:`katrore = [x**2 for x in range(1, 11)]\nprint(katrore)`},
+  {n:52, title:"List comprehension me filtrim", level:"mid", code:`numrat = range(1, 21)\nciftet = [x for x in numrat if x % 2 == 0]\nprint(ciftet)`, solution:`numrat = range(1, 21)\nciftet = [x for x in numrat if x % 2 == 0]\nprint(ciftet)`},
+  {n:53, title:"Lambda funksion", level:"mid", code:`dyfishi = lambda x: x * 2\nprint(dyfishi(5))\nprint(dyfishi(12))`, solution:`dyfishi = lambda x: x * 2\nprint(dyfishi(5))\nprint(dyfishi(12))`},
+  {n:54, title:"Map funksion", level:"mid", code:`numrat = [1, 2, 3, 4, 5]\nkatrore = list(map(lambda x: x**2, numrat))\nprint(katrore)`, solution:`numrat = [1, 2, 3, 4, 5]\nkatrore = list(map(lambda x: x**2, numrat))\nprint(katrore)`},
+  {n:55, title:"Filter funksion", level:"mid", code:`numrat = [1, 2, 3, 4, 5, 6, 7, 8]\nciftet = list(filter(lambda x: x % 2 == 0, numrat))\nprint(ciftet)`, solution:`numrat = [1, 2, 3, 4, 5, 6, 7, 8]\nciftet = list(filter(lambda x: x % 2 == 0, numrat))\nprint(ciftet)`},
+  {n:56, title:"Rekursion - factorial", level:"mid", code:`def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))\nprint(factorial(10))`, solution:`def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))\nprint(factorial(10))`},
+  {n:57, title:"Fibonacci rekursiv", level:"mid", code:`def fib(n):\n    if n <= 1:\n        return n\n    return fib(n-1) + fib(n-2)\n\nfor i in range(10):\n    print(fib(i), end=" ")`, solution:`def fib(n):\n    if n <= 1:\n        return n\n    return fib(n-1) + fib(n-2)\n\nfor i in range(10):\n    print(fib(i), end=" ")`},
+  {n:58, title:"Class e thjeshtë", level:"mid", code:`class Kafsha:\n    def __init__(self, emri, lloji):\n        self.emri = emri\n        self.lloji = lloji\n    def prezanto(self):\n        print(f"Une jam {self.emri}, nje {self.lloji}")\n\nk = Kafsha("Rex", "qen")\nk.prezanto()`, solution:`class Kafsha:\n    def __init__(self, emri, lloji):\n        self.emri = emri\n        self.lloji = lloji\n    def prezanto(self):\n        print(f"Une jam {self.emri}, nje {self.lloji}")\n\nk = Kafsha("Rex", "qen")\nk.prezanto()`},
+  {n:59, title:"Trashëgimia (Inheritance)", level:"mid", code:`class Katrori:\n    def __init__(self, a):\n        self.a = a\n    def syprina(self):\n        return self.a ** 2\n\nclass Kubi(Katrori):\n    def volumi(self):\n        return self.a ** 3\n\nk = Kubi(3)\nprint("Syprina:", k.syprina())\nprint("Volumi:", k.volumi())`, solution:`class Katrori:\n    def __init__(self, a):\n        self.a = a\n    def syprina(self):\n        return self.a ** 2\n\nclass Kubi(Katrori):\n    def volumi(self):\n        return self.a ** 3\n\nk = Kubi(3)\nprint("Syprina:", k.syprina())\nprint("Volumi:", k.volumi())`},
+  {n:60, title:"Try-Except - trajtim gabimesh", level:"mid", code:`try:\n    x = 10 / 0\nexcept ZeroDivisionError:\n    print("Gabim: Pjesetim me zero!")\nfinally:\n    print("Done")`, solution:`try:\n    x = 10 / 0\nexcept ZeroDivisionError:\n    print("Gabim: Pjesetim me zero!")\nfinally:\n    print("Done")`},
+  {n:61, title:"Dictionary comprehension", level:"mid", code:`katrore = {x: x**2 for x in range(1, 6)}\nprint(katrore)`, solution:`katrore = {x: x**2 for x in range(1, 6)}\nprint(katrore)`},
+  {n:62, title:"Set operations - bashkim, prerje", level:"mid", code:`A = {1, 2, 3, 4}\nB = {3, 4, 5, 6}\nprint("Bashkim:", A | B)\nprint("Prerje:", A & B)\nprint("Diference:", A - B)`, solution:`A = {1, 2, 3, 4}\nB = {3, 4, 5, 6}\nprint("Bashkim:", A | B)\nprint("Prerje:", A & B)\nprint("Diference:", A - B)`},
+  {n:63, title:"Sorted me key funksion", level:"mid", code:`fjalet = ["banane", "molle", "portokall", "kivi"]\nrenditur = sorted(fjalet, key=len)\nprint(renditur)`, solution:`fjalet = ["banane", "molle", "portokall", "kivi"]\nrenditur = sorted(fjalet, key=len)\nprint(renditur)`},
+  {n:64, title:"*args - argumente variabël", level:"mid", code:`def shuma(*args):\n    return sum(args)\n\nprint(shuma(1, 2, 3))\nprint(shuma(10, 20, 30, 40))`, solution:`def shuma(*args):\n    return sum(args)\n\nprint(shuma(1, 2, 3))\nprint(shuma(10, 20, 30, 40))`},
+  {n:65, title:"**kwargs - argumente me çelës", level:"mid", code:`def info(**kwargs):\n    for k, v in kwargs.items():\n        print(f"{k}: {v}")\n\ninfo(emri="Andi", mosha=25, qyteti="Tirane")`, solution:`def info(**kwargs):\n    for k, v in kwargs.items():\n        print(f"{k}: {v}")\n\ninfo(emri="Andi", mosha=25, qyteti="Tirane")`},
+  {n:66, title:"Generator funksion", level:"mid", code:`def numrat_cift(limit):\n    n = 0\n    while n <= limit:\n        yield n\n        n += 2\n\nfor n in numrat_cift(10):\n    print(n, end=" ")`, solution:`def numrat_cift(limit):\n    n = 0\n    while n <= limit:\n        yield n\n        n += 2\n\nfor n in numrat_cift(10):\n    print(n, end=" ")`},
+  {n:67, title:"Nested lista (matrica)", level:"mid", code:`matrica = [[1,2,3],[4,5,6],[7,8,9]]\nfor rresht in matrica:\n    for elem in rresht:\n        print(elem, end=" ")\n    print()`, solution:`matrica = [[1,2,3],[4,5,6],[7,8,9]]\nfor rresht in matrica:\n    for elem in rresht:\n        print(elem, end=" ")\n    print()`},
+  {n:68, title:"Numëro fjalët në tekst", level:"mid", code:`tekst = "python eshte shume i mire python"\nfjalë = tekst.split()\nfrekuenca = {}\nfor f in fjalë:\n    frekuenca[f] = frekuenca.get(f, 0) + 1\nprint(frekuenca)`, solution:`tekst = "python eshte shume i mire python"\nfjalë = tekst.split()\nfrekuenca = {}\nfor f in fjalë:\n    frekuenca[f] = frekuenca.get(f, 0) + 1\nprint(frekuenca)`},
+  {n:69, title:"Binary search", level:"mid", code:`def binary_search(lst, target):\n    left, right = 0, len(lst) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if lst[mid] == target:\n            return mid\n        elif lst[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n\nlst = [1, 3, 5, 7, 9, 11, 13]\nprint(binary_search(lst, 7))\nprint(binary_search(lst, 4))`, solution:`def binary_search(lst, target):\n    left, right = 0, len(lst) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if lst[mid] == target:\n            return mid\n        elif lst[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n\nlst = [1, 3, 5, 7, 9, 11, 13]\nprint(binary_search(lst, 7))\nprint(binary_search(lst, 4))`},
+  {n:70, title:"Bubble sort", level:"mid", code:`def bubble_sort(lst):\n    n = len(lst)\n    for i in range(n):\n        for j in range(0, n-i-1):\n            if lst[j] > lst[j+1]:\n                lst[j], lst[j+1] = lst[j+1], lst[j]\n    return lst\n\nprint(bubble_sort([64, 34, 25, 12, 22, 11, 90]))`, solution:`def bubble_sort(lst):\n    n = len(lst)\n    for i in range(n):\n        for j in range(0, n-i-1):\n            if lst[j] > lst[j+1]:\n                lst[j], lst[j+1] = lst[j+1], lst[j]\n    return lst\n\nprint(bubble_sort([64, 34, 25, 12, 22, 11, 90]))`},
+  {n:71, title:"Palindrom kontrollo", level:"mid", code:`def eshte_palindrom(s):\n    s = s.lower()\n    return s == s[::-1]\n\nprint(eshte_palindrom("racecar"))\nprint(eshte_palindrom("aba"))\nprint(eshte_palindrom("python"))`, solution:`def eshte_palindrom(s):\n    s = s.lower()\n    return s == s[::-1]\n\nprint(eshte_palindrom("racecar"))\nprint(eshte_palindrom("aba"))\nprint(eshte_palindrom("python"))`},
+  {n:72, title:"Anagram kontrollo", level:"mid", code:`def anagram(s1, s2):\n    return sorted(s1.lower()) == sorted(s2.lower())\n\nprint(anagram("listen", "silent"))\nprint(anagram("hello", "world"))`, solution:`def anagram(s1, s2):\n    return sorted(s1.lower()) == sorted(s2.lower())\n\nprint(anagram("listen", "silent"))\nprint(anagram("hello", "world"))`},
+  {n:73, title:"Numri i parë (primo)", level:"mid", code:`def eshte_primo(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5)+1):\n        if n % i == 0:\n            return False\n    return True\n\nprimo = [x for x in range(2, 50) if eshte_primo(x)]\nprint(primo)`, solution:`def eshte_primo(n):\n    if n < 2:\n        return False\n    for i in range(2, int(n**0.5)+1):\n        if n % i == 0:\n            return False\n    return True\n\nprimo = [x for x in range(2, 50) if eshte_primo(x)]\nprint(primo)`},
+  {n:74, title:"Stack me listë", level:"mid", code:`stack = []\nstack.append(1)\nstack.append(2)\nstack.append(3)\nprint("Push:", stack)\nprint("Pop:", stack.pop())\nprint("Pas pop:", stack)`, solution:`stack = []\nstack.append(1)\nstack.append(2)\nstack.append(3)\nprint("Push:", stack)\nprint("Pop:", stack.pop())\nprint("Pas pop:", stack)`},
+  {n:75, title:"Queue me collections.deque", level:"mid", code:`from collections import deque\nq = deque()\nq.append("a")\nq.append("b")\nq.append("c")\nprint("Queue:", q)\nprint("Dequeue:", q.popleft())\nprint("Pas dequeue:", q)`, solution:`from collections import deque\nq = deque()\nq.append("a")\nq.append("b")\nq.append("c")\nprint("Queue:", q)\nprint("Dequeue:", q.popleft())\nprint("Pas dequeue:", q)`},
+  {n:76, title:"Counter me collections", level:"mid", code:`from collections import Counter\ntekst = "abracadabra"\nc = Counter(tekst)\nprint(c)\nprint("Letra me e shpeshte:", c.most_common(1))`, solution:`from collections import Counter\ntekst = "abracadabra"\nc = Counter(tekst)\nprint(c)\nprint("Letra me e shpeshte:", c.most_common(1))`},
+  {n:77, title:"DefaultDict", level:"mid", code:`from collections import defaultdict\nd = defaultdict(list)\nd["frutat"].append("molle")\nd["frutat"].append("banane")\nd["perimet"].append("domate")\nprint(dict(d))`, solution:`from collections import defaultdict\nd = defaultdict(list)\nd["frutat"].append("molle")\nd["frutat"].append("banane")\nd["perimet"].append("domate")\nprint(dict(d))`},
+  {n:78, title:"Flatten lista të ndërtuara", level:"mid", code:`def flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n\nprint(flatten([1, [2, 3], [4, [5, 6]]]))`, solution:`def flatten(lst):\n    result = []\n    for item in lst:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n\nprint(flatten([1, [2, 3], [4, [5, 6]]]))`},
+  {n:79, title:"GCD dhe LCM", level:"mid", code:`def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n\ndef lcm(a, b):\n    return a * b // gcd(a, b)\n\nprint("GCD(12, 18):", gcd(12, 18))\nprint("LCM(12, 18):", lcm(12, 18))`, solution:`def gcd(a, b):\n    while b:\n        a, b = b, a % b\n    return a\n\ndef lcm(a, b):\n    return a * b // gcd(a, b)\n\nprint("GCD(12, 18):", gcd(12, 18))\nprint("LCM(12, 18):", lcm(12, 18))`},
+  {n:80, title:"Inverso dictionary", level:"mid", code:`d = {"a": 1, "b": 2, "c": 3}\ninversed = {v: k for k, v in d.items()}\nprint(inversed)`, solution:`d = {"a": 1, "b": 2, "c": 3}\ninversed = {v: k for k, v in d.items()}\nprint(inversed)`},
+  {n:81, title:"Merge dy dictionary", level:"mid", code:`d1 = {"a": 1, "b": 2}\nd2 = {"c": 3, "d": 4}\nmerged = {**d1, **d2}\nprint(merged)`, solution:`d1 = {"a": 1, "b": 2}\nd2 = {"c": 3, "d": 4}\nmerged = {**d1, **d2}\nprint(merged)`},
+  {n:82, title:"Numëro vokalet në string", level:"easy", code:`def numro_vokalet(s):\n    vokalet = "aeiouAEIOU"\n    return sum(1 for c in s if c in vokalet)\n\nprint(numro_vokalet("Hello World"))\nprint(numro_vokalet("Python"))`, solution:`def numro_vokalet(s):\n    vokalet = "aeiouAEIOU"\n    return sum(1 for c in s if c in vokalet)\n\nprint(numro_vokalet("Hello World"))\nprint(numro_vokalet("Python"))`},
+  {n:83, title:"Tabela e shumëzimit", level:"mid", code:`for i in range(1, 6):\n    for j in range(1, 6):\n        print(f"{i*j:4}", end="")\n    print()`, solution:`for i in range(1, 6):\n    for j in range(1, 6):\n        print(f"{i*j:4}", end="")\n    print()`},
+  {n:84, title:"Konvertime temperature", level:"mid", code:`def celsius_ne_fahrenheit(c):\n    return c * 9/5 + 32\n\ndef fahrenheit_ne_celsius(f):\n    return (f - 32) * 5/9\n\nprint(f"0°C = {celsius_ne_fahrenheit(0)}°F")\nprint(f"100°F = {fahrenheit_ne_celsius(100):.2f}°C")`, solution:`def celsius_ne_fahrenheit(c):\n    return c * 9/5 + 32\n\ndef fahrenheit_ne_celsius(f):\n    return (f - 32) * 5/9\n\nprint(f"0°C = {celsius_ne_fahrenheit(0)}°F")\nprint(f"100°F = {fahrenheit_ne_celsius(100):.2f}°C")`},
+  {n:85, title:"Caesar cipher enkriptim", level:"mid", code:`def caesar(tekst, shift):\n    result = ""\n    for c in tekst:\n        if c.isalpha():\n            baza = ord('A') if c.isupper() else ord('a')\n            result += chr((ord(c) - baza + shift) % 26 + baza)\n        else:\n            result += c\n    return result\n\nprint(caesar("Hello World", 3))\nprint(caesar("Khoor Zruog", -3))`, solution:`def caesar(tekst, shift):\n    result = ""\n    for c in tekst:\n        if c.isalpha():\n            baza = ord('A') if c.isupper() else ord('a')\n            result += chr((ord(c) - baza + shift) % 26 + baza)\n        else:\n            result += c\n    return result\n\nprint(caesar("Hello World", 3))\nprint(caesar("Khoor Zruog", -3))`},
+  {n:86, title:"Linked List e thjeshtë", level:"mid", code:`class Node:\n    def __init__(self, val):\n        self.val = val\n        self.next = None\n\nclass LinkedList:\n    def __init__(self):\n        self.head = None\n    def append(self, val):\n        node = Node(val)\n        if not self.head:\n            self.head = node\n            return\n        cur = self.head\n        while cur.next:\n            cur = cur.next\n        cur.next = node\n    def shtyp(self):\n        cur = self.head\n        while cur:\n            print(cur.val, end=" -> ")\n            cur = cur.next\n        print("None")\n\nll = LinkedList()\nll.append(1)\nll.append(2)\nll.append(3)\nll.shtyp()`, solution:`class Node:\n    def __init__(self, val):\n        self.val = val\n        self.next = None\n\nclass LinkedList:\n    def __init__(self):\n        self.head = None\n    def append(self, val):\n        node = Node(val)\n        if not self.head:\n            self.head = node\n            return\n        cur = self.head\n        while cur.next:\n            cur = cur.next\n        cur.next = node\n    def shtyp(self):\n        cur = self.head\n        while cur:\n            print(cur.val, end=" -> ")\n            cur = cur.next\n        print("None")\n\nll = LinkedList()\nll.append(1)\nll.append(2)\nll.append(3)\nll.shtyp()`},
+  {n:87, title:"Dekorator i thjeshtë", level:"mid", code:`def log_call(func):\n    def wrapper(*args, **kwargs):\n        print(f"Duke thirrur: {func.__name__}")\n        result = func(*args, **kwargs)\n        print(f"Done!")\n        return result\n    return wrapper\n\n@log_call\ndef shuma(a, b):\n    return a + b\n\nprint(shuma(3, 4))`, solution:`def log_call(func):\n    def wrapper(*args, **kwargs):\n        print(f"Duke thirrur: {func.__name__}")\n        result = func(*args, **kwargs)\n        print(f"Done!")\n        return result\n    return wrapper\n\n@log_call\ndef shuma(a, b):\n    return a + b\n\nprint(shuma(3, 4))`},
+  {n:88, title:"Context Manager (with)", level:"mid", code:`class Menaxher:\n    def __enter__(self):\n        print("Hap burimin")\n        return self\n    def __exit__(self, *args):\n        print("Mbyll burimin")\n    def bej_pune(self):\n        print("Duke punuar...")\n\nwith Menaxher() as m:\n    m.bej_pune()`, solution:`class Menaxher:\n    def __enter__(self):\n        print("Hap burimin")\n        return self\n    def __exit__(self, *args):\n        print("Mbyll burimin")\n    def bej_pune(self):\n        print("Duke punuar...")\n\nwith Menaxher() as m:\n    m.bej_pune()`},
+  {n:89, title:"Namedtuple", level:"mid", code:`from collections import namedtuple\nPerson = namedtuple("Person", ["emri", "mosha", "qyteti"])\np = Person("Andi", 25, "Tirane")\nprint(p.emri)\nprint(p.mosha)\nprint(p)`, solution:`from collections import namedtuple\nPerson = namedtuple("Person", ["emri", "mosha", "qyteti"])\np = Person("Andi", 25, "Tirane")\nprint(p.emri)\nprint(p.mosha)\nprint(p)`},
+  {n:90, title:"Merge sort", level:"mid", code:`def merge_sort(lst):\n    if len(lst) <= 1:\n        return lst\n    mid = len(lst) // 2\n    left = merge_sort(lst[:mid])\n    right = merge_sort(lst[mid:])\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i]); i += 1\n        else:\n            result.append(right[j]); j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n\nprint(merge_sort([38, 27, 43, 3, 9, 82, 10]))`, solution:`def merge_sort(lst):\n    if len(lst) <= 1:\n        return lst\n    mid = len(lst) // 2\n    left = merge_sort(lst[:mid])\n    right = merge_sort(lst[mid:])\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i]); i += 1\n        else:\n            result.append(right[j]); j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n\nprint(merge_sort([38, 27, 43, 3, 9, 82, 10]))`},
+  {n:91, title:"Itertools - product", level:"mid", code:`from itertools import product\nrezultat = list(product([1,2], [3,4]))\nprint(rezultat)`, solution:`from itertools import product\nrezultat = list(product([1,2], [3,4]))\nprint(rezultat)`},
+  {n:92, title:"Enumerate me start", level:"mid", code:`frutat = ["molle", "banane", "portokall"]\nfor i, f in enumerate(frutat, start=1):\n    print(f"{i}. {f}")`, solution:`frutat = ["molle", "banane", "portokall"]\nfor i, f in enumerate(frutat, start=1):\n    print(f"{i}. {f}")`},
+  {n:93, title:"All dhe Any", level:"mid", code:`numrat = [2, 4, 6, 8]\nprint("Te gjithe cift:", all(x % 2 == 0 for x in numrat))\nprint("Ndonje > 5:", any(x > 5 for x in numrat))`, solution:`numrat = [2, 4, 6, 8]\nprint("Te gjithe cift:", all(x % 2 == 0 for x in numrat))\nprint("Ndonje > 5:", any(x > 5 for x in numrat))`},
+  {n:94, title:"Chunk listën", level:"mid", code:`def chunk(lst, n):\n    return [lst[i:i+n] for i in range(0, len(lst), n)]\n\nprint(chunk([1,2,3,4,5,6,7,8,9], 3))`, solution:`def chunk(lst, n):\n    return [lst[i:i+n] for i in range(0, len(lst), n)]\n\nprint(chunk([1,2,3,4,5,6,7,8,9], 3))`},
+  {n:95, title:"Rotate lista", level:"mid", code:`def rotate(lst, k):\n    k = k % len(lst)\n    return lst[k:] + lst[:k]\n\nprint(rotate([1,2,3,4,5], 2))\nprint(rotate([1,2,3,4,5], -1))`, solution:`def rotate(lst, k):\n    k = k % len(lst)\n    return lst[k:] + lst[:k]\n\nprint(rotate([1,2,3,4,5], 2))\nprint(rotate([1,2,3,4,5], -1))`},
+  {n:96, title:"Numëro elementet unikë", level:"mid", code:`lst = [1,2,2,3,3,3,4,4,4,4]\nunike = len(set(lst))\nprint(f"Elemente unike: {unike}")\nprint(f"Frekuenca: {set(lst)}")`, solution:`lst = [1,2,2,3,3,3,4,4,4,4]\nunike = len(set(lst))\nprint(f"Elemente unike: {unike}")\nprint(f"Frekuenca: {set(lst)}")`},
+  {n:97, title:"Zip dhe unzip", level:"mid", code:`cifrat = [(1,'a'), (2,'b'), (3,'c')]\nnumrat, shkronjat = zip(*cifrat)\nprint(numrat)\nprint(shkronjat)`, solution:`cifrat = [(1,'a'), (2,'b'), (3,'c')]\nnumrat, shkronjat = zip(*cifrat)\nprint(numrat)\nprint(shkronjat)`},
+  {n:98, title:"Power set", level:"mid", code:`def power_set(s):\n    if not s:\n        return [[]]\n    first = s[0]\n    rest = power_set(s[1:])\n    return rest + [[first] + sub for sub in rest]\n\nprint(power_set([1, 2, 3]))`, solution:`def power_set(s):\n    if not s:\n        return [[]]\n    first = s[0]\n    rest = power_set(s[1:])\n    return rest + [[first] + sub for sub in rest]\n\nprint(power_set([1, 2, 3]))`},
+  {n:99, title:"Memoization me dict", level:"mid", code:`memo = {}\ndef fib(n):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    memo[n] = fib(n-1) + fib(n-2)\n    return memo[n]\n\nprint([fib(i) for i in range(15)])`, solution:`memo = {}\ndef fib(n):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    memo[n] = fib(n-1) + fib(n-2)\n    return memo[n]\n\nprint([fib(i) for i in range(15)])`},
+  {n:100, title:"Klasa me __str__ dhe __repr__", level:"mid", code:`class Pika:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\n    def __str__(self):\n        return f"Pika({self.x}, {self.y})"\n    def __repr__(self):\n        return f"Pika(x={self.x}, y={self.y})"\n    def distanca(self, other):\n        return ((self.x-other.x)**2 + (self.y-other.y)**2)**0.5\n\np1 = Pika(0, 0)\np2 = Pika(3, 4)\nprint(p1)\nprint(repr(p2))\nprint(f"Distanca: {p1.distanca(p2)}")`, solution:`class Pika:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\n    def __str__(self):\n        return f"Pika({self.x}, {self.y})"\n    def __repr__(self):\n        return f"Pika(x={self.x}, y={self.y})"\n    def distanca(self, other):\n        return ((self.x-other.x)**2 + (self.y-other.y)**2)**0.5\n\np1 = Pika(0, 0)\np2 = Pika(3, 4)\nprint(p1)\nprint(repr(p2))\nprint(f"Distanca: {p1.distanca(p2)}")`},
+];
+
+let solved = JSON.parse(localStorage.getItem('py_solved') || '[]');
+let activeFilter = 'all';
+
+function saveState() {
+  localStorage.setItem('py_solved', JSON.stringify(solved));
+}
+
+function updateProgress() {
+  const pct = (solved.length / 100) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('solvedCount').textContent = solved.length;
+}
+
+function runPython(n, code) {
+  const outputDiv = document.getElementById(`out-${n}`);
+  const outputContent = document.getElementById(`out-content-${n}`);
+  outputDiv.classList.add('visible');
+  outputContent.className = 'output-content';
+  outputContent.textContent = '▶ Running...';
+  
+  let output = '';
+  
+  Sk.configure({
+    output: (text) => { output += text; },
+    read: (x) => {
+      if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+        throw "File not found: '" + x + "'";
+      return Sk.builtinFiles["files"][x];
+    }
+  });
+  
+  Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
+    .then(() => {
+      outputContent.textContent = output || '(Asnjë output)';
+      outputContent.className = 'output-content success';
+      if (!solved.includes(n)) {
+        solved.push(n);
+        saveState();
+        document.getElementById(`card-${n}`).classList.add('solved');
+        updateProgress();
+      }
+    })
+    .catch(err => {
+      outputContent.textContent = '❌ ' + (err.toString() || 'Gabim i panjohur');
+      outputContent.className = 'output-content error';
+    });
+}
+
+function resetCard(n, origCode) {
+  document.getElementById(`code-${n}`).value = origCode;
+  const outputDiv = document.getElementById(`out-${n}`);
+  outputDiv.classList.remove('visible');
+}
+
+function renderCards(list) {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+  const noRes = document.getElementById('noResults');
+  if (list.length === 0) { noRes.style.display = 'block'; return; }
+  noRes.style.display = 'none';
+  
+  list.forEach(t => {
+    const isSolved = solved.includes(t.n);
+    const card = document.createElement('div');
+    card.className = 'card' + (isSolved ? ' solved' : '');
+    card.id = `card-${t.n}`;
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-num">#${String(t.n).padStart(2,'0')}</span>
+        <span class="card-title">${t.title}</span>
+        <span class="level-tag level-${t.level}">${t.level}</span>
+      </div>
+      <div class="code-area">
+        <div class="code-label"><span>python</span><span>edito & ekzekuto</span></div>
+        <textarea class="code-input" id="code-${t.n}" spellcheck="false">${t.code}</textarea>
+      </div>
+      <div class="output-area" id="out-${t.n}">
+        <div class="output-label">output</div>
+        <div class="output-content" id="out-content-${t.n}"></div>
+      </div>
+      <div class="card-footer">
+        <button class="run-btn" onclick="runPython(${t.n}, document.getElementById('code-${t.n}').value)">▶ Run</button>
+        <button class="reset-btn" onclick="resetCard(${t.n}, \`${t.code.replace(/`/g,'\\`')}\`)">↺ Reset</button>
+        <span class="solved-badge">✓ Zgjidhur</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterCards(type, btn) {
+  activeFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function searchCards() { applyFilters(); }
+
+function applyFilters() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  let list = tasks;
+  if (activeFilter === 'easy') list = list.filter(t => t.level === 'easy');
+  else if (activeFilter === 'mid') list = list.filter(t => t.level === 'mid');
+  else if (activeFilter === 'solved') list = list.filter(t => solved.includes(t.n));
+  if (q) list = list.filter(t => t.title.toLowerCase().includes(q) || String(t.n).includes(q));
+  renderCards(list);
+}
+
+renderCards(tasks);
+updateProgress();
+</script>
+</body>
+</html>
