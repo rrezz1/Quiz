@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SQL 100 Detyra</title>
+<title>SQL 100 Detyra — Quiz Mode</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -16,133 +16,106 @@
     --muted: #4a7a60;
     --easy: #4ecca3;
     --mid: #f7c948;
+    --hard: #ff6b6b;
     --code-bg: #040c08;
+    --success-bg: rgba(78,204,163,0.08);
+    --error-bg: rgba(255,107,107,0.07);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-  header {
-    padding: 60px 40px 40px;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-  header::before {
-    content: '';
-    position: absolute;
-    top: -80px; left: -80px;
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(78,204,163,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index:1; }
-  .badge {
-    display: inline-block;
-    background: var(--accent);
-    color: #000;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    padding: 4px 12px;
-    border-radius: 2px;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-  }
-  h1 { font-size: clamp(36px, 6vw, 72px); font-weight: 800; line-height: 1; letter-spacing: -2px; margin-bottom: 12px; }
-  h1 span { color: var(--accent); }
-  .subtitle { color: var(--muted); font-size: 16px; }
-  .stats { display: flex; gap: 32px; margin-top: 28px; flex-wrap: wrap; }
-  .stat { display: flex; align-items: center; gap: 8px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; }
-  .dot.easy { background: var(--easy); }
-  .dot.mid { background: var(--mid); }
-  .stat-label { font-size: 13px; color: var(--muted); }
-  .stat-val { font-size: 13px; font-weight: 700; }
-
-  .filters {
-    padding: 24px 40px;
-    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
-    max-width: 1200px; margin: 0 auto;
-    border-bottom: 1px solid var(--border);
-  }
-  .filter-btn {
-    background: transparent; border: 1px solid var(--border); color: var(--muted);
-    font-family: 'Syne', sans-serif; font-size: 13px; padding: 8px 18px;
-    border-radius: 4px; cursor: pointer; transition: all 0.2s;
-  }
-  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(78,204,163,0.06); }
-  .search-box {
-    margin-left: auto; background: var(--card); border: 1px solid var(--border);
-    color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px;
-    padding: 8px 16px; border-radius: 4px; width: 220px; outline: none;
-  }
-  .search-box:focus { border-color: var(--accent); }
-  .search-box::placeholder { color: var(--muted); }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   .progress-bar { height: 3px; background: var(--border); position: sticky; top: 0; z-index: 10; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.4s ease; width: 0%; }
 
-  main {
-    max-width: 1200px; margin: 0 auto; padding: 40px;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;
-  }
-  .card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-    overflow: hidden; transition: border-color 0.2s, transform 0.2s; display: flex; flex-direction: column;
-  }
-  .card:hover { border-color: rgba(78,204,163,0.3); transform: translateY(-2px); }
-  .card.solved { border-color: rgba(78,204,163,0.5); }
-  .card-header { padding: 16px 20px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-  .card-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); flex-shrink: 0; margin-top: 3px; }
+  header { padding: 40px 40px 30px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+  header::before { content: ''; position: absolute; top: -80px; left: -80px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(78,204,163,0.08) 0%, transparent 70%); pointer-events: none; }
+  .header-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index:1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .header-left .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 4px 12px; border-radius: 2px; margin-bottom: 10px; text-transform: uppercase; }
+  .header-left h1 { font-size: clamp(28px, 4vw, 52px); font-weight: 800; line-height: 1; letter-spacing: -2px; }
+  .header-left h1 span { color: var(--accent); }
+  .header-right { display: flex; gap: 20px; flex-wrap: wrap; }
+  .stat-pill { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 18px; text-align: center; }
+  .stat-pill .val { font-size: 22px; font-weight: 800; }
+  .stat-pill .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .stat-pill.correct .val { color: var(--easy); }
+  .stat-pill.wrong .val { color: var(--hard); }
+  .stat-pill.total .val { color: var(--accent); }
+
+  .filters { padding: 20px 40px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; max-width: 1100px; margin: 0 auto; border-bottom: 1px solid var(--border); }
+  .filter-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Syne', sans-serif; font-size: 13px; padding: 7px 16px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(78,204,163,0.06); }
+  .search-box { margin-left: auto; background: var(--card); border: 1px solid var(--border); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; padding: 7px 14px; border-radius: 4px; width: 200px; outline: none; }
+  .search-box:focus { border-color: var(--accent); }
+  .search-box::placeholder { color: var(--muted); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.2s, transform 0.2s; display: flex; flex-direction: column; }
+  .card:hover { border-color: rgba(78,204,163,0.25); transform: translateY(-2px); }
+  .card.solved { border-color: rgba(78,204,163,0.45); }
+  .card.wrong-ans { border-color: rgba(255,107,107,0.35); }
+
+  .card-header { padding: 14px 18px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .card-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); flex-shrink: 0; margin-top: 2px; }
   .card-title { font-size: 14px; font-weight: 700; line-height: 1.4; flex: 1; }
-  .level-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; flex-shrink: 0; }
+  .level-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 3px 7px; border-radius: 2px; text-transform: uppercase; flex-shrink: 0; }
   .level-easy { background: rgba(78,204,163,0.15); color: var(--easy); }
   .level-mid { background: rgba(247,201,72,0.15); color: var(--mid); }
 
-  .code-area { margin: 0 16px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-  .code-label { padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-  textarea.code-input {
-    width: 100%; background: transparent; border: none; color: var(--accent);
-    font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 12px 14px;
-    resize: vertical; min-height: 80px; outline: none; line-height: 1.6;
+  .quiz-section { padding: 0 16px; }
+  .quiz-label { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  textarea.answer-input {
+    width: 100%; background: var(--code-bg); border: 1px solid var(--border);
+    color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    padding: 10px 12px; resize: vertical; min-height: 70px; outline: none; line-height: 1.6;
+    border-radius: 6px; transition: border-color 0.2s;
   }
-  .card-footer { padding: 12px 16px 16px; display: flex; gap: 8px; align-items: center; margin-top: auto; }
-  .run-btn {
-    background: var(--accent); color: #000; border: none;
-    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
-    padding: 8px 18px; border-radius: 4px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px;
-  }
-  .run-btn:hover { background: #6fffd4; transform: scale(1.03); }
-  .reset-btn {
-    background: transparent; border: 1px solid var(--border); color: var(--muted);
-    font-family: 'Syne', sans-serif; font-size: 12px; padding: 8px 14px;
-    border-radius: 4px; cursor: pointer; transition: all 0.15s;
-  }
+  textarea.answer-input:focus { border-color: var(--accent); }
+  textarea.answer-input.correct { border-color: var(--easy); }
+  textarea.answer-input.wrong { border-color: var(--hard); }
+
+  .hint-row { margin-top: 5px; }
+  .hint-btn { background: transparent; border: none; color: var(--muted); font-size: 11px; cursor: pointer; padding: 0; font-family: 'Syne', sans-serif; transition: color 0.15s; }
+  .hint-btn:hover { color: var(--accent); }
+  .hint-text { display: none; font-size: 11px; color: var(--accent); margin-top: 4px; font-style: italic; padding: 4px 8px; background: rgba(78,204,163,0.06); border-radius: 4px; }
+
+  .card-footer { padding: 10px 16px 14px; display: flex; gap: 8px; align-items: center; margin-top: auto; }
+  .run-btn { background: var(--accent); color: #000; border: none; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 4px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px; }
+  .run-btn:hover { background: #6fffd4; transform: scale(1.02); }
+  .reset-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'Syne', sans-serif; font-size: 12px; padding: 8px 12px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
   .reset-btn:hover { border-color: var(--muted); color: var(--text); }
   .solved-badge { margin-left: auto; font-size: 11px; color: var(--easy); display: none; align-items: center; gap: 4px; }
   .card.solved .solved-badge { display: flex; }
 
-  .output-area { margin: 0 16px 16px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: none; }
-  .output-area.visible { display: block; }
-  .output-label { padding: 6px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); border-bottom: 1px solid var(--border); }
-  .output-content { padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; white-space: pre; overflow-x: auto; max-height: 200px; overflow-y: auto; }
-  .output-content.success { color: var(--easy); }
-  .output-content.error { color: #ff6b6b; }
+  .feedback-banner { margin: 0 16px 8px; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; display: none; }
+  .feedback-banner.correct { background: rgba(78,204,163,0.12); color: var(--easy); border: 1px solid rgba(78,204,163,0.3); }
+  .feedback-banner.wrong { background: rgba(255,107,107,0.10); color: var(--hard); border: 1px solid rgba(255,107,107,0.3); }
+
+  .result-area { margin: 0 16px 8px; border-radius: 6px; overflow: hidden; display: none; }
+  .result-area.visible { display: block; }
+  .result-header { padding: 6px 12px; font-family: 'JetBrains Mono', monospace; font-size: 10px; border-bottom: 1px solid var(--border); }
+  .result-content { padding: 8px 12px; max-height: 180px; overflow-y: auto; overflow-x: auto; }
+
+  .result-area.success { background: var(--success-bg); border: 1px solid rgba(78,204,163,0.3); }
+  .result-area.success .result-header { color: var(--easy); }
+  .result-area.error { background: var(--error-bg); border: 1px solid rgba(255,107,107,0.3); }
+  .result-area.error .result-header { color: var(--hard); }
+  .result-area.error .result-content { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--hard); white-space: pre-wrap; }
 
   table.sql-table { border-collapse: collapse; min-width: 100%; font-size: 11px; }
-  table.sql-table th { background: rgba(78,204,163,0.15); color: var(--accent); padding: 6px 12px; text-align: left; border: 1px solid var(--border); font-weight: 700; }
-  table.sql-table td { padding: 5px 12px; border: 1px solid var(--border); color: var(--text); }
+  table.sql-table th { background: rgba(78,204,163,0.15); color: var(--accent); padding: 5px 10px; text-align: left; border: 1px solid var(--border); font-weight: 700; }
+  table.sql-table td { padding: 4px 10px; border: 1px solid var(--border); color: var(--text); }
   table.sql-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
 
-  .no-results { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--muted); font-size: 18px; display: none; }
+  .solution-area { margin: 0 16px 12px; display: none; }
+  .solution-area.visible { display: block; }
+  .solution-label { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+  .solution-code { background: var(--code-bg); border: 1px solid rgba(78,204,163,0.2); border-radius: 6px; padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--easy); white-space: pre-wrap; }
 
+  .no-results { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--muted); font-size: 18px; display: none; }
   footer { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); margin-top: 20px; }
   footer a { color: var(--accent); text-decoration: none; }
-  @media(max-width:600px){ header, .filters, main { padding-left: 20px; padding-right: 20px; } main { grid-template-columns: 1fr; } }
+  @media(max-width:600px){ header, .filters, main { padding-left: 18px; padding-right: 18px; } main { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -151,23 +124,33 @@
 
 <header>
   <div class="header-inner">
-    <div class="badge">🗄️ SQL</div>
-    <h1>100 <span>Detyra</span></h1>
-    <p class="subtitle">Nga Easy deri në Mid — ekzekuto SQL direkt në browser</p>
-    <div class="stats">
-      <div class="stat"><div class="dot easy"></div><span class="stat-label">Easy:</span><span class="stat-val">50 detyra</span></div>
-      <div class="stat"><div class="dot mid"></div><span class="stat-label">Mid:</span><span class="stat-val">50 detyra</span></div>
-      <div class="stat"><span class="stat-label">✅ Zgjidhur:</span><span class="stat-val" id="solvedCount">0</span>/100</div>
+    <div class="header-left">
+      <div class="badge">🗄️ SQL</div>
+      <h1>100 <span>Detyra</span></h1>
+    </div>
+    <div class="header-right">
+      <div class="stat-pill total">
+        <div class="val" id="solvedCount">0</div>
+        <div class="lbl">Zgjidhur</div>
+      </div>
+      <div class="stat-pill correct">
+        <div class="val" id="correctCount">0</div>
+        <div class="lbl">Saktë</div>
+      </div>
+      <div class="stat-pill wrong">
+        <div class="val" id="wrongCount">0</div>
+        <div class="lbl">Gabim</div>
+      </div>
     </div>
   </div>
 </header>
 
-<div class="filters">
+<div class="filters" style="max-width:1100px; margin:0 auto;">
   <button class="filter-btn active" onclick="filterCards('all', this)">Të gjitha</button>
   <button class="filter-btn" onclick="filterCards('easy', this)">Easy</button>
   <button class="filter-btn" onclick="filterCards('mid', this)">Mid</button>
   <button class="filter-btn" onclick="filterCards('solved', this)">✅ Zgjidhur</button>
-  <input class="search-box" id="searchBox" placeholder="🔍 Kërko detyrë..." oninput="searchCards()">
+  <input class="search-box" id="searchBox" placeholder="🔍 Kërko..." oninput="searchCards()">
 </div>
 
 <main id="cardsGrid"></main>
@@ -181,6 +164,8 @@
 <script>
 let db;
 let solved = JSON.parse(localStorage.getItem('sql_solved') || '[]');
+let correctArr = JSON.parse(localStorage.getItem('sql_correct') || '[]');
+let wrongArr = JSON.parse(localStorage.getItem('sql_wrong') || '[]');
 let activeFilter = 'all';
 
 const SQL_INIT = `
@@ -264,6 +249,8 @@ INSERT INTO shitjet VALUES
 (11,'Monitor',5,380,'2023-06-01','Tirane'),
 (12,'Keyboard',20,45,'2023-06-15','Durres');
 `;
+
+
 
 const tasks = [
   // ===== EASY (1-50) =====
@@ -371,54 +358,133 @@ const tasks = [
   {n:100, title:"Analiza e plotë: TOP punonjës + rank + mesatare", level:"mid", code:`SELECT\n  emri,\n  departamenti,\n  paga,\n  RANK() OVER (ORDER BY paga DESC) AS rank_global,\n  RANK() OVER (PARTITION BY departamenti ORDER BY paga DESC) AS rank_dept,\n  ROUND(AVG(paga) OVER (PARTITION BY departamenti), 0) AS avg_dept,\n  ROUND(paga - AVG(paga) OVER (PARTITION BY departamenti), 0) AS diff_avg,\n  CASE\n    WHEN RANK() OVER (PARTITION BY departamenti ORDER BY paga DESC) = 1 THEN 'Top'\n    WHEN paga > AVG(paga) OVER (PARTITION BY departamenti) THEN 'Mbi mesatare'\n    ELSE 'Nën mesatare'\n  END AS kategoria\nFROM punonjesit\nORDER BY rank_global;`},
 ];
 
+
+function saveState() {
+  localStorage.setItem('sql_solved', JSON.stringify(solved));
+  localStorage.setItem('sql_correct', JSON.stringify(correctArr));
+  localStorage.setItem('sql_wrong', JSON.stringify(wrongArr));
+}
+
+function updateProgress() {
+  const pct = (solved.length / 100) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('solvedCount').textContent = solved.length;
+  document.getElementById('correctCount').textContent = correctArr.length;
+  document.getElementById('wrongCount').textContent = wrongArr.length;
+}
+
 async function initDB() {
   const SQL = await initSqlJs({ locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.10.2/dist/${file}` });
   db = new SQL.Database();
   db.run(SQL_INIT);
 }
 
-function runSQL(n, query) {
-  const outputDiv = document.getElementById(`out-${n}`);
-  const outputContent = document.getElementById(`out-content-${n}`);
-  outputDiv.classList.add('visible');
-  
-  try {
-    const results = db.exec(query);
-    if (!results || results.length === 0) {
-      outputContent.innerHTML = '<span style="color:var(--muted)">Query ekzekutuar. Asnjë rresht.</span>';
-      outputContent.className = 'output-content success';
-    } else {
-      let html = '';
-      results.forEach(res => {
-        html += '<table class="sql-table"><thead><tr>';
-        res.columns.forEach(col => { html += `<th>${col}</th>`; });
-        html += '</tr></thead><tbody>';
-        res.values.forEach(row => {
-          html += '<tr>';
-          row.forEach(val => { html += `<td>${val === null ? '<span style="color:var(--muted)">NULL</span>' : val}</td>`; });
-          html += '</tr>';
-        });
-        html += '</tbody></table>';
-      });
-      outputContent.innerHTML = html;
-      outputContent.className = 'output-content success';
+function runAndCheck(n) {
+  if (!db) { alert('DB po ngarkohet, provo sërish...'); return; }
+  const task = tasks.find(t => t.n === n);
+  const userQuery = document.getElementById('ans-' + n).value.trim();
+  if (!userQuery) return;
+
+  const resultArea = document.getElementById('res-' + n);
+  const resultHeader = document.getElementById('res-header-' + n);
+  const resultContent = document.getElementById('res-content-' + n);
+  const feedbackBanner = document.getElementById('fb-' + n);
+  const solutionArea = document.getElementById('sol-' + n);
+  const ansTextarea = document.getElementById('ans-' + n);
+
+  function execQuery(query) {
+    try {
+      const results = db.exec(query);
+      return { ok: true, results };
+    } catch(e) {
+      return { ok: false, error: e.message };
     }
-    if (!solved.includes(n)) {
-      solved.push(n);
-      localStorage.setItem('sql_solved', JSON.stringify(solved));
-      document.getElementById(`card-${n}`).classList.add('solved');
-      updateProgress();
-    }
-  } catch(err) {
-    outputContent.innerHTML = '';
-    outputContent.textContent = '❌ ' + err.message;
-    outputContent.className = 'output-content error';
   }
+
+  function resultsToString(results) {
+    if (!results || results.length === 0) return '(empty)';
+    return results.map(r => {
+      const cols = r.columns.join('|');
+      const rows = r.values.map(row => row.map(v => v === null ? 'NULL' : String(v)).join('|')).join('\n');
+      return cols + '\n' + rows;
+    }).join('\n---\n');
+  }
+
+  function renderTable(results) {
+    if (!results || results.length === 0) return '<span style="color:var(--muted)">Query ekzekutuar. Asnjë rresht.</span>';
+    let html = '';
+    results.forEach(res => {
+      html += '<table class="sql-table"><thead><tr>';
+      res.columns.forEach(col => { html += `<th>${col}</th>`; });
+      html += '</tr></thead><tbody>';
+      res.values.forEach(row => {
+        html += '<tr>';
+        row.forEach(val => { html += `<td>${val === null ? '<span style="color:var(--muted)">NULL</span>' : val}</td>`; });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+    });
+    return html;
+  }
+
+  const userRes = execQuery(userQuery);
+  if (!userRes.ok) {
+    resultArea.className = 'result-area visible error';
+    resultHeader.textContent = '❌ Gabim SQL';
+    resultContent.innerHTML = '';
+    resultContent.textContent = userRes.error;
+    ansTextarea.className = 'answer-input wrong';
+    feedbackBanner.style.display = 'none';
+    return;
+  }
+
+  const solRes = execQuery(task.code);
+
+  const userStr = resultsToString(userRes.results);
+  const solStr = resultsToString(solRes.ok ? solRes.results : []);
+  const isCorrect = userStr === solStr;
+
+  resultArea.className = 'result-area visible ' + (isCorrect ? 'success' : 'error');
+  resultHeader.textContent = isCorrect ? '✓ Rezultati i saktë' : '✗ Rezultat i ndryshëm nga zgjidhja';
+  resultContent.innerHTML = renderTable(userRes.results);
+
+  if (isCorrect) {
+    ansTextarea.className = 'answer-input correct';
+    feedbackBanner.className = 'feedback-banner correct';
+    feedbackBanner.textContent = '✓ Saktë! Rezultati përputhet me zgjidhjen.';
+    feedbackBanner.style.display = 'block';
+    solutionArea.className = 'solution-area';
+
+    if (!solved.includes(n)) { solved.push(n); document.getElementById('card-' + n).classList.add('solved'); }
+    if (!correctArr.includes(n)) { correctArr.push(n); }
+    wrongArr = wrongArr.filter(x => x !== n);
+    document.getElementById('card-' + n).classList.remove('wrong-ans');
+  } else {
+    ansTextarea.className = 'answer-input wrong';
+    feedbackBanner.className = 'feedback-banner wrong';
+    feedbackBanner.textContent = '✗ Jo saktë! Zgjidhja e duhur shfaqet më poshtë.';
+    feedbackBanner.style.display = 'block';
+    solutionArea.className = 'solution-area visible';
+    document.getElementById('sol-code-' + n).textContent = task.code;
+    if (!wrongArr.includes(n)) { wrongArr.push(n); }
+    document.getElementById('card-' + n).classList.add('wrong-ans');
+  }
+  saveState();
+  updateProgress();
 }
 
-function resetCard(n, origCode) {
-  document.getElementById(`code-${n}`).value = origCode;
-  document.getElementById(`out-${n}`).classList.remove('visible');
+function toggleHint(n) {
+  const h = document.getElementById('hint-' + n);
+  h.style.display = h.style.display === 'block' ? 'none' : 'block';
+}
+
+function resetCard(n) {
+  document.getElementById('ans-' + n).value = '';
+  document.getElementById('ans-' + n).className = 'answer-input';
+  document.getElementById('res-' + n).className = 'result-area';
+  document.getElementById('fb-' + n).style.display = 'none';
+  document.getElementById('sol-' + n).className = 'solution-area';
+  document.getElementById('hint-' + n).style.display = 'none';
 }
 
 function renderCards(list) {
@@ -427,40 +493,44 @@ function renderCards(list) {
   const noRes = document.getElementById('noResults');
   if (list.length === 0) { noRes.style.display = 'block'; return; }
   noRes.style.display = 'none';
+
   list.forEach(t => {
     const isSolved = solved.includes(t.n);
+    const isWrong = wrongArr.includes(t.n);
     const card = document.createElement('div');
-    card.className = 'card' + (isSolved ? ' solved' : '');
-    card.id = `card-${t.n}`;
-    const escapedCode = t.code.replace(/`/g, '\\`').replace(/\\/g, '\\\\').replace(/`/g, '\\`');
+    card.className = 'card' + (isSolved ? ' solved' : '') + (isWrong && !isSolved ? ' wrong-ans' : '');
+    card.id = 'card-' + t.n;
     card.innerHTML = `
       <div class="card-header">
         <span class="card-num">#${String(t.n).padStart(2,'0')}</span>
         <span class="card-title">${t.title}</span>
         <span class="level-tag level-${t.level}">${t.level}</span>
       </div>
-      <div class="code-area">
-        <div class="code-label"><span>sql</span><span>edito & ekzekuto</span></div>
-        <textarea class="code-input" id="code-${t.n}" spellcheck="false">${t.code}</textarea>
+      <div class="quiz-section">
+        <div class="quiz-label">Shkruaj SQL query-n:</div>
+        <textarea class="answer-input" id="ans-${t.n}" spellcheck="false" placeholder="SELECT ..." onkeydown="if(event.ctrlKey && event.key==='Enter') runAndCheck(${t.n})"></textarea>
+        <div class="hint-row">
+          <button class="hint-btn" onclick="toggleHint(${t.n})">💡 Ndihma</button>
+        </div>
+        <div class="hint-text" id="hint-${t.n}" style="display:none">${t.title}</div>
       </div>
-      <div class="output-area" id="out-${t.n}">
-        <div class="output-label">rezultati</div>
-        <div class="output-content" id="out-content-${t.n}"></div>
+      <div class="feedback-banner" id="fb-${t.n}"></div>
+      <div class="result-area" id="res-${t.n}">
+        <div class="result-header" id="res-header-${t.n}"></div>
+        <div class="result-content" id="res-content-${t.n}"></div>
+      </div>
+      <div class="solution-area" id="sol-${t.n}">
+        <div class="solution-label">Zgjidhja e saktë:</div>
+        <pre class="solution-code" id="sol-code-${t.n}"></pre>
       </div>
       <div class="card-footer">
-        <button class="run-btn" onclick="runSQL(${t.n}, document.getElementById('code-${t.n}').value)">▶ Run</button>
-        <button class="reset-btn" onclick="document.getElementById('code-${t.n}').value = tasks.find(x=>x.n===${t.n}).code; document.getElementById('out-${t.n}').classList.remove('visible')">↺ Reset</button>
+        <button class="run-btn" onclick="runAndCheck(${t.n})">▶ Ekzekuto</button>
+        <button class="reset-btn" onclick="resetCard(${t.n})">↺ Reset</button>
         <span class="solved-badge">✓ Zgjidhur</span>
       </div>
     `;
     grid.appendChild(card);
   });
-}
-
-function updateProgress() {
-  const pct = (solved.length / 100) * 100;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('solvedCount').textContent = solved.length;
 }
 
 function filterCards(type, btn) {
