@@ -1,0 +1,591 @@
+python3 << 'PYEOF'
+py_tasks_block  = open('/tmp/py_mid_tasks.js',  encoding='utf-8').read()
+sql_tasks_block = open('/tmp/sql_mid_tasks.js', encoding='utf-8').read()
+sql_init        = open('/tmp/sql_init.js',       encoding='utf-8').read()
+
+PY_TOTAL = 49
+SQL_TOTAL = 50
+
+# ============================================================
+# PYTHON 100 MID
+# ============================================================
+py_html = f'''<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Mid — {PY_TOTAL} Detyra</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {{
+    --bg:#0a0a0f; --card:#111118; --border:#1e1e2e;
+    --accent:#f7c948; --accent2:#4ecca3;
+    --text:#e8e8f0; --muted:#6b6b8a;
+    --easy:#4ecca3; --mid:#f7c948; --hard:#ff6b6b;
+    --code-bg:#0d0d15;
+    --success-bg:rgba(78,204,163,0.08);
+    --error-bg:rgba(255,107,107,0.08);
+  }}
+  *{{margin:0;padding:0;box-sizing:border-box;}}
+  body{{font-family:\'Syne\',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}}
+  .progress-bar{{height:3px;background:var(--border);position:sticky;top:0;z-index:10;}}
+  .progress-fill{{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.4s;width:0%;}}
+  header{{padding:40px 40px 28px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}}
+  header::before{{content:\'\';position:absolute;top:-80px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(247,201,72,0.08) 0%,transparent 70%);pointer-events:none;}}
+  .header-inner{{max-width:1100px;margin:0 auto;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}}
+  .badge{{display:inline-block;background:var(--mid);color:#000;font-size:11px;font-weight:700;letter-spacing:2px;padding:4px 12px;border-radius:2px;margin-bottom:10px;text-transform:uppercase;}}
+  h1{{font-size:clamp(28px,4vw,52px);font-weight:800;line-height:1;letter-spacing:-2px;}}
+  h1 span{{color:var(--accent);}}
+  .header-right{{display:flex;gap:16px;flex-wrap:wrap;}}
+  .stat-pill{{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-align:center;}}
+  .stat-pill .val{{font-size:22px;font-weight:800;}}
+  .stat-pill .lbl{{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}}
+  .stat-pill.correct .val{{color:var(--easy);}}
+  .stat-pill.wrong .val{{color:var(--hard);}}
+  .stat-pill.total .val{{color:var(--accent);}}
+  .filters{{padding:18px 40px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;max-width:1100px;margin:0 auto;border-bottom:1px solid var(--border);}}
+  .filter-btn{{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:\'Syne\',sans-serif;font-size:13px;padding:7px 16px;border-radius:4px;cursor:pointer;transition:all 0.2s;}}
+  .filter-btn:hover,.filter-btn.active{{border-color:var(--accent);color:var(--accent);background:rgba(247,201,72,0.06);}}
+  .search-box{{margin-left:auto;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:\'Syne\',sans-serif;font-size:13px;padding:7px 14px;border-radius:4px;width:200px;outline:none;}}
+  .search-box:focus{{border-color:var(--accent2);}}
+  .search-box::placeholder{{color:var(--muted);}}
+  main{{max-width:1100px;margin:0 auto;padding:30px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px;}}
+  .card{{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color 0.2s,transform 0.2s;display:flex;flex-direction:column;}}
+  .card:hover{{border-color:rgba(247,201,72,0.25);transform:translateY(-2px);}}
+  .card.solved{{border-color:rgba(78,204,163,0.4);}}
+  .card.wrong-ans{{border-color:rgba(255,107,107,0.35);}}
+  .card-header{{padding:14px 18px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}}
+  .card-num{{font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted);flex-shrink:0;margin-top:2px;}}
+  .card-title{{font-size:14px;font-weight:700;line-height:1.4;flex:1;}}
+  .level-tag{{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:2px;text-transform:uppercase;flex-shrink:0;background:rgba(247,201,72,0.15);color:var(--mid);}}
+  .quiz-section{{padding:0 16px;}}
+  .quiz-label{{font-size:10px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}}
+  textarea.answer-input{{width:100%;background:var(--code-bg);border:1px solid var(--border);color:var(--accent2);font-family:\'JetBrains Mono\',monospace;font-size:12px;padding:10px 12px;resize:vertical;min-height:90px;outline:none;line-height:1.6;border-radius:6px;transition:border-color 0.2s;}}
+  textarea.answer-input:focus{{border-color:var(--accent2);}}
+  textarea.answer-input.correct{{border-color:var(--easy);}}
+  textarea.answer-input.wrong{{border-color:var(--hard);}}
+  .hint-row{{margin-top:5px;}}
+  .hint-btn{{background:transparent;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:0;font-family:\'Syne\',sans-serif;transition:color 0.15s;}}
+  .hint-btn:hover{{color:var(--accent);}}
+  .hint-text{{display:none;font-size:11px;color:var(--accent);margin-top:4px;font-style:italic;padding:4px 8px;background:rgba(247,201,72,0.06);border-radius:4px;}}
+  .card-footer{{padding:10px 16px 14px;display:flex;gap:8px;align-items:center;margin-top:auto;}}
+  .run-btn{{background:var(--accent);color:#000;border:none;font-family:\'Syne\',sans-serif;font-size:12px;font-weight:700;padding:8px 16px;border-radius:4px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}}
+  .run-btn:hover{{background:#ffd966;transform:scale(1.02);}}
+  .reset-btn{{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:\'Syne\',sans-serif;font-size:12px;padding:8px 12px;border-radius:4px;cursor:pointer;transition:all 0.15s;}}
+  .reset-btn:hover{{border-color:var(--muted);color:var(--text);}}
+  .solved-badge{{margin-left:auto;font-size:11px;color:var(--easy);display:none;align-items:center;gap:4px;}}
+  .card.solved .solved-badge{{display:flex;}}
+  .feedback-banner{{margin:0 16px 8px;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:700;display:none;}}
+  .feedback-banner.correct{{background:rgba(78,204,163,0.12);color:var(--easy);border:1px solid rgba(78,204,163,0.3);}}
+  .feedback-banner.wrong{{background:rgba(255,107,107,0.10);color:var(--hard);border:1px solid rgba(255,107,107,0.3);}}
+  .result-area{{margin:0 16px 8px;border-radius:6px;overflow:hidden;display:none;}}
+  .result-area.visible{{display:block;}}
+  .result-header{{padding:6px 12px;font-family:\'JetBrains Mono\',monospace;font-size:10px;border-bottom:1px solid var(--border);}}
+  .result-content{{padding:10px 12px;font-family:\'JetBrains Mono\',monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-all;max-height:140px;overflow-y:auto;}}
+  .result-area.success{{background:var(--success-bg);border:1px solid rgba(78,204,163,0.3);}}
+  .result-area.success .result-header{{color:var(--easy);}}
+  .result-area.success .result-content{{color:var(--easy);}}
+  .result-area.error{{background:var(--error-bg);border:1px solid rgba(255,107,107,0.3);}}
+  .result-area.error .result-header{{color:var(--hard);}}
+  .result-area.error .result-content{{color:var(--hard);}}
+  .solution-area{{margin:0 16px 12px;display:none;}}
+  .solution-area.visible{{display:block;}}
+  .solution-label{{font-size:10px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}}
+  .solution-code{{background:var(--code-bg);border:1px solid rgba(78,204,163,0.2);border-radius:6px;padding:10px 12px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--easy);white-space:pre-wrap;}}
+  .no-results{{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted);font-size:18px;display:none;}}
+  footer{{text-align:center;padding:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);margin-top:20px;}}
+  footer a{{color:var(--accent);text-decoration:none;margin:0 10px;}}
+  @media(max-width:600px){{header,.filters,main{{padding-left:18px;padding-right:18px;}}main{{grid-template-columns:1fr;}}}}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="badge">🐍 Python · Mid Level</div>
+      <h1>{PY_TOTAL} <span>Detyra</span></h1>
+    </div>
+    <div class="header-right">
+      <div class="stat-pill total"><div class="val" id="solvedCount">0</div><div class="lbl">Zgjidhur</div></div>
+      <div class="stat-pill correct"><div class="val" id="correctCount">0</div><div class="lbl">Saktë</div></div>
+      <div class="stat-pill wrong"><div class="val" id="wrongCount">0</div><div class="lbl">Gabim</div></div>
+    </div>
+  </div>
+</header>
+<div class="filters" style="max-width:1100px;margin:0 auto;">
+  <button class="filter-btn active" onclick="filterCards(\'all\',this)">Të gjitha</button>
+  <button class="filter-btn" onclick="filterCards(\'solved\',this)">✅ Zgjidhur</button>
+  <input class="search-box" id="searchBox" placeholder="🔍 Kërko..." oninput="searchCards()">
+</div>
+<main id="cardsGrid"></main>
+<div class="no-results" id="noResults">Asnjë detyrë nuk u gjet 😕</div>
+<footer>
+  <a href="python100.html">🐍 Python 100 (të gjitha)</a>
+  <a href="sql100mid.html">🗄️ SQL Mid →</a>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+<script>
+{py_tasks_block}
+
+const TOTAL = {PY_TOTAL};
+let solved = JSON.parse(localStorage.getItem('py_mid_solved') || '[]');
+let correctArr = JSON.parse(localStorage.getItem('py_mid_correct') || '[]');
+let wrongArr = JSON.parse(localStorage.getItem('py_mid_wrong') || '[]');
+let activeFilter = 'all';
+
+function saveState() {{
+  localStorage.setItem('py_mid_solved', JSON.stringify(solved));
+  localStorage.setItem('py_mid_correct', JSON.stringify(correctArr));
+  localStorage.setItem('py_mid_wrong', JSON.stringify(wrongArr));
+}}
+function updateProgress() {{
+  document.getElementById('progressFill').style.width = (solved.length/TOTAL*100)+'%';
+  document.getElementById('solvedCount').textContent = solved.length;
+  document.getElementById('correctCount').textContent = correctArr.length;
+  document.getElementById('wrongCount').textContent = wrongArr.length;
+}}
+function runAndCheck(n) {{
+  const userCode = document.getElementById('ans-'+n).value.trim();
+  if (!userCode) return;
+  const task = tasks.find(t => t.n===n);
+  const resultArea = document.getElementById('res-'+n);
+  const resultContent = document.getElementById('res-content-'+n);
+  const resultHeader = document.getElementById('res-header-'+n);
+  const feedbackBanner = document.getElementById('fb-'+n);
+  const solutionArea = document.getElementById('sol-'+n);
+  const ansTA = document.getElementById('ans-'+n);
+  resultArea.className='result-area visible';
+  resultHeader.textContent='▶ Duke ekzekutuar...';
+  resultContent.textContent='';
+  function runCode(code, cb) {{
+    let out='';
+    Sk.configure({{
+      output:(t)=>{{out+=t;}},
+      read:(x)=>{{
+        if(Sk.builtinFiles===undefined||Sk.builtinFiles["files"][x]===undefined) throw "File not found: '"+x+"'";
+        return Sk.builtinFiles["files"][x];
+      }}
+    }});
+    Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody("<stdin>",false,code,true))
+      .then(()=>cb(null,out)).catch(err=>cb(err,out));
+  }}
+  runCode(userCode,(err,out)=>{{
+    if(err){{
+      resultArea.className='result-area visible error';
+      resultHeader.textContent='❌ Gabim Sintaksor';
+      resultContent.textContent=err.toString();
+      ansTA.className='answer-input wrong';
+      feedbackBanner.style.display='none';
+      if(!wrongArr.includes(n)){{wrongArr.push(n);saveState();updateProgress();}}
+      document.getElementById('card-'+n).classList.add('wrong-ans');
+      return;
+    }}
+    const userOut=out.trim();
+    runCode(task.solution,(err2,out2)=>{{
+      const solOut=out2.trim();
+      resultContent.textContent=userOut||'(Asnjë output)';
+      const ok=userOut===solOut;
+      if(ok){{
+        resultArea.className='result-area visible success';
+        resultHeader.textContent='✓ Output i saktë';
+        ansTA.className='answer-input correct';
+        feedbackBanner.className='feedback-banner correct';
+        feedbackBanner.textContent='✓ Saktë! Kodi jep output-in e duhur.';
+        feedbackBanner.style.display='block';
+        solutionArea.className='solution-area';
+        if(!solved.includes(n)){{solved.push(n);document.getElementById('card-'+n).classList.add('solved');}}
+        if(!correctArr.includes(n)){{correctArr.push(n);}}
+        wrongArr=wrongArr.filter(x=>x!==n);
+        document.getElementById('card-'+n).classList.remove('wrong-ans');
+      }}else{{
+        resultArea.className='result-area visible error';
+        resultHeader.textContent='✗ Output nuk përputhet';
+        ansTA.className='answer-input wrong';
+        feedbackBanner.className='feedback-banner wrong';
+        feedbackBanner.innerHTML='✗ Jo saktë! Output juaj: <code>'+(userOut||'(bosh)')+'</code> — Pritet: <code>'+solOut+'</code>';
+        feedbackBanner.style.display='block';
+        solutionArea.className='solution-area visible';
+        document.getElementById('sol-code-'+n).textContent=task.solution;
+        if(!wrongArr.includes(n)){{wrongArr.push(n);}}
+        document.getElementById('card-'+n).classList.add('wrong-ans');
+      }}
+      saveState();updateProgress();
+    }});
+  }});
+}}
+function toggleHint(n){{const h=document.getElementById('hint-'+n);h.style.display=h.style.display==='block'?'none':'block';}}
+function resetCard(n){{
+  document.getElementById('ans-'+n).value='';
+  document.getElementById('ans-'+n).className='answer-input';
+  document.getElementById('res-'+n).className='result-area';
+  document.getElementById('fb-'+n).style.display='none';
+  document.getElementById('sol-'+n).className='solution-area';
+  document.getElementById('hint-'+n).style.display='none';
+}}
+function renderCards(list){{
+  const grid=document.getElementById('cardsGrid');
+  grid.innerHTML='';
+  const noRes=document.getElementById('noResults');
+  if(list.length===0){{noRes.style.display='block';return;}}
+  noRes.style.display='none';
+  list.forEach(t=>{{
+    const isSolved=solved.includes(t.n);
+    const isWrong=wrongArr.includes(t.n);
+    const card=document.createElement('div');
+    card.className='card'+(isSolved?' solved':'')+(isWrong&&!isSolved?' wrong-ans':'');
+    card.id='card-'+t.n;
+    card.innerHTML=`
+      <div class="card-header">
+        <span class="card-num">#${{String(t.n).padStart(2,'0')}}</span>
+        <span class="card-title">${{t.title}}</span>
+        <span class="level-tag">mid</span>
+      </div>
+      <div class="quiz-section">
+        <div class="quiz-label">Shkruaj kodin Python:</div>
+        <textarea class="answer-input" id="ans-${{t.n}}" spellcheck="false" placeholder="Shkruaj zgjidhjen tënde..." onkeydown="if(event.ctrlKey&&event.key==='Enter')runAndCheck(${{t.n}})"></textarea>
+        <div class="hint-row"><button class="hint-btn" onclick="toggleHint(${{t.n}})">💡 Ndihma</button></div>
+        <div class="hint-text" id="hint-${{t.n}}" style="display:none">${{t.title}}</div>
+      </div>
+      <div class="feedback-banner" id="fb-${{t.n}}"></div>
+      <div class="result-area" id="res-${{t.n}}">
+        <div class="result-header" id="res-header-${{t.n}}"></div>
+        <div class="result-content" id="res-content-${{t.n}}"></div>
+      </div>
+      <div class="solution-area" id="sol-${{t.n}}">
+        <div class="solution-label">Zgjidhja e saktë:</div>
+        <pre class="solution-code" id="sol-code-${{t.n}}"></pre>
+      </div>
+      <div class="card-footer">
+        <button class="run-btn" onclick="runAndCheck(${{t.n}})">▶ Ekzekuto</button>
+        <button class="reset-btn" onclick="resetCard(${{t.n}})">↺ Reset</button>
+        <span class="solved-badge">✓ Zgjidhur</span>
+      </div>`;
+    grid.appendChild(card);
+  }});
+}}
+function filterCards(type,btn){{
+  activeFilter=type;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}}
+function searchCards(){{applyFilters();}}
+function applyFilters(){{
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  let list=tasks;
+  if(activeFilter==='solved') list=list.filter(t=>solved.includes(t.n));
+  if(q) list=list.filter(t=>t.title.toLowerCase().includes(q)||String(t.n).includes(q));
+  renderCards(list);
+}}
+renderCards(tasks);
+updateProgress();
+</script>
+</body>
+</html>'''
+
+with open('/home/claude/python100mid.html','w',encoding='utf-8') as f:
+    f.write(py_html)
+print("python100mid.html:", len(py_html))
+
+# ============================================================
+# SQL 100 MID
+# ============================================================
+sql_html = f'''<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Mid — {SQL_TOTAL} Detyra</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {{
+    --bg:#050d0a; --card:#0a1610; --border:#0f2318;
+    --accent:#4ecca3; --accent2:#a8ff78;
+    --text:#e0f0e8; --muted:#4a7a60;
+    --easy:#4ecca3; --mid:#f7c948; --hard:#ff6b6b;
+    --code-bg:#040c08;
+    --success-bg:rgba(78,204,163,0.08);
+    --error-bg:rgba(255,107,107,0.07);
+  }}
+  *{{margin:0;padding:0;box-sizing:border-box;}}
+  body{{font-family:\'Syne\',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}}
+  .progress-bar{{height:3px;background:var(--border);position:sticky;top:0;z-index:10;}}
+  .progress-fill{{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.4s;width:0%;}}
+  header{{padding:40px 40px 28px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}}
+  header::before{{content:\'\';position:absolute;top:-80px;left:-80px;width:400px;height:400px;background:radial-gradient(circle,rgba(78,204,163,0.08) 0%,transparent 70%);pointer-events:none;}}
+  .header-inner{{max-width:1100px;margin:0 auto;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;}}
+  .badge{{display:inline-block;background:var(--mid);color:#000;font-size:11px;font-weight:700;letter-spacing:2px;padding:4px 12px;border-radius:2px;margin-bottom:10px;text-transform:uppercase;}}
+  h1{{font-size:clamp(28px,4vw,52px);font-weight:800;line-height:1;letter-spacing:-2px;}}
+  h1 span{{color:var(--accent);}}
+  .header-right{{display:flex;gap:16px;flex-wrap:wrap;}}
+  .stat-pill{{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-align:center;}}
+  .stat-pill .val{{font-size:22px;font-weight:800;}}
+  .stat-pill .lbl{{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}}
+  .stat-pill.correct .val{{color:var(--easy);}}
+  .stat-pill.wrong .val{{color:var(--hard);}}
+  .stat-pill.total .val{{color:var(--accent);}}
+  .filters{{padding:18px 40px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;max-width:1100px;margin:0 auto;border-bottom:1px solid var(--border);}}
+  .filter-btn{{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:\'Syne\',sans-serif;font-size:13px;padding:7px 16px;border-radius:4px;cursor:pointer;transition:all 0.2s;}}
+  .filter-btn:hover,.filter-btn.active{{border-color:var(--accent);color:var(--accent);background:rgba(78,204,163,0.06);}}
+  .search-box{{margin-left:auto;background:var(--card);border:1px solid var(--border);color:var(--text);font-family:\'Syne\',sans-serif;font-size:13px;padding:7px 14px;border-radius:4px;width:200px;outline:none;}}
+  .search-box:focus{{border-color:var(--accent);}}
+  .search-box::placeholder{{color:var(--muted);}}
+  main{{max-width:1100px;margin:0 auto;padding:30px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px;}}
+  .card{{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color 0.2s,transform 0.2s;display:flex;flex-direction:column;}}
+  .card:hover{{border-color:rgba(78,204,163,0.25);transform:translateY(-2px);}}
+  .card.solved{{border-color:rgba(78,204,163,0.45);}}
+  .card.wrong-ans{{border-color:rgba(255,107,107,0.35);}}
+  .card-header{{padding:14px 18px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}}
+  .card-num{{font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--muted);flex-shrink:0;margin-top:2px;}}
+  .card-title{{font-size:14px;font-weight:700;line-height:1.4;flex:1;}}
+  .level-tag{{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 7px;border-radius:2px;text-transform:uppercase;flex-shrink:0;background:rgba(247,201,72,0.15);color:var(--mid);}}
+  .quiz-section{{padding:0 16px;}}
+  .quiz-label{{font-size:10px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}}
+  textarea.answer-input{{width:100%;background:var(--code-bg);border:1px solid var(--border);color:var(--accent);font-family:\'JetBrains Mono\',monospace;font-size:12px;padding:10px 12px;resize:vertical;min-height:70px;outline:none;line-height:1.6;border-radius:6px;transition:border-color 0.2s;}}
+  textarea.answer-input:focus{{border-color:var(--accent);}}
+  textarea.answer-input.correct{{border-color:var(--easy);}}
+  textarea.answer-input.wrong{{border-color:var(--hard);}}
+  .hint-row{{margin-top:5px;}}
+  .hint-btn{{background:transparent;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:0;font-family:\'Syne\',sans-serif;transition:color 0.15s;}}
+  .hint-btn:hover{{color:var(--accent);}}
+  .hint-text{{display:none;font-size:11px;color:var(--accent);margin-top:4px;font-style:italic;padding:4px 8px;background:rgba(78,204,163,0.06);border-radius:4px;}}
+  .card-footer{{padding:10px 16px 14px;display:flex;gap:8px;align-items:center;margin-top:auto;}}
+  .run-btn{{background:var(--accent);color:#000;border:none;font-family:\'Syne\',sans-serif;font-size:12px;font-weight:700;padding:8px 16px;border-radius:4px;cursor:pointer;transition:all 0.15s;letter-spacing:0.5px;}}
+  .run-btn:hover{{background:#6fffd4;transform:scale(1.02);}}
+  .reset-btn{{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:\'Syne\',sans-serif;font-size:12px;padding:8px 12px;border-radius:4px;cursor:pointer;transition:all 0.15s;}}
+  .reset-btn:hover{{border-color:var(--muted);color:var(--text);}}
+  .solved-badge{{margin-left:auto;font-size:11px;color:var(--easy);display:none;align-items:center;gap:4px;}}
+  .card.solved .solved-badge{{display:flex;}}
+  .feedback-banner{{margin:0 16px 8px;padding:8px 12px;border-radius:6px;font-size:12px;font-weight:700;display:none;}}
+  .feedback-banner.correct{{background:rgba(78,204,163,0.12);color:var(--easy);border:1px solid rgba(78,204,163,0.3);}}
+  .feedback-banner.wrong{{background:rgba(255,107,107,0.10);color:var(--hard);border:1px solid rgba(255,107,107,0.3);}}
+  .result-area{{margin:0 16px 8px;border-radius:6px;overflow:hidden;display:none;}}
+  .result-area.visible{{display:block;}}
+  .result-header{{padding:6px 12px;font-family:\'JetBrains Mono\',monospace;font-size:10px;border-bottom:1px solid var(--border);}}
+  .result-content{{padding:8px 12px;max-height:180px;overflow-y:auto;overflow-x:auto;}}
+  .result-area.success{{background:var(--success-bg);border:1px solid rgba(78,204,163,0.3);}}
+  .result-area.success .result-header{{color:var(--easy);}}
+  .result-area.error{{background:var(--error-bg);border:1px solid rgba(255,107,107,0.3);}}
+  .result-area.error .result-header{{color:var(--hard);}}
+  .result-area.error .result-content{{font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--hard);white-space:pre-wrap;}}
+  table.sql-table{{border-collapse:collapse;min-width:100%;font-size:11px;}}
+  table.sql-table th{{background:rgba(78,204,163,0.15);color:var(--accent);padding:5px 10px;text-align:left;border:1px solid var(--border);font-weight:700;}}
+  table.sql-table td{{padding:4px 10px;border:1px solid var(--border);color:var(--text);}}
+  table.sql-table tr:nth-child(even) td{{background:rgba(255,255,255,0.02);}}
+  .solution-area{{margin:0 16px 12px;display:none;}}
+  .solution-area.visible{{display:block;}}
+  .solution-label{{font-size:10px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}}
+  .solution-code{{background:var(--code-bg);border:1px solid rgba(78,204,163,0.2);border-radius:6px;padding:10px 12px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--easy);white-space:pre-wrap;}}
+  .no-results{{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted);font-size:18px;display:none;}}
+  footer{{text-align:center;padding:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--border);margin-top:20px;}}
+  footer a{{color:var(--accent);text-decoration:none;margin:0 10px;}}
+  @media(max-width:600px){{header,.filters,main{{padding-left:18px;padding-right:18px;}}main{{grid-template-columns:1fr;}}}}
+</style>
+</head>
+<body>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="badge">🗄️ SQL · Mid Level</div>
+      <h1>{SQL_TOTAL} <span>Detyra</span></h1>
+    </div>
+    <div class="header-right">
+      <div class="stat-pill total"><div class="val" id="solvedCount">0</div><div class="lbl">Zgjidhur</div></div>
+      <div class="stat-pill correct"><div class="val" id="correctCount">0</div><div class="lbl">Saktë</div></div>
+      <div class="stat-pill wrong"><div class="val" id="wrongCount">0</div><div class="lbl">Gabim</div></div>
+    </div>
+  </div>
+</header>
+<div class="filters" style="max-width:1100px;margin:0 auto;">
+  <button class="filter-btn active" onclick="filterCards(\'all\',this)">Të gjitha</button>
+  <button class="filter-btn" onclick="filterCards(\'solved\',this)">✅ Zgjidhur</button>
+  <input class="search-box" id="searchBox" placeholder="🔍 Kërko..." oninput="searchCards()">
+</div>
+<main id="cardsGrid"></main>
+<div class="no-results" id="noResults">Asnjë detyrë nuk u gjet 😕</div>
+<footer>
+  <a href="sql100.html">🗄️ SQL 100 (të gjitha)</a>
+  <a href="python100mid.html">🐍 Python Mid →</a>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.2/dist/sql-wasm.js"></script>
+<script>
+let db;
+let solved = JSON.parse(localStorage.getItem('sql_mid_solved') || '[]');
+let correctArr = JSON.parse(localStorage.getItem('sql_mid_correct') || '[]');
+let wrongArr = JSON.parse(localStorage.getItem('sql_mid_wrong') || '[]');
+let activeFilter = 'all';
+const TOTAL = {SQL_TOTAL};
+
+{sql_init}
+
+{sql_tasks_block}
+
+function saveState() {{
+  localStorage.setItem('sql_mid_solved', JSON.stringify(solved));
+  localStorage.setItem('sql_mid_correct', JSON.stringify(correctArr));
+  localStorage.setItem('sql_mid_wrong', JSON.stringify(wrongArr));
+}}
+function updateProgress() {{
+  document.getElementById('progressFill').style.width = (solved.length/TOTAL*100)+'%';
+  document.getElementById('solvedCount').textContent = solved.length;
+  document.getElementById('correctCount').textContent = correctArr.length;
+  document.getElementById('wrongCount').textContent = wrongArr.length;
+}}
+async function initDB() {{
+  const SQL = await initSqlJs({{ locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.10.2/dist/${{file}}` }});
+  db = new SQL.Database();
+  db.run(SQL_INIT);
+}}
+function runAndCheck(n) {{
+  if (!db) {{ alert('DB po ngarkohet, provo sërish...'); return; }}
+  const task = tasks.find(t => t.n===n);
+  const userQuery = document.getElementById('ans-'+n).value.trim();
+  if (!userQuery) return;
+  const resultArea = document.getElementById('res-'+n);
+  const resultHeader = document.getElementById('res-header-'+n);
+  const resultContent = document.getElementById('res-content-'+n);
+  const feedbackBanner = document.getElementById('fb-'+n);
+  const solutionArea = document.getElementById('sol-'+n);
+  const ansTA = document.getElementById('ans-'+n);
+  function execQ(q) {{ try {{ return {{ok:true,results:db.exec(q)}}; }} catch(e) {{ return {{ok:false,error:e.message}}; }} }}
+  function resToStr(results) {{
+    if (!results||results.length===0) return '(empty)';
+    return results.map(r=>{{
+      const cols=r.columns.join('|');
+      const rows=r.values.map(row=>row.map(v=>v===null?'NULL':String(v)).join('|')).join('\\n');
+      return cols+'\\n'+rows;
+    }}).join('\\n---\\n');
+  }}
+  function renderTable(results) {{
+    if (!results||results.length===0) return '<span style="color:var(--muted)">Query ekzekutuar. Asnjë rresht.</span>';
+    let html='';
+    results.forEach(res=>{{
+      html+='<table class="sql-table"><thead><tr>';
+      res.columns.forEach(col=>{{html+=`<th>${{col}}</th>`;}});
+      html+='</tr></thead><tbody>';
+      res.values.forEach(row=>{{
+        html+='<tr>';
+        row.forEach(val=>{{html+=`<td>${{val===null?'<span style="color:var(--muted)">NULL</span>':val}}</td>`;}});
+        html+='</tr>';
+      }});
+      html+='</tbody></table>';
+    }});
+    return html;
+  }}
+  const userRes = execQ(userQuery);
+  if (!userRes.ok) {{
+    resultArea.className='result-area visible error';
+    resultHeader.textContent='❌ Gabim SQL';
+    resultContent.innerHTML='';
+    resultContent.textContent=userRes.error;
+    ansTA.className='answer-input wrong';
+    feedbackBanner.style.display='none';
+    if(!wrongArr.includes(n)){{wrongArr.push(n);saveState();updateProgress();}}
+    document.getElementById('card-'+n).classList.add('wrong-ans');
+    return;
+  }}
+  const solRes = execQ(task.code);
+  const isCorrect = resToStr(userRes.results)===resToStr(solRes.ok?solRes.results:[]);
+  resultArea.className='result-area visible '+(isCorrect?'success':'error');
+  resultHeader.textContent=isCorrect?'✓ Rezultati i saktë':'✗ Rezultat i ndryshëm';
+  resultContent.innerHTML=renderTable(userRes.results);
+  if (isCorrect) {{
+    ansTA.className='answer-input correct';
+    feedbackBanner.className='feedback-banner correct';
+    feedbackBanner.textContent='✓ Saktë! Rezultati përputhet me zgjidhjen.';
+    feedbackBanner.style.display='block';
+    solutionArea.className='solution-area';
+    if(!solved.includes(n)){{solved.push(n);document.getElementById('card-'+n).classList.add('solved');}}
+    if(!correctArr.includes(n)){{correctArr.push(n);}}
+    wrongArr=wrongArr.filter(x=>x!==n);
+    document.getElementById('card-'+n).classList.remove('wrong-ans');
+  }} else {{
+    ansTA.className='answer-input wrong';
+    feedbackBanner.className='feedback-banner wrong';
+    feedbackBanner.textContent='✗ Jo saktë! Zgjidhja e duhur shfaqet më poshtë.';
+    feedbackBanner.style.display='block';
+    solutionArea.className='solution-area visible';
+    document.getElementById('sol-code-'+n).textContent=task.code;
+    if(!wrongArr.includes(n)){{wrongArr.push(n);}}
+    document.getElementById('card-'+n).classList.add('wrong-ans');
+  }}
+  saveState();updateProgress();
+}}
+function toggleHint(n){{const h=document.getElementById('hint-'+n);h.style.display=h.style.display==='block'?'none':'block';}}
+function resetCard(n){{
+  document.getElementById('ans-'+n).value='';
+  document.getElementById('ans-'+n).className='answer-input';
+  document.getElementById('res-'+n).className='result-area';
+  document.getElementById('fb-'+n).style.display='none';
+  document.getElementById('sol-'+n).className='solution-area';
+  document.getElementById('hint-'+n).style.display='none';
+}}
+function renderCards(list){{
+  const grid=document.getElementById('cardsGrid');
+  grid.innerHTML='';
+  const noRes=document.getElementById('noResults');
+  if(list.length===0){{noRes.style.display='block';return;}}
+  noRes.style.display='none';
+  list.forEach(t=>{{
+    const isSolved=solved.includes(t.n);
+    const isWrong=wrongArr.includes(t.n);
+    const card=document.createElement('div');
+    card.className='card'+(isSolved?' solved':'')+(isWrong&&!isSolved?' wrong-ans':'');
+    card.id='card-'+t.n;
+    card.innerHTML=`
+      <div class="card-header">
+        <span class="card-num">#${{String(t.n).padStart(2,'0')}}</span>
+        <span class="card-title">${{t.title}}</span>
+        <span class="level-tag">mid</span>
+      </div>
+      <div class="quiz-section">
+        <div class="quiz-label">Shkruaj SQL query-n:</div>
+        <textarea class="answer-input" id="ans-${{t.n}}" spellcheck="false" placeholder="SELECT ..." onkeydown="if(event.ctrlKey&&event.key==='Enter')runAndCheck(${{t.n}})"></textarea>
+        <div class="hint-row"><button class="hint-btn" onclick="toggleHint(${{t.n}})">💡 Ndihma</button></div>
+        <div class="hint-text" id="hint-${{t.n}}" style="display:none">${{t.title}}</div>
+      </div>
+      <div class="feedback-banner" id="fb-${{t.n}}"></div>
+      <div class="result-area" id="res-${{t.n}}">
+        <div class="result-header" id="res-header-${{t.n}}"></div>
+        <div class="result-content" id="res-content-${{t.n}}"></div>
+      </div>
+      <div class="solution-area" id="sol-${{t.n}}">
+        <div class="solution-label">Zgjidhja e saktë:</div>
+        <pre class="solution-code" id="sol-code-${{t.n}}"></pre>
+      </div>
+      <div class="card-footer">
+        <button class="run-btn" onclick="runAndCheck(${{t.n}})">▶ Ekzekuto</button>
+        <button class="reset-btn" onclick="resetCard(${{t.n}})">↺ Reset</button>
+        <span class="solved-badge">✓ Zgjidhur</span>
+      </div>`;
+    grid.appendChild(card);
+  }});
+}}
+function filterCards(type,btn){{
+  activeFilter=type;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}}
+function searchCards(){{applyFilters();}}
+function applyFilters(){{
+  const q=document.getElementById('searchBox').value.toLowerCase();
+  let list=tasks;
+  if(activeFilter==='solved') list=list.filter(t=>solved.includes(t.n));
+  if(q) list=list.filter(t=>t.title.toLowerCase().includes(q)||String(t.n).includes(q));
+  renderCards(list);
+}}
+renderCards(tasks);
+updateProgress();
+initDB().catch(e=>console.error(e));
+</script>
+</body>
+</html>'''
+
+with open('/home/claude/sql100mid.html','w',encoding='utf-8') as f:
+    f.write(sql_html)
+print("sql100mid.html:", len(sql_html))
+PYEOF
