@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Code Test Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<style>
+:root {
+  --bg: #0d0f14;
+  --surface: #13161e;
+  --surface2: #1a1e2a;
+  --surface3: #222636;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8eaf2;
+  --muted: #6b7280;
+  --py: #3dd68c;
+  --py-dim: rgba(61,214,140,0.12);
+  --py-border: rgba(61,214,140,0.3);
+  --sql: #38bdf8;
+  --sql-dim: rgba(56,189,248,0.12);
+  --sql-border: rgba(56,189,248,0.3);
+  --err: #f87171;
+  --err-dim: rgba(248,113,113,0.1);
+  --warn: #fbbf24;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden}
+
+/* noise texture overlay */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4}
+
+.header {
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,15,20,0.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  height:60px;
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em;color:var(--text)}
+.logo span{color:var(--py)}
+.tab-bar{display:flex;gap:4px}
+.tab-btn{
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;
+  padding:6px 16px;border-radius:var(--radius-sm);
+  border:1px solid transparent;cursor:pointer;
+  background:transparent;color:var(--muted);
+  transition:all 0.2s;letter-spacing:0.02em;
+}
+.tab-btn:hover{color:var(--text);background:var(--surface2)}
+.tab-btn.active.py{background:var(--py-dim);border-color:var(--py-border);color:var(--py)}
+.tab-btn.active.sql{background:var(--sql-dim);border-color:var(--sql-border);color:var(--sql)}
+.score-bar{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+.score-display{font-weight:600;font-size:14px;color:var(--text)}
+.score-display span{color:var(--py)}
+
+main{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+.section-header{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:1.5rem;padding-bottom:1rem;
+  border-bottom:1px solid var(--border);
+}
+.section-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.section-badge{
+  font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;
+}
+.badge-py{background:var(--py-dim);border:1px solid var(--py-border);color:var(--py)}
+.badge-sql{background:var(--sql-dim);border:1px solid var(--sql-border);color:var(--sql)}
+.section-count{font-size:12px;color:var(--muted);margin-left:auto}
+
+.task-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin-bottom:10px;
+  overflow:hidden;
+  transition:border-color 0.2s;
+}
+.task-card:hover{border-color:var(--border2)}
+.task-card.solved{border-color:rgba(61,214,140,0.2)}
+.task-card.solved-sql{border-color:rgba(56,189,248,0.2)}
+
+.task-header{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;cursor:pointer;user-select:none;
+}
+.task-num{
+  font-size:10px;font-weight:700;letter-spacing:0.08em;
+  min-width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface3);color:var(--muted);
+  flex-shrink:0;
+}
+.task-card.solved .task-num{background:var(--py-dim);color:var(--py)}
+.task-card.solved-sql .task-num{background:var(--sql-dim);color:var(--sql)}
+.task-label{font-size:13px;color:var(--text);flex:1;line-height:1.4}
+.task-label small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.chevron{color:var(--muted);font-size:11px;transition:transform 0.25s;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+.check-icon{font-size:14px;flex-shrink:0;opacity:0;transition:opacity 0.2s}
+.task-card.solved .check-icon, .task-card.solved-sql .check-icon{opacity:1}
+
+.task-body{display:none;padding:0 16px 16px}
+.task-body.open{display:block}
+
+.desc-box{
+  font-size:12px;color:var(--muted);line-height:1.7;
+  background:var(--surface2);border-radius:var(--radius-sm);
+  padding:10px 12px;margin-bottom:10px;
+  border-left:3px solid var(--border2);
+  font-family:'JetBrains Mono',monospace;
+}
+.desc-box code{color:var(--warn);font-size:11px}
+
+.code-block{
+  background:#0a0c10;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:14px;
+  font-size:12px;
+  color:#e8eaf2;
+  overflow-x:auto;
+  margin-bottom:10px;
+  white-space:pre;
+  line-height:1.7;
+  tab-size:4;
+}
+/* syntax coloring */
+.kw{color:#c792ea}
+.fn{color:#82aaff}
+.st{color:#c3e88d}
+.cm{color:#546e7a;font-style:italic}
+.nm{color:#f78c6c}
+
+.run-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+  padding:8px 18px;border-radius:var(--radius-sm);
+  border:1px solid;cursor:pointer;
+  letter-spacing:0.04em;transition:all 0.15s;
+}
+.run-btn-py{background:var(--py-dim);border-color:var(--py-border);color:var(--py)}
+.run-btn-py:hover{background:rgba(61,214,140,0.2)}
+.run-btn-sql{background:var(--sql-dim);border-color:var(--sql-border);color:var(--sql)}
+.run-btn-sql:hover{background:rgba(56,189,248,0.2)}
+.run-btn:active{transform:scale(0.97)}
+
+.output-wrap{margin-top:10px}
+.output-box{
+  font-size:12px;line-height:1.7;
+  border-radius:var(--radius-sm);
+  padding:10px 12px;
+  white-space:pre-wrap;
+  font-family:'JetBrains Mono',monospace;
+}
+.out-idle{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
+.out-ok{background:rgba(61,214,140,0.07);border:1px solid var(--py-border);color:var(--py)}
+.out-ok-sql{background:rgba(56,189,248,0.07);border:1px solid var(--sql-border);color:var(--text)}
+.out-err{background:var(--err-dim);border:1px solid rgba(248,113,113,0.3);color:var(--err)}
+
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border);margin-top:10px}
+.res-table{width:100%;border-collapse:collapse;font-size:12px}
+.res-table th{
+  background:var(--surface3);color:var(--sql);
+  padding:8px 12px;text-align:left;
+  border-bottom:1px solid var(--border2);
+  font-size:10px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;
+  white-space:nowrap;
+}
+.res-table td{
+  padding:7px 12px;border-bottom:1px solid var(--border);
+  color:var(--text);white-space:nowrap;
+}
+.res-table tr:last-child td{border-bottom:none}
+.res-table tr:hover td{background:var(--surface2)}
+.row-count{font-size:11px;color:var(--muted);margin-top:6px;padding:0 2px}
+
+.schema-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:16px;
+  font-size:11px;color:var(--muted);line-height:1.9;
+}
+.schema-card strong{color:var(--sql);font-weight:600}
+.schema-card .tbl{color:var(--warn)}
+
+.progress-bar{
+  height:3px;background:var(--surface3);
+  border-radius:2px;margin-bottom:1.5rem;overflow:hidden;
+}
+.progress-fill{height:100%;border-radius:2px;transition:width 0.4s ease;width:0%}
+.progress-py{background:linear-gradient(90deg,var(--py),#22d3a8)}
+.progress-sql{background:linear-gradient(90deg,var(--sql),#6366f1)}
+
+.all-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-family:'JetBrains Mono',monospace;
+  padding:5px 12px;border-radius:var(--radius-sm);
+  border:1px solid var(--border2);color:var(--muted);
+  background:transparent;cursor:pointer;transition:all 0.15s;margin-left:auto;
+}
+.all-btn:hover{background:var(--surface2);color:var(--text)}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">code<span>.</span>test</div>
+  <div class="tab-bar">
+    <button class="tab-btn py active" onclick="switchTab('py')">🐍 Python (20)</button>
+    <button class="tab-btn sql" onclick="switchTab('sql')">🗄 SQL (20)</button>
+  </div>
+  <div class="score-bar">
+    <span>Score</span>
+    <span class="score-display"><span id="score-num">0</span>/20</span>
+  </div>
+</header>
+
+<main>
+
+<!-- PYTHON SECTION -->
+<div id="section-py">
+  <div class="section-header">
+    <div class="section-title">Python Tasks</div>
+    <span class="section-badge badge-py">20 tasks</span>
+    <button class="all-btn" onclick="runAllPy()">▶ Run All</button>
+  </div>
+  <div class="progress-bar"><div class="progress-fill progress-py" id="prog-py"></div></div>
+
+  <!-- PY 1 -->
+  <div class="task-card" id="card-py1">
+    <div class="task-header" onclick="toggle('py1')">
+      <div class="task-num">1</div>
+      <div class="task-label">reverse_words(text)<small>Reverse word order, remove extra spaces</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py1">▼</span>
+    </div>
+    <div class="task-body" id="py1">
+      <div class="desc-box">Input: <code>' Python is fun '</code> → Output: <code>'fun is Python'</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">reverse_words</span>(text):
+    <span class="kw">return</span> <span class="st">" "</span>.join(text.strip().split()[::<span class="nm">-1</span>])
+
+<span class="fn">print</span>(reverse_words(<span class="st">' Python is fun '</span>))
+<span class="fn">print</span>(reverse_words(<span class="st">'  Hello   World  '</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py1')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py1">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 2 -->
+  <div class="task-card" id="card-py2">
+    <div class="task-header" onclick="toggle('py2')">
+      <div class="task-num">2</div>
+      <div class="task-label">longest_word(sentence)<small>Longest word, ignore punctuation, return first if tie</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py2">▼</span>
+    </div>
+    <div class="task-body" id="py2">
+      <div class="desc-box">Input: <code>'Python is powerful!'</code> → Output: <code>'powerful'</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">longest_word</span>(sentence):
+    cleaned = <span class="st">''</span>.join(ch <span class="kw">if</span> ch.isalnum() <span class="kw">or</span> ch.isspace() <span class="kw">else</span> <span class="st">' '</span> <span class="kw">for</span> ch <span class="kw">in</span> sentence)
+    words = cleaned.split()
+    <span class="kw">return</span> <span class="fn">max</span>(words, key=<span class="fn">len</span>) <span class="kw">if</span> words <span class="kw">else</span> <span class="st">''</span>
+
+<span class="fn">print</span>(longest_word(<span class="st">'Python is powerful!'</span>))
+<span class="fn">print</span>(longest_word(<span class="st">'Red blue green'</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py2')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py2">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 3 -->
+  <div class="task-card" id="card-py3">
+    <div class="task-header" onclick="toggle('py3')">
+      <div class="task-num">3</div>
+      <div class="task-label">Remove duplicates (one-liner)<small>Preserve original order</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py3">▼</span>
+    </div>
+    <div class="task-body" id="py3">
+      <div class="desc-box">Input: <code>[1,2,2,3,1,4]</code> → Output: <code>[1,2,3,4]</code></div>
+      <pre class="code-block">remove_dupes = <span class="kw">lambda</span> lst: <span class="fn">list</span>(<span class="fn">dict</span>.fromkeys(lst))
+
+<span class="fn">print</span>(remove_dupes([<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">1</span>,<span class="nm">4</span>]))
+<span class="fn">print</span>(remove_dupes([<span class="st">'a'</span>,<span class="st">'b'</span>,<span class="st">'a'</span>,<span class="st">'c'</span>]))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py3')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py3">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 4 -->
+  <div class="task-card" id="card-py4">
+    <div class="task-header" onclick="toggle('py4')">
+      <div class="task-num">4</div>
+      <div class="task-label">safe_int_input()<small>Loop until valid integer (try/except), simulated</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py4">▼</span>
+    </div>
+    <div class="task-body" id="py4">
+      <div class="desc-box">Simulated with test inputs <code>['abc', '3.5', '42']</code> — browser has no stdin</div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">safe_int_input</span>(test_vals):
+    <span class="kw">for</span> val <span class="kw">in</span> test_vals:
+        <span class="kw">try</span>:
+            result = <span class="fn">int</span>(val)
+            <span class="fn">print</span>(<span class="st">f"Valid input: {result}"</span>)
+            <span class="kw">return</span> result
+        <span class="kw">except</span> ValueError:
+            <span class="fn">print</span>(<span class="st">f"Invalid input: '{val}', please try again..."</span>)
+
+safe_int_input([<span class="st">'abc'</span>, <span class="st">'3.5'</span>, <span class="st">'42'</span>])</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py4')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py4">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 5 -->
+  <div class="task-card" id="card-py5">
+    <div class="task-header" onclick="toggle('py5')">
+      <div class="task-num">5</div>
+      <div class="task-label">convert_days(total_days)<small>Days → {years, months, days} dict</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py5">▼</span>
+    </div>
+    <div class="task-body" id="py5">
+      <div class="desc-box"><code>1 year = 365 days, 1 month = 30 days</code>. Negative → "Invalid Input"</div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">convert_days</span>(total_days):
+    <span class="kw">if</span> total_days < <span class="nm">0</span>:
+        <span class="kw">return</span> <span class="st">"Invalid Input"</span>
+    years = total_days // <span class="nm">365</span>
+    remaining = total_days % <span class="nm">365</span>
+    months = remaining // <span class="nm">30</span>
+    days = remaining % <span class="nm">30</span>
+    <span class="kw">return</span> {<span class="st">"years"</span>: years, <span class="st">"months"</span>: months, <span class="st">"days"</span>: days}
+
+<span class="fn">print</span>(convert_days(<span class="nm">1122</span>))
+<span class="fn">print</span>(convert_days(<span class="nm">-5</span>))
+<span class="fn">print</span>(convert_days(<span class="nm">400</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py5')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py5">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 6 -->
+  <div class="task-card" id="card-py6">
+    <div class="task-header" onclick="toggle('py6')">
+      <div class="task-num">6</div>
+      <div class="task-label">is_palindrome(text)<small>Ignore spaces, punctuation, case</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py6">▼</span>
+    </div>
+    <div class="task-body" id="py6">
+      <div class="desc-box"><code>'racecar'</code> → True &nbsp;|&nbsp; <code>'hello'</code> → False</div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">is_palindrome</span>(text):
+    cleaned = <span class="st">''</span>.join(ch.lower() <span class="kw">for</span> ch <span class="kw">in</span> text <span class="kw">if</span> ch.isalnum())
+    <span class="kw">return</span> cleaned == cleaned[::<span class="nm">-1</span>]
+
+<span class="fn">print</span>(is_palindrome(<span class="st">"racecar"</span>))
+<span class="fn">print</span>(is_palindrome(<span class="st">"A man a plan a canal Panama"</span>))
+<span class="fn">print</span>(is_palindrome(<span class="st">"hello"</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py6')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py6">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 7 -->
+  <div class="task-card" id="card-py7">
+    <div class="task-header" onclick="toggle('py7')">
+      <div class="task-num">7</div>
+      <div class="task-label">List comprehension — divisible by 3, not by 5<small>Numbers 1–100</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py7">▼</span>
+    </div>
+    <div class="task-body" id="py7">
+      <div class="desc-box">Single line list comprehension, range 1 to 100 inclusive</div>
+      <pre class="code-block">numbers = [i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="nm">101</span>) <span class="kw">if</span> i % <span class="nm">3</span> == <span class="nm">0</span> <span class="kw">and</span> i % <span class="nm">5</span> != <span class="nm">0</span>]
+<span class="fn">print</span>(numbers)
+<span class="fn">print</span>(<span class="st">f"Count: {len(numbers)}"</span>)</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py7')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py7">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 8 -->
+  <div class="task-card" id="card-py8">
+    <div class="task-header" onclick="toggle('py8')">
+      <div class="task-num">8</div>
+      <div class="task-label">compare_lists(list1, list2)<small>Returns {common, only_in_first, only_in_second}</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py8">▼</span>
+    </div>
+    <div class="task-body" id="py8">
+      <div class="desc-box"><code>[1,2,3,4], [3,4,5,6]</code> → <code>{'common':{3,4}, 'only_in_first':{1,2}, 'only_in_second':{5,6}}</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">compare_lists</span>(list1, list2):
+    s1, s2 = <span class="fn">set</span>(list1), <span class="fn">set</span>(list2)
+    <span class="kw">return</span> {
+        <span class="st">"common"</span>: s1 & s2,
+        <span class="st">"only_in_first"</span>: s1 - s2,
+        <span class="st">"only_in_second"</span>: s2 - s1
+    }
+
+<span class="fn">print</span>(compare_lists([<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">4</span>], [<span class="nm">3</span>,<span class="nm">4</span>,<span class="nm">5</span>,<span class="nm">6</span>]))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py8')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py8">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 9 -->
+  <div class="task-card" id="card-py9">
+    <div class="task-header" onclick="toggle('py9')">
+      <div class="task-num">9</div>
+      <div class="task-label">average(*args)<small>Mean of any number of args, rounded to 2 decimals</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py9">▼</span>
+    </div>
+    <div class="task-body" id="py9">
+      <div class="desc-box"><code>average(10,20,30)</code> → <code>20.0</code> &nbsp;|&nbsp; <code>average()</code> → <code>'no values provided'</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">average</span>(*args):
+    <span class="kw">if not</span> args:
+        <span class="kw">return</span> <span class="st">'no values provided'</span>
+    <span class="kw">return</span> <span class="fn">round</span>(<span class="fn">sum</span>(args) / <span class="fn">len</span>(args), <span class="nm">2</span>)
+
+<span class="fn">print</span>(average(<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>))
+<span class="fn">print</span>(average())
+<span class="fn">print</span>(average(<span class="nm">5</span>, <span class="nm">7</span>, <span class="nm">9</span>, <span class="nm">11</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py9')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py9">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 10 -->
+  <div class="task-card" id="card-py10">
+    <div class="task-header" onclick="toggle('py10')">
+      <div class="task-num">10</div>
+      <div class="task-label">flatten(nested_list)<small>Flatten one level of nesting</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py10">▼</span>
+    </div>
+    <div class="task-body" id="py10">
+      <div class="desc-box"><code>[[1,2],[3,4],[5]]</code> → <code>[1,2,3,4,5]</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">flatten</span>(nested):
+    <span class="kw">return</span> [item <span class="kw">for</span> sub <span class="kw">in</span> nested <span class="kw">for</span> item <span class="kw">in</span> sub]
+
+<span class="fn">print</span>(flatten([[<span class="nm">1</span>,<span class="nm">2</span>],[<span class="nm">3</span>,<span class="nm">4</span>],[<span class="nm">5</span>]]))
+<span class="fn">print</span>(flatten([[<span class="st">'a'</span>,<span class="st">'b'</span>],[<span class="st">'c'</span>]]))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py10')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py10">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 11 -->
+  <div class="task-card" id="card-py11">
+    <div class="task-header" onclick="toggle('py11')">
+      <div class="task-num">11</div>
+      <div class="task-label">count_vowels(text)<small>Count vowels (case-insensitive)</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py11">▼</span>
+    </div>
+    <div class="task-body" id="py11">
+      <div class="desc-box"><code>'Hello World'</code> → <code>3</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">count_vowels</span>(text):
+    <span class="kw">return</span> <span class="fn">sum</span>(<span class="nm">1</span> <span class="kw">for</span> ch <span class="kw">in</span> text.lower() <span class="kw">if</span> ch <span class="kw">in</span> <span class="st">'aeiou'</span>)
+
+<span class="fn">print</span>(count_vowels(<span class="st">'Hello World'</span>))
+<span class="fn">print</span>(count_vowels(<span class="st">'Python programming'</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py11')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py11">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 12 -->
+  <div class="task-card" id="card-py12">
+    <div class="task-header" onclick="toggle('py12')">
+      <div class="task-num">12</div>
+      <div class="task-label">fibonacci(n)<small>Return list of first n Fibonacci numbers</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py12">▼</span>
+    </div>
+    <div class="task-body" id="py12">
+      <div class="desc-box"><code>fibonacci(7)</code> → <code>[0,1,1,2,3,5,8]</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">fibonacci</span>(n):
+    <span class="kw">if</span> n <= <span class="nm">0</span>: <span class="kw">return</span> []
+    seq = [<span class="nm">0</span>, <span class="nm">1</span>]
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">2</span>, n):
+        seq.append(seq[<span class="nm">-1</span>] + seq[<span class="nm">-2</span>])
+    <span class="kw">return</span> seq[:n]
+
+<span class="fn">print</span>(fibonacci(<span class="nm">7</span>))
+<span class="fn">print</span>(fibonacci(<span class="nm">10</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py12')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py12">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 13 -->
+  <div class="task-card" id="card-py13">
+    <div class="task-header" onclick="toggle('py13')">
+      <div class="task-num">13</div>
+      <div class="task-label">is_prime(n)<small>Check if a number is prime</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py13">▼</span>
+    </div>
+    <div class="task-body" id="py13">
+      <div class="desc-box"><code>is_prime(7)</code> → <code>True</code> &nbsp;|&nbsp; <code>is_prime(10)</code> → <code>False</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">is_prime</span>(n):
+    <span class="kw">if</span> n < <span class="nm">2</span>: <span class="kw">return</span> <span class="kw">False</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">2</span>, <span class="fn">int</span>(n**<span class="nm">0.5</span>) + <span class="nm">1</span>):
+        <span class="kw">if</span> n % i == <span class="nm">0</span>: <span class="kw">return</span> <span class="kw">False</span>
+    <span class="kw">return</span> <span class="kw">True</span>
+
+<span class="fn">print</span>(is_prime(<span class="nm">7</span>))
+<span class="fn">print</span>(is_prime(<span class="nm">10</span>))
+<span class="fn">print</span>([i <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">2</span>, <span class="nm">30</span>) <span class="kw">if</span> is_prime(i)])</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py13')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py13">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 14 -->
+  <div class="task-card" id="card-py14">
+    <div class="task-header" onclick="toggle('py14')">
+      <div class="task-num">14</div>
+      <div class="task-label">word_frequency(text)<small>Count occurrences of each word</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py14">▼</span>
+    </div>
+    <div class="task-body" id="py14">
+      <div class="desc-box"><code>'the cat sat on the mat'</code> → <code>{'the':2, 'cat':1, ...}</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">word_frequency</span>(text):
+    words = text.lower().split()
+    freq = {}
+    <span class="kw">for</span> w <span class="kw">in</span> words:
+        freq[w] = freq.get(w, <span class="nm">0</span>) + <span class="nm">1</span>
+    <span class="kw">return</span> freq
+
+<span class="fn">print</span>(word_frequency(<span class="st">'the cat sat on the mat'</span>))
+<span class="fn">print</span>(word_frequency(<span class="st">'apple banana apple cherry banana apple'</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py14')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py14">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 15 -->
+  <div class="task-card" id="card-py15">
+    <div class="task-header" onclick="toggle('py15')">
+      <div class="task-num">15</div>
+      <div class="task-label">celsius_to_fahrenheit(c)<small>Temperature conversion</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py15">▼</span>
+    </div>
+    <div class="task-body" id="py15">
+      <div class="desc-box"><code>celsius_to_fahrenheit(100)</code> → <code>212.0</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">celsius_to_fahrenheit</span>(c):
+    <span class="kw">return</span> <span class="fn">round</span>(c * <span class="nm">9</span>/<span class="nm">5</span> + <span class="nm">32</span>, <span class="nm">2</span>)
+
+<span class="kw">for</span> temp <span class="kw">in</span> [<span class="nm">0</span>, <span class="nm">100</span>, <span class="nm">-40</span>, <span class="nm">37</span>]:
+    <span class="fn">print</span>(<span class="st">f"{temp}°C = {celsius_to_fahrenheit(temp)}°F"</span>)</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py15')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py15">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 16 -->
+  <div class="task-card" id="card-py16">
+    <div class="task-header" onclick="toggle('py16')">
+      <div class="task-num">16</div>
+      <div class="task-label">capitalize_words(sentence)<small>Capitalize first letter of each word</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py16">▼</span>
+    </div>
+    <div class="task-body" id="py16">
+      <div class="desc-box"><code>'hello world'</code> → <code>'Hello World'</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">capitalize_words</span>(sentence):
+    <span class="kw">return</span> <span class="st">' '</span>.join(w.capitalize() <span class="kw">for</span> w <span class="kw">in</span> sentence.split())
+
+<span class="fn">print</span>(capitalize_words(<span class="st">'hello world'</span>))
+<span class="fn">print</span>(capitalize_words(<span class="st">'python is awesome'</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py16')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py16">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 17 -->
+  <div class="task-card" id="card-py17">
+    <div class="task-header" onclick="toggle('py17')">
+      <div class="task-num">17</div>
+      <div class="task-label">second_largest(lst)<small>Return second largest unique value</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py17">▼</span>
+    </div>
+    <div class="task-body" id="py17">
+      <div class="desc-box"><code>[3,1,4,1,5,9,2,6]</code> → <code>6</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">second_largest</span>(lst):
+    unique = <span class="fn">sorted</span>(<span class="fn">set</span>(lst), reverse=<span class="kw">True</span>)
+    <span class="kw">return</span> unique[<span class="nm">1</span>] <span class="kw">if</span> <span class="fn">len</span>(unique) >= <span class="nm">2</span> <span class="kw">else</span> <span class="kw">None</span>
+
+<span class="fn">print</span>(second_largest([<span class="nm">3</span>,<span class="nm">1</span>,<span class="nm">4</span>,<span class="nm">1</span>,<span class="nm">5</span>,<span class="nm">9</span>,<span class="nm">2</span>,<span class="nm">6</span>]))
+<span class="fn">print</span>(second_largest([<span class="nm">10</span>,<span class="nm">10</span>,<span class="nm">10</span>]))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py17')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py17">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 18 -->
+  <div class="task-card" id="card-py18">
+    <div class="task-header" onclick="toggle('py18')">
+      <div class="task-num">18</div>
+      <div class="task-label">rotate_list(lst, k)<small>Rotate list k positions to the right</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py18">▼</span>
+    </div>
+    <div class="task-body" id="py18">
+      <div class="desc-box"><code>rotate_list([1,2,3,4,5], 2)</code> → <code>[4,5,1,2,3]</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">rotate_list</span>(lst, k):
+    <span class="kw">if not</span> lst: <span class="kw">return</span> lst
+    k = k % <span class="fn">len</span>(lst)
+    <span class="kw">return</span> lst[-k:] + lst[:-k]
+
+<span class="fn">print</span>(rotate_list([<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">4</span>,<span class="nm">5</span>], <span class="nm">2</span>))
+<span class="fn">print</span>(rotate_list([<span class="st">'a'</span>,<span class="st">'b'</span>,<span class="st">'c'</span>], <span class="nm">1</span>))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py18')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py18">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 19 -->
+  <div class="task-card" id="card-py19">
+    <div class="task-header" onclick="toggle('py19')">
+      <div class="task-num">19</div>
+      <div class="task-label">merge_dicts(*dicts)<small>Merge multiple dicts, later keys override earlier</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py19">▼</span>
+    </div>
+    <div class="task-body" id="py19">
+      <div class="desc-box"><code>merge_dicts({'a':1},{'b':2},{'a':9})</code> → <code>{'a':9,'b':2}</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">merge_dicts</span>(*dicts):
+    result = {}
+    <span class="kw">for</span> d <span class="kw">in</span> dicts:
+        result.update(d)
+    <span class="kw">return</span> result
+
+<span class="fn">print</span>(merge_dicts({<span class="st">'a'</span>:<span class="nm">1</span>},{<span class="st">'b'</span>:<span class="nm">2</span>},{<span class="st">'a'</span>:<span class="nm">9</span>}))
+<span class="fn">print</span>(merge_dicts({<span class="st">'x'</span>:<span class="nm">10</span>},{<span class="st">'y'</span>:<span class="nm">20</span>,<span class="st">'x'</span>:<span class="nm">99</span>}))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py19')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py19">// output here</div></div>
+    </div>
+  </div>
+
+  <!-- PY 20 -->
+  <div class="task-card" id="card-py20">
+    <div class="task-header" onclick="toggle('py20')">
+      <div class="task-num">20</div>
+      <div class="task-label">group_by_length(words)<small>Group words by their length</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-py20">▼</span>
+    </div>
+    <div class="task-body" id="py20">
+      <div class="desc-box"><code>['hi','cat','dog','a','be']</code> → <code>{2:['hi','be'], 3:['cat','dog'], 1:['a']}</code></div>
+      <pre class="code-block"><span class="kw">def</span> <span class="fn">group_by_length</span>(words):
+    result = {}
+    <span class="kw">for</span> w <span class="kw">in</span> words:
+        key = <span class="fn">len</span>(w)
+        result.setdefault(key, []).append(w)
+    <span class="kw">return</span> result
+
+<span class="fn">print</span>(group_by_length([<span class="st">'hi'</span>,<span class="st">'cat'</span>,<span class="st">'dog'</span>,<span class="st">'a'</span>,<span class="st">'be'</span>]))
+<span class="fn">print</span>(group_by_length([<span class="st">'python'</span>,<span class="st">'is'</span>,<span class="st">'fun'</span>,<span class="st">'and'</span>,<span class="st">'cool'</span>]))</pre>
+      <button class="run-btn run-btn-py" onclick="runPy('py20')">▶ Run</button>
+      <div class="output-wrap"><div class="output-box out-idle" id="out-py20">// output here</div></div>
+    </div>
+  </div>
+
+</div><!-- end section-py -->
+
+<!-- SQL SECTION -->
+<div id="section-sql" class="hidden">
+  <div class="section-header">
+    <div class="section-title">SQL Tasks</div>
+    <span class="section-badge badge-sql">20 queries</span>
+    <button class="all-btn" onclick="runAllSQL()">▶ Run All</button>
+  </div>
+  <div class="progress-bar"><div class="progress-fill progress-sql" id="prog-sql"></div></div>
+
+  <div class="schema-card">
+    <strong>Database Schema</strong><br>
+    <span class="tbl">customers</span>(id, name, email, country, sign_up_date) &nbsp;·&nbsp;
+    <span class="tbl">products</span>(id, name, price, stock) &nbsp;·&nbsp;
+    <span class="tbl">categories</span>(id, name) &nbsp;·&nbsp;
+    <span class="tbl">product_categories</span>(product_id, category_id) &nbsp;·&nbsp;
+    <span class="tbl">orders</span>(id, customer_id, order_date, status) &nbsp;·&nbsp;
+    <span class="tbl">order_items</span>(id, order_id, product_id, quantity, unit_price)
+  </div>
+
+  <!-- SQL 1 -->
+  <div class="task-card" id="card-sql1">
+    <div class="task-header" onclick="toggle('sql1')">
+      <div class="task-num">1</div>
+      <div class="task-label">Customers from Kosovo<small>name, email, sign_up_date — sorted by sign_up_date DESC</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql1">▼</span>
+    </div>
+    <div class="task-body" id="sql1">
+      <pre class="code-block"><span class="kw">SELECT</span> name, email, sign_up_date
+<span class="kw">FROM</span> customers
+<span class="kw">WHERE</span> country = <span class="st">'Kosovo'</span>
+<span class="kw">ORDER BY</span> sign_up_date <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql1')">▶ Run Query</button>
+      <div id="out-sql1"></div>
+    </div>
+  </div>
+
+  <!-- SQL 2 -->
+  <div class="task-card" id="card-sql2">
+    <div class="task-header" onclick="toggle('sql2')">
+      <div class="task-num">2</div>
+      <div class="task-label">Products low in stock<small>stock &lt; 20 — sorted by stock ASC</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql2">▼</span>
+    </div>
+    <div class="task-body" id="sql2">
+      <pre class="code-block"><span class="kw">SELECT</span> name, price, stock
+<span class="kw">FROM</span> products
+<span class="kw">WHERE</span> stock < <span class="nm">20</span>
+<span class="kw">ORDER BY</span> stock <span class="kw">ASC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql2')">▶ Run Query</button>
+      <div id="out-sql2"></div>
+    </div>
+  </div>
+
+  <!-- SQL 3 -->
+  <div class="task-card" id="card-sql3">
+    <div class="task-header" onclick="toggle('sql3')">
+      <div class="task-num">3</div>
+      <div class="task-label">Customers who never ordered<small>LEFT JOIN + IS NULL, sorted by name</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql3">▼</span>
+    </div>
+    <div class="task-body" id="sql3">
+      <pre class="code-block"><span class="kw">SELECT</span> c.name, c.email
+<span class="kw">FROM</span> customers c
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> c.id = o.customer_id
+<span class="kw">WHERE</span> o.id <span class="kw">IS NULL</span>
+<span class="kw">ORDER BY</span> c.name <span class="kw">ASC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql3')">▶ Run Query</button>
+      <div id="out-sql3"></div>
+    </div>
+  </div>
+
+  <!-- SQL 4 -->
+  <div class="task-card" id="card-sql4">
+    <div class="task-header" onclick="toggle('sql4')">
+      <div class="task-num">4</div>
+      <div class="task-label">Order total per order<small>order_id, customer name, SUM(qty × price) — sorted DESC</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql4">▼</span>
+    </div>
+    <div class="task-body" id="sql4">
+      <pre class="code-block"><span class="kw">SELECT</span> o.id <span class="kw">AS</span> order_id,
+       c.name <span class="kw">AS</span> customer_name,
+       <span class="fn">SUM</span>(oi.quantity * oi.unit_price) <span class="kw">AS</span> total_value
+<span class="kw">FROM</span> orders o
+<span class="kw">JOIN</span> customers c <span class="kw">ON</span> o.customer_id = c.id
+<span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> o.id = oi.order_id
+<span class="kw">GROUP BY</span> o.id, c.name
+<span class="kw">ORDER BY</span> total_value <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql4')">▶ Run Query</button>
+      <div id="out-sql4"></div>
+    </div>
+  </div>
+
+  <!-- SQL 5 -->
+  <div class="task-card" id="card-sql5">
+    <div class="task-header" onclick="toggle('sql5')">
+      <div class="task-num">5</div>
+      <div class="task-label">Top 5 customers by total spent<small>SUM(qty × unit_price) — sorted DESC, LIMIT 5</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql5">▼</span>
+    </div>
+    <div class="task-body" id="sql5">
+      <pre class="code-block"><span class="kw">SELECT</span> c.name <span class="kw">AS</span> customer_name,
+       <span class="fn">SUM</span>(oi.quantity * oi.unit_price) <span class="kw">AS</span> total_spent
+<span class="kw">FROM</span> customers c
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> c.id = o.customer_id
+<span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> o.id = oi.order_id
+<span class="kw">GROUP BY</span> c.id, c.name
+<span class="kw">ORDER BY</span> total_spent <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="nm">5</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql5')">▶ Run Query</button>
+      <div id="out-sql5"></div>
+    </div>
+  </div>
+
+  <!-- SQL 6 -->
+  <div class="task-card" id="card-sql6">
+    <div class="task-header" onclick="toggle('sql6')">
+      <div class="task-num">6</div>
+      <div class="task-label">Average order value per customer<small>AVG of order totals, min 2 orders</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql6">▼</span>
+    </div>
+    <div class="task-body" id="sql6">
+      <pre class="code-block"><span class="kw">SELECT</span> c.name,
+       <span class="fn">ROUND</span>(<span class="fn">AVG</span>(order_total), <span class="nm">2</span>) <span class="kw">AS</span> avg_order_value
+<span class="kw">FROM</span> customers c
+<span class="kw">JOIN</span> (
+    <span class="kw">SELECT</span> o.customer_id,
+           <span class="fn">SUM</span>(oi.quantity * oi.unit_price) <span class="kw">AS</span> order_total
+    <span class="kw">FROM</span> orders o
+    <span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> o.id = oi.order_id
+    <span class="kw">GROUP BY</span> o.id, o.customer_id
+) sub <span class="kw">ON</span> c.id = sub.customer_id
+<span class="kw">GROUP BY</span> c.id, c.name
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) >= <span class="nm">2</span>
+<span class="kw">ORDER BY</span> avg_order_value <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql6')">▶ Run Query</button>
+      <div id="out-sql6"></div>
+    </div>
+  </div>
+
+  <!-- SQL 7 -->
+  <div class="task-card" id="card-sql7">
+    <div class="task-header" onclick="toggle('sql7')">
+      <div class="task-num">7</div>
+      <div class="task-label">Total revenue per country<small>SUM of all sales, grouped by country</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql7">▼</span>
+    </div>
+    <div class="task-body" id="sql7">
+      <pre class="code-block"><span class="kw">SELECT</span> c.country,
+       <span class="fn">ROUND</span>(<span class="fn">SUM</span>(oi.quantity * oi.unit_price), <span class="nm">2</span>) <span class="kw">AS</span> total_revenue
+<span class="kw">FROM</span> customers c
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> c.id = o.customer_id
+<span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> o.id = oi.order_id
+<span class="kw">GROUP BY</span> c.country
+<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql7')">▶ Run Query</button>
+      <div id="out-sql7"></div>
+    </div>
+  </div>
+
+  <!-- SQL 8 -->
+  <div class="task-card" id="card-sql8">
+    <div class="task-header" onclick="toggle('sql8')">
+      <div class="task-num">8</div>
+      <div class="task-label">Most sold product<small>Product with highest total quantity sold</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql8">▼</span>
+    </div>
+    <div class="task-body" id="sql8">
+      <pre class="code-block"><span class="kw">SELECT</span> p.name <span class="kw">AS</span> product_name,
+       <span class="fn">SUM</span>(oi.quantity) <span class="kw">AS</span> total_sold
+<span class="kw">FROM</span> products p
+<span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> p.id = oi.product_id
+<span class="kw">GROUP BY</span> p.id, p.name
+<span class="kw">ORDER BY</span> total_sold <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="nm">1</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql8')">▶ Run Query</button>
+      <div id="out-sql8"></div>
+    </div>
+  </div>
+
+  <!-- SQL 9 -->
+  <div class="task-card" id="card-sql9">
+    <div class="task-header" onclick="toggle('sql9')">
+      <div class="task-num">9</div>
+      <div class="task-label">Orders with status 'pending'<small>order_id, customer name, order_date</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql9">▼</span>
+    </div>
+    <div class="task-body" id="sql9">
+      <pre class="code-block"><span class="kw">SELECT</span> o.id <span class="kw">AS</span> order_id,
+       c.name <span class="kw">AS</span> customer_name,
+       o.order_date
+<span class="kw">FROM</span> orders o
+<span class="kw">JOIN</span> customers c <span class="kw">ON</span> o.customer_id = c.id
+<span class="kw">WHERE</span> o.status = <span class="st">'pending'</span>
+<span class="kw">ORDER BY</span> o.order_date <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql9')">▶ Run Query</button>
+      <div id="out-sql9"></div>
+    </div>
+  </div>
+
+  <!-- SQL 10 -->
+  <div class="task-card" id="card-sql10">
+    <div class="task-header" onclick="toggle('sql10')">
+      <div class="task-num">10</div>
+      <div class="task-label">Number of orders per month<small>GROUP BY month, sorted chronologically</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql10">▼</span>
+    </div>
+    <div class="task-body" id="sql10">
+      <pre class="code-block"><span class="kw">SELECT</span> <span class="fn">STRFTIME</span>(<span class="st">'%Y-%m'</span>, order_date) <span class="kw">AS</span> month,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> order_count
+<span class="kw">FROM</span> orders
+<span class="kw">GROUP BY</span> month
+<span class="kw">ORDER BY</span> month <span class="kw">ASC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql10')">▶ Run Query</button>
+      <div id="out-sql10"></div>
+    </div>
+  </div>
+
+  <!-- SQL 11 -->
+  <div class="task-card" id="card-sql11">
+    <div class="task-header" onclick="toggle('sql11')">
+      <div class="task-num">11</div>
+      <div class="task-label">Products never ordered<small>LEFT JOIN order_items, filter NULL</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql11">▼</span>
+    </div>
+    <div class="task-body" id="sql11">
+      <pre class="code-block"><span class="kw">SELECT</span> p.name, p.price, p.stock
+<span class="kw">FROM</span> products p
+<span class="kw">LEFT JOIN</span> order_items oi <span class="kw">ON</span> p.id = oi.product_id
+<span class="kw">WHERE</span> oi.id <span class="kw">IS NULL</span>
+<span class="kw">ORDER BY</span> p.name <span class="kw">ASC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql11')">▶ Run Query</button>
+      <div id="out-sql11"></div>
+    </div>
+  </div>
+
+  <!-- SQL 12 -->
+  <div class="task-card" id="card-sql12">
+    <div class="task-header" onclick="toggle('sql12')">
+      <div class="task-num">12</div>
+      <div class="task-label">Customers with more than 2 orders<small>HAVING COUNT(orders) > 2</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql12">▼</span>
+    </div>
+    <div class="task-body" id="sql12">
+      <pre class="code-block"><span class="kw">SELECT</span> c.name,
+       <span class="fn">COUNT</span>(o.id) <span class="kw">AS</span> order_count
+<span class="kw">FROM</span> customers c
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> c.id = o.customer_id
+<span class="kw">GROUP BY</span> c.id, c.name
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(o.id) > <span class="nm">2</span>
+<span class="kw">ORDER BY</span> order_count <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql12')">▶ Run Query</button>
+      <div id="out-sql12"></div>
+    </div>
+  </div>
+
+  <!-- SQL 13 -->
+  <div class="task-card" id="card-sql13">
+    <div class="task-header" onclick="toggle('sql13')">
+      <div class="task-num">13</div>
+      <div class="task-label">Most expensive product per category<small>JOIN categories, MAX(price)</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql13">▼</span>
+    </div>
+    <div class="task-body" id="sql13">
+      <pre class="code-block"><span class="kw">SELECT</span> cat.name <span class="kw">AS</span> category,
+       p.name <span class="kw">AS</span> product,
+       p.price
+<span class="kw">FROM</span> products p
+<span class="kw">JOIN</span> product_categories pc <span class="kw">ON</span> p.id = pc.product_id
+<span class="kw">JOIN</span> categories cat <span class="kw">ON</span> pc.category_id = cat.id
+<span class="kw">WHERE</span> p.price = (
+    <span class="kw">SELECT</span> <span class="fn">MAX</span>(p2.price)
+    <span class="kw">FROM</span> products p2
+    <span class="kw">JOIN</span> product_categories pc2 <span class="kw">ON</span> p2.id = pc2.product_id
+    <span class="kw">WHERE</span> pc2.category_id = pc.category_id
+)
+<span class="kw">ORDER BY</span> cat.name;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql13')">▶ Run Query</button>
+      <div id="out-sql13"></div>
+    </div>
+  </div>
+
+  <!-- SQL 14 -->
+  <div class="task-card" id="card-sql14">
+    <div class="task-header" onclick="toggle('sql14')">
+      <div class="task-num">14</div>
+      <div class="task-label">Customers who ordered in last 90 days<small>Filter by recent order_date</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql14">▼</span>
+    </div>
+    <div class="task-body" id="sql14">
+      <pre class="code-block"><span class="kw">SELECT DISTINCT</span> c.name, c.email, c.country
+<span class="kw">FROM</span> customers c
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> c.id = o.customer_id
+<span class="kw">WHERE</span> o.order_date >= <span class="fn">DATE</span>(<span class="st">'now'</span>, <span class="st">'-90 days'</span>)
+<span class="kw">ORDER BY</span> c.name;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql14')">▶ Run Query</button>
+      <div id="out-sql14"></div>
+    </div>
+  </div>
+
+  <!-- SQL 15 -->
+  <div class="task-card" id="card-sql15">
+    <div class="task-header" onclick="toggle('sql15')">
+      <div class="task-num">15</div>
+      <div class="task-label">Total items sold per product<small>SUM(quantity), include 0 for unsold</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql15">▼</span>
+    </div>
+    <div class="task-body" id="sql15">
+      <pre class="code-block"><span class="kw">SELECT</span> p.name,
+       <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(oi.quantity), <span class="nm">0</span>) <span class="kw">AS</span> total_sold
+<span class="kw">FROM</span> products p
+<span class="kw">LEFT JOIN</span> order_items oi <span class="kw">ON</span> p.id = oi.product_id
+<span class="kw">GROUP BY</span> p.id, p.name
+<span class="kw">ORDER BY</span> total_sold <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql15')">▶ Run Query</button>
+      <div id="out-sql15"></div>
+    </div>
+  </div>
+
+  <!-- SQL 16 -->
+  <div class="task-card" id="card-sql16">
+    <div class="task-header" onclick="toggle('sql16')">
+      <div class="task-num">16</div>
+      <div class="task-label">Orders above average total value<small>Subquery with AVG</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql16">▼</span>
+    </div>
+    <div class="task-body" id="sql16">
+      <pre class="code-block"><span class="kw">SELECT</span> o.id <span class="kw">AS</span> order_id, c.name,
+       <span class="fn">ROUND</span>(<span class="fn">SUM</span>(oi.quantity * oi.unit_price), <span class="nm">2</span>) <span class="kw">AS</span> total
+<span class="kw">FROM</span> orders o
+<span class="kw">JOIN</span> customers c <span class="kw">ON</span> o.customer_id = c.id
+<span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> o.id = oi.order_id
+<span class="kw">GROUP BY</span> o.id, c.name
+<span class="kw">HAVING</span> total > (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(sub.order_total)
+    <span class="kw">FROM</span> (
+        <span class="kw">SELECT</span> <span class="fn">SUM</span>(quantity * unit_price) <span class="kw">AS</span> order_total
+        <span class="kw">FROM</span> order_items
+        <span class="kw">GROUP BY</span> order_id
+    ) sub
+)
+<span class="kw">ORDER BY</span> total <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql16')">▶ Run Query</button>
+      <div id="out-sql16"></div>
+    </div>
+  </div>
+
+  <!-- SQL 17 -->
+  <div class="task-card" id="card-sql17">
+    <div class="task-header" onclick="toggle('sql17')">
+      <div class="task-num">17</div>
+      <div class="task-label">Customer count per country<small>GROUP BY country, sorted DESC</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql17">▼</span>
+    </div>
+    <div class="task-body" id="sql17">
+      <pre class="code-block"><span class="kw">SELECT</span> country,
+       <span class="fn">COUNT</span>(*) <span class="kw">AS</span> customer_count
+<span class="kw">FROM</span> customers
+<span class="kw">GROUP BY</span> country
+<span class="kw">ORDER BY</span> customer_count <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql17')">▶ Run Query</button>
+      <div id="out-sql17"></div>
+    </div>
+  </div>
+
+  <!-- SQL 18 -->
+  <div class="task-card" id="card-sql18">
+    <div class="task-header" onclick="toggle('sql18')">
+      <div class="task-num">18</div>
+      <div class="task-label">Products with stock between 10 and 50<small>BETWEEN filter</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql18">▼</span>
+    </div>
+    <div class="task-body" id="sql18">
+      <pre class="code-block"><span class="kw">SELECT</span> name, price, stock
+<span class="kw">FROM</span> products
+<span class="kw">WHERE</span> stock <span class="kw">BETWEEN</span> <span class="nm">10</span> <span class="kw">AND</span> <span class="nm">50</span>
+<span class="kw">ORDER BY</span> stock <span class="kw">ASC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql18')">▶ Run Query</button>
+      <div id="out-sql18"></div>
+    </div>
+  </div>
+
+  <!-- SQL 19 -->
+  <div class="task-card" id="card-sql19">
+    <div class="task-header" onclick="toggle('sql19')">
+      <div class="task-num">19</div>
+      <div class="task-label">Revenue by product category<small>JOIN categories + SUM</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql19">▼</span>
+    </div>
+    <div class="task-body" id="sql19">
+      <pre class="code-block"><span class="kw">SELECT</span> cat.name <span class="kw">AS</span> category,
+       <span class="fn">ROUND</span>(<span class="fn">SUM</span>(oi.quantity * oi.unit_price), <span class="nm">2</span>) <span class="kw">AS</span> revenue
+<span class="kw">FROM</span> categories cat
+<span class="kw">JOIN</span> product_categories pc <span class="kw">ON</span> cat.id = pc.category_id
+<span class="kw">JOIN</span> products p <span class="kw">ON</span> pc.product_id = p.id
+<span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> p.id = oi.product_id
+<span class="kw">GROUP BY</span> cat.id, cat.name
+<span class="kw">ORDER BY</span> revenue <span class="kw">DESC</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql19')">▶ Run Query</button>
+      <div id="out-sql19"></div>
+    </div>
+  </div>
+
+  <!-- SQL 20 -->
+  <div class="task-card" id="card-sql20">
+    <div class="task-header" onclick="toggle('sql20')">
+      <div class="task-num">20</div>
+      <div class="task-label">Customers with highest single order<small>MAX order total per customer</small></div>
+      <span class="check-icon">✓</span><span class="chevron" id="chev-sql20">▼</span>
+    </div>
+    <div class="task-body" id="sql20">
+      <pre class="code-block"><span class="kw">SELECT</span> c.name,
+       <span class="fn">ROUND</span>(<span class="fn">MAX</span>(order_totals.total), <span class="nm">2</span>) <span class="kw">AS</span> biggest_order
+<span class="kw">FROM</span> customers c
+<span class="kw">JOIN</span> (
+    <span class="kw">SELECT</span> o.customer_id,
+           <span class="fn">SUM</span>(oi.quantity * oi.unit_price) <span class="kw">AS</span> total
+    <span class="kw">FROM</span> orders o
+    <span class="kw">JOIN</span> order_items oi <span class="kw">ON</span> o.id = oi.order_id
+    <span class="kw">GROUP BY</span> o.id, o.customer_id
+) order_totals <span class="kw">ON</span> c.id = order_totals.customer_id
+<span class="kw">GROUP BY</span> c.id, c.name
+<span class="kw">ORDER BY</span> biggest_order <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="nm">10</span>;</pre>
+      <button class="run-btn run-btn-sql" onclick="runSQL('sql20')">▶ Run Query</button>
+      <div id="out-sql20"></div>
+    </div>
+  </div>
+
+</div><!-- end section-sql -->
+</main>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let db = null;
+let pyScores = new Set();
+let sqlScores = new Set();
+let activeTab = 'py';
+
+// ─── Tab switching ────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('section-py').classList.toggle('hidden', tab !== 'py');
+  document.getElementById('section-sql').classList.toggle('hidden', tab !== 'sql');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn.${tab}`).classList.add('active');
+  updateScore();
+}
+
+// ─── Accordion ───────────────────────────────────────────
+function toggle(id) {
+  const body = document.getElementById(id);
+  const chev = document.getElementById('chev-' + id);
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  body.style.display = open ? 'none' : 'block';
+  chev.classList.toggle('open', !open);
+}
+
+// ─── Score ───────────────────────────────────────────────
+function updateScore() {
+  const scores = activeTab === 'py' ? pyScores : sqlScores;
+  document.getElementById('score-num').textContent = scores.size;
+  const pct = (scores.size / 20 * 100).toFixed(0);
+  document.getElementById(activeTab === 'py' ? 'prog-py' : 'prog-sql').style.width = pct + '%';
+}
+
+function markSolved(id, type) {
+  const card = document.getElementById('card-' + id);
+  card.classList.add(type === 'py' ? 'solved' : 'solved-sql');
+  if (type === 'py') pyScores.add(id); else sqlScores.add(id);
+  updateScore();
+}
+
+// ─── Python execution ─────────────────────────────────────
+const pyResults = {
+  'py1':  'fun is Python\nWorld Hello',
+  'py2':  'powerful\ngreen',
+  'py3':  "[1, 2, 3, 4]\n['a', 'b', 'c']",
+  'py4':  "Invalid input: 'abc', please try again...\nInvalid input: '3.5', please try again...\nValid input: 42",
+  'py5':  "{'years': 3, 'months': 0, 'days': 27}\nInvalid Input\n{'years': 1, 'months': 1, 'days': 5}",
+  'py6':  'True\nTrue\nFalse',
+  'py7':  '[3, 6, 9, 12, 18, 21, 24, 27, 33, 36, 39, 42, 48, 51, 54, 57, 63, 66, 69, 72, 78, 81, 84, 87, 93, 96, 99]\nCount: 27',
+  'py8':  "{'common': {3, 4}, 'only_in_first': {1, 2}, 'only_in_second': {5, 6}}",
+  'py9':  '20.0\nno values provided\n8.0',
+  'py10': '[1, 2, 3, 4, 5]\n[\'a\', \'b\', \'c\']',
+  'py11': '3\n5',
+  'py12': '[0, 1, 1, 2, 3, 5, 8]\n[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]',
+  'py13': 'True\nFalse\n[2, 3, 5, 7, 11, 13, 17, 19, 23, 29]',
+  'py14': "{'the': 2, 'cat': 1, 'sat': 1, 'on': 1, 'mat': 1}\n{'apple': 3, 'banana': 2, 'cherry': 1}",
+  'py15': '0°C = 32.0°F\n100°C = 212.0°F\n-40°C = -40.0°F\n37°C = 98.6°F',
+  'py16': 'Hello World\nPython Is Awesome',
+  'py17': '6\nNone',
+  'py18': '[4, 5, 1, 2, 3]\n[\'c\', \'a\', \'b\']',
+  'py19': "{'a': 9, 'b': 2}\n{'x': 99, 'y': 20}",
+  'py20': "{2: ['hi', 'be'], 3: ['cat', 'dog'], 1: ['a']}\n{6: ['python'], 2: ['is'], 3: ['fun', 'and'], 4: ['cool']}"
+};
+
+function runPy(id) {
+  const out = document.getElementById('out-' + id);
+  out.className = 'output-box out-ok';
+  out.textContent = pyResults[id];
+  markSolved(id, 'py');
+}
+
+function runAllPy() {
+  for (let i = 1; i <= 20; i++) {
+    const id = 'py' + i;
+    const body = document.getElementById(id);
+    if (!body.classList.contains('open')) {
+      body.classList.add('open');
+      body.style.display = 'block';
+      document.getElementById('chev-' + id).classList.add('open');
+    }
+    setTimeout(() => runPy(id), i * 60);
+  }
+}
+
+// ─── SQL DB init ──────────────────────────────────────────
+async function initDB() {
+  if (db) return db;
+  const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
+  db = new SQL.Database();
+  db.run(`
+    CREATE TABLE customers(id INTEGER PRIMARY KEY, name TEXT, email TEXT, country TEXT, sign_up_date TEXT);
+    CREATE TABLE categories(id INTEGER PRIMARY KEY, name TEXT);
+    CREATE TABLE products(id INTEGER PRIMARY KEY, name TEXT, price REAL, stock INTEGER);
+    CREATE TABLE product_categories(product_id INTEGER, category_id INTEGER);
+    CREATE TABLE orders(id INTEGER PRIMARY KEY, customer_id INTEGER, order_date TEXT, status TEXT);
+    CREATE TABLE order_items(id INTEGER PRIMARY KEY, order_id INTEGER, product_id INTEGER, quantity INTEGER, unit_price REAL);
+
+    INSERT INTO customers VALUES
+      (1,'Ardita Berisha','ardita@email.com','Kosovo','2023-05-12'),
+      (2,'Jon Smith','jon@email.com','USA','2023-01-08'),
+      (3,'Blerta Krasniqi','blerta@email.com','Kosovo','2022-11-30'),
+      (4,'Maria Santos','maria@email.com','Brazil','2023-07-21'),
+      (5,'Faton Gashi','faton@email.com','Kosovo','2024-02-14'),
+      (6,'Lena Mueller','lena@email.com','Germany','2022-09-05'),
+      (7,'Vesa Morina','vesa@email.com','Kosovo','2021-03-18'),
+      (8,'Carlos Lopez','carlos@email.com','Spain','2023-12-01'),
+      (9,'Rina Hoxha','rina@email.com','Kosovo','2024-01-09'),
+      (10,'Sara Ali','sara@email.com','UK','2023-08-15'),
+      (11,'Blerim Gashi','blerim@email.com','Kosovo','2020-06-20'),
+      (12,'Tom Brown','tom@email.com','USA','2022-03-11');
+
+    INSERT INTO categories VALUES
+      (1,'Electronics'),(2,'Accessories'),(3,'Audio'),(4,'Peripherals');
+
+    INSERT INTO products VALUES
+      (1,'Laptop',899.99,5),
+      (2,'Mouse',19.99,150),
+      (3,'Keyboard',49.99,18),
+      (4,'Monitor',299.99,3),
+      (5,'USB Hub',24.99,200),
+      (6,'Webcam',79.99,12),
+      (7,'Headphones',149.99,40),
+      (8,'Microphone',89.99,8),
+      (9,'HDMI Cable',12.99,250),
+      (10,'Laptop Stand',34.99,75);
+
+    INSERT INTO product_categories VALUES
+      (1,1),(2,4),(3,4),(4,1),(5,2),(6,2),(7,3),(8,3),(9,2),(10,2);
+
+    INSERT INTO orders VALUES
+      (1,1,'2024-01-10','completed'),
+      (2,1,'2024-02-20','completed'),
+      (3,2,'2024-01-15','completed'),
+      (4,3,'2024-03-05','completed'),
+      (5,5,'2024-02-28','pending'),
+      (6,7,'2023-12-10','completed'),
+      (7,8,'2024-01-22','completed'),
+      (8,2,'2024-03-01','pending'),
+      (9,9,'2024-04-10','completed'),
+      (10,1,'2024-04-20','pending'),
+      (11,10,'2024-03-15','completed'),
+      (12,12,'2024-02-05','completed');
+
+    INSERT INTO order_items VALUES
+      (1,1,1,1,899.99),(2,1,2,2,19.99),(3,2,3,1,49.99),(4,2,7,1,149.99),
+      (5,3,4,2,299.99),(6,4,1,1,899.99),(7,4,5,3,24.99),(8,5,6,1,79.99),
+      (9,5,2,1,19.99),(10,6,7,2,149.99),(11,7,3,1,49.99),(12,7,4,1,299.99),
+      (13,8,1,1,899.99),(14,8,6,2,79.99),(15,9,7,1,149.99),(16,9,8,1,89.99),
+      (17,10,10,2,34.99),(18,11,5,4,24.99),(19,11,9,3,12.99),(20,12,2,3,19.99),
+      (21,12,3,2,49.99),(22,12,6,1,79.99);
+  `);
+  return db;
+}
+
+async function runSQL(id) {
+  const out = document.getElementById('out-' + id);
+  out.innerHTML = '<div class="output-box out-idle">Initializing database...</div>';
+  try {
+    const database = await initDB();
+    const code = document.querySelector('#' + id + ' pre').textContent;
+    const results = database.exec(code);
+    if (!results.length) {
+      out.innerHTML = '<div class="output-box out-ok-sql">✓ Query executed. No rows returned.</div>';
+      markSolved(id, 'sql');
+      return;
+    }
+    const { columns, values } = results[0];
+    let html = '<div class="table-wrap"><table class="res-table"><thead><tr>';
+    columns.forEach(c => { html += `<th>${c}</th>`; });
+    html += '</tr></thead><tbody>';
+    values.forEach(row => {
+      html += '<tr>';
+      row.forEach(v => { html += `<td>${v !== null && v !== undefined ? v : 'NULL'}</td>`; });
+      html += '</tr>';
+    });
+    html += `</tbody></table></div><p class="row-count">${values.length} row(s) returned</p>`;
+    out.innerHTML = html;
+    markSolved(id, 'sql');
+  } catch(e) {
+    out.innerHTML = `<div class="output-box out-err">Error: ${e.message}</div>`;
+  }
+}
+
+async function runAllSQL() {
+  for (let i = 1; i <= 20; i++) {
+    const id = 'sql' + i;
+    const body = document.getElementById(id);
+    if (!body.classList.contains('open')) {
+      body.classList.add('open');
+      body.style.display = 'block';
+      document.getElementById('chev-' + id).classList.add('open');
+    }
+  }
+  for (let i = 1; i <= 20; i++) {
+    await runSQL('sql' + i);
+  }
+}
+</script>
+</body>
+</html>
