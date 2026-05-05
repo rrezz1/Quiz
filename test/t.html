@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Code Test Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07070d;--surface:#0f0f1a;--surface2:#14141f;--surface3:#1a1a28;
+  --border:#1e1e30;--border2:#272740;
+  --accent:#7c6aff;--accent-glow:rgba(124,106,255,0.15);
+  --green:#00e5a0;--green-dim:rgba(0,229,160,0.1);
+  --red:#ff5f6d;--red-dim:rgba(255,95,109,0.1);
+  --amber:#ffb347;
+  --text:#eeeef5;--text2:#8888a8;--text3:#3d3d5c;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+  --r:10px;--r-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
+body{display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden}
+
+/* TOP BAR */
+.topbar{
+  position:sticky;top:0;z-index:200;
+  background:rgba(7,7,13,0.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:1.2rem;padding:0 1.5rem;height:56px;
+}
+.logo{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:-0.02em}
+.logo em{color:var(--accent);font-style:normal}
+.tabs{display:flex;gap:4px;margin-left:auto}
+.tab-btn{
+  padding:6px 18px;font-size:13px;font-family:var(--sans);font-weight:500;
+  border:1px solid var(--border2);border-radius:8px;cursor:pointer;
+  background:transparent;color:var(--text2);transition:all .2s;
+}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 0 20px var(--accent-glow)}
+.tab-btn:not(.active):hover{background:var(--surface3);color:var(--text)}
+.progress-pill{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;padding:3px 12px;
+}
+.progress-pill b{color:var(--green)}
+
+/* PROGRESS LINE */
+.prog-line{height:1.5px;background:var(--border)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .5s cubic-bezier(.4,0,.2,1);width:0}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+  width:248px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);overflow-y:auto;
+  padding:12px 0;
+}
+.sb-section-title{
+  font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--text3);padding:4px 16px 6px;
+}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 14px 7px 12px;cursor:pointer;transition:all .15s;
+  border-left:2px solid transparent;
+}
+.sb-item:hover{background:var(--surface2);border-left-color:var(--border2)}
+.sb-item.active{background:var(--accent-glow);border-left-color:var(--accent)}
+.sb-item.ok .sb-dot{background:var(--green)!important;color:#000!important;border-color:var(--green)!important}
+.sb-item.err .sb-dot{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important}
+.sb-dot{
+  min-width:22px;height:22px;border-radius:6px;
+  background:var(--surface3);color:var(--text3);
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border2);flex-shrink:0;transition:all .2s;
+}
+.sb-label{font-size:12px;color:var(--text2);line-height:1.35;flex:1}
+.sb-item.active .sb-label{color:var(--text)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:2rem 2.5rem;max-width:860px}
+.panel{display:none}.panel.active{display:block}
+
+/* TASK HEADING */
+.task-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
+  color:var(--accent);text-transform:uppercase;margin-bottom:8px;
+}
+.task-badge span{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block}
+.task-h1{font-size:21px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:12px}
+.task-desc{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:13px 16px;font-size:13.5px;color:var(--text2);line-height:1.75;margin-bottom:1.5rem;
+}
+.task-desc code{
+  background:rgba(124,106,255,.18);color:var(--accent);
+  font-family:var(--mono);font-size:12px;padding:2px 7px;border-radius:4px;
+}
+
+/* SCHEMA BOX */
+.schema-toggle{
+  display:flex;align-items:center;gap:6px;cursor:pointer;
+  font-size:12px;font-family:var(--mono);color:var(--text3);
+  border:1px solid var(--border2);border-radius:var(--r);
+  padding:6px 14px;width:fit-content;margin-bottom:1rem;
+  background:var(--surface2);transition:all .15s;
+}
+.schema-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.schema-box{
+  display:none;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r);padding:14px 16px;margin-bottom:1.5rem;
+  font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.9;
+}
+.schema-box.open{display:block}
+.schema-box strong{color:var(--accent2,#82aaff)}
+
+/* CODE BLOCK */
+.code-wrap{margin-bottom:1.2rem}
+.code-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.07em;margin-bottom:5px}
+.code-block{
+  background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);
+  padding:16px;font-family:var(--mono);font-size:13px;color:var(--text);
+  overflow-x:auto;white-space:pre;line-height:1.75;
+}
+
+/* RUN BUTTON */
+.run-row{display:flex;align-items:center;gap:12px;margin:1rem 0}
+.run-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 22px;font-size:13px;font-family:var(--sans);font-weight:600;
+  background:var(--accent);color:#fff;border:none;border-radius:var(--r);
+  cursor:pointer;transition:all .2s;letter-spacing:.02em;
+  box-shadow:0 4px 16px rgba(124,106,255,.25);
+}
+.run-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.run-btn:active{transform:translateY(0)}
+.run-btn svg{width:13px;height:13px}
+.run-hint{font-size:12px;color:var(--text3);font-family:var(--mono)}
+
+/* OUTPUT */
+.out-label{font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:.07em;margin-bottom:5px;margin-top:1rem}
+.out-box{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;font-family:var(--mono);font-size:13px;
+  min-height:48px;color:var(--text3);font-style:italic;
+  line-height:1.75;white-space:pre-wrap;transition:all .3s;
+}
+.out-box.ok{
+  background:var(--green-dim);border-color:rgba(0,229,160,.25);
+  color:var(--green);font-style:normal;
+}
+.out-box.fail{
+  background:var(--red-dim);border-color:rgba(255,95,109,.25);
+  color:var(--red);font-style:normal;
+}
+
+/* SQL TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);margin-top:8px}
+.rtable{width:100%;border-collapse:collapse;font-size:12.5px;font-family:var(--mono)}
+.rtable th{
+  background:var(--surface3);color:var(--accent);font-weight:700;
+  padding:8px 14px;text-align:left;border-bottom:1px solid var(--border2);
+  font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+}
+.rtable td{padding:7px 14px;border-bottom:1px solid var(--border);color:var(--text2)}
+.rtable tr:last-child td{border-bottom:none}
+.rtable tr:hover td{background:var(--surface3);color:var(--text)}
+.row-info{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:6px}
+
+/* NAV */
+.task-nav{display:flex;justify-content:space-between;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.nav-btn{
+  padding:8px 20px;font-size:13px;font-family:var(--sans);font-weight:500;
+  background:var(--surface);color:var(--text2);
+  border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;transition:all .2s;
+}
+.nav-btn:hover:not(:disabled){background:var(--surface3);color:var(--text)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+@media(max-width:700px){.sidebar{display:none}.content{padding:1rem 1.2rem}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><em>&lt;</em>test<em>/&gt;</em></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchLang('python',this)">🐍 Python</button>
+    <button class="tab-btn" onclick="switchLang('sql',this)">🗄️ SQL</button>
+  </div>
+  <div class="progress-pill">Done: <b id="done-n">0</b> / <span id="tot-n">9</span></div>
+</div>
+<div class="prog-line"><div class="prog-fill" id="pbar"></div></div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="content" id="content"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script>
+// ──────────────────────────────────────────────────
+// TASK DATA
+// ──────────────────────────────────────────────────
+const PYTHON = [
+{
+  title: "reverse_words(text)",
+  desc: "Reverse the order of words in a sentence and remove extra spaces.<br>Example: <code>reverse_words(' Python is fun ') → 'fun is Python'</code>",
+  code:
+`def reverse_words(text):
+    return " ".join(text.strip().split()[::-1])
+
+print(reverse_words(' Python is fun '))`,
+  out: "fun is Python"
+},
+{
+  title: "longest_word(sentence)",
+  desc: "Return the longest word in a sentence. If tie → first one. Ignore punctuation.<br>Example: <code>longest_word('Python is powerful!') → 'powerful'</code>",
+  code:
+`def longest_word(sentence):
+    cleaned = ''.join(ch if ch.isalnum() or ch.isspace() else ' ' for ch in sentence)
+    words = cleaned.split()
+    return max(words, key=len) if words else ''
+
+print(longest_word('Python is powerful!'))
+print(longest_word('Red blue green'))`,
+  out: "powerful\ngreen"
+},
+{
+  title: "Remove duplicates — one-liner",
+  desc: "One line: remove duplicates from a list while preserving original order.<br>Example: <code>[1,2,2,3,1,4] → [1,2,3,4]</code>",
+  code:
+`remove_dupes = lambda lst: list(dict.fromkeys(lst))
+
+print(remove_dupes([1, 2, 2, 3, 1, 4]))
+print(remove_dupes(['a', 'b', 'a', 'c']))`,
+  out: "[1, 2, 3, 4]\n['a', 'b', 'c']"
+},
+{
+  title: "safe_int_input() — simulated",
+  desc: "Repeatedly ask for input; return integer when valid; print friendly message on bad input. <em>(Simulated — browser can't use <code>input()</code>)</em>",
+  code:
+`def safe_int_input(test_vals):
+    for val in test_vals:
+        try:
+            result = int(val)
+            print(f"You entered: {result}")
+            return result
+        except ValueError:
+            print(f"'{val}' is not valid. Try again...")
+
+safe_int_input(['abc', '3.5', '42'])`,
+  out: "'abc' is not valid. Try again...\n'3.5' is not valid. Try again...\nYou entered: 42"
+},
+{
+  title: "convert_days(total_days)",
+  desc: "Convert total days → dict with years/months/days. 1 year=365 days, 1 month=30 days. Return 'Invalid Input' for negatives.",
+  code:
+`def convert_days(total_days):
+    if total_days < 0:
+        return "Invalid Input"
+    years = total_days // 365
+    remaining = total_days % 365
+    months = remaining // 30
+    days = remaining % 30
+    return {"years": years, "months": months, "days": days}
+
+print(convert_days(1122))
+print(convert_days(-5))`,
+  out: "{'years': 3, 'months': 0, 'days': 27}\nInvalid Input"
+},
+{
+  title: "is_palindrome(text)",
+  desc: "Return True if the string is a palindrome. Ignore spaces, punctuation, case.",
+  code:
+`def is_palindrome(text):
+    cleaned = ''.join(ch.lower() for ch in text if ch.isalnum())
+    return cleaned == cleaned[::-1]
+
+print(is_palindrome("racecar"))
+print(is_palindrome("A man a plan a canal Panama"))
+print(is_palindrome("hello"))`,
+  out: "True\nTrue\nFalse"
+},
+{
+  title: "Divisible by 3, not by 5 (1–100)",
+  desc: "List comprehension: numbers 1–100 divisible by 3 but NOT by 5.",
+  code:
+`numbers = [i for i in range(1, 101) if i % 3 == 0 and i % 5 != 0]
+print(numbers)
+print(f"Count: {len(numbers)}")`,
+  out: "[3, 6, 9, 12, 18, 21, 24, 27, 33, 36, 39, 42, 48, 51, 54, 57, 63, 66, 69, 72, 78, 81, 84, 87, 93, 96, 99]\nCount: 27"
+},
+{
+  title: "compare_lists(list1, list2)",
+  desc: "Return dict with common, only_in_first, only_in_second as sets.<br>Example: <code>compare_lists([1,2,3,4],[3,4,5,6]) → {common:{3,4},...}</code>",
+  code:
+`def compare_lists(list1, list2):
+    s1, s2 = set(list1), set(list2)
+    return {
+        "common": s1 & s2,
+        "only_in_first": s1 - s2,
+        "only_in_second": s2 - s1
+    }
+
+print(compare_lists([1,2,3,4], [3,4,5,6]))`,
+  out: "{'common': {3, 4}, 'only_in_first': {1, 2}, 'only_in_second': {5, 6}}"
+},
+{
+  title: "average(*args)",
+  desc: "Accept any number of numeric args → average rounded to 2 decimal places. Return 'no values provided' if empty.",
+  code:
+`def average(*args):
+    if not args:
+        return 'no values provided'
+    return round(sum(args) / len(args), 2)
+
+print(average(10, 20, 30))
+print(average())`,
+  out: "20.0\nno values provided"
+}
+];
+
+const SQL = [
+{
+  title: "Customers from Kosovo",
+  desc: "Return name, email, and sign_up_date of all customers from Kosovo. Sort by sign_up_date DESC (newest first).",
+  code:
+`SELECT name, email, sign_up_date
+FROM customers
+WHERE country = 'Kosovo'
+ORDER BY sign_up_date DESC;`,
+  run: db => db.exec("SELECT name,email,sign_up_date FROM customers WHERE country='Kosovo' ORDER BY sign_up_date DESC;")
+},
+{
+  title: "Products low in stock",
+  desc: "Return product name, price, and stock for every product whose stock &lt; 20. Sort by stock ASC.",
+  code:
+`SELECT name, price, stock
+FROM products
+WHERE stock < 20
+ORDER BY stock ASC;`,
+  run: db => db.exec("SELECT name,price,stock FROM products WHERE stock<20 ORDER BY stock ASC;")
+},
+{
+  title: "Customers who never ordered",
+  desc: "Return name and email of every customer who has never placed an order. Sort alphabetically by name. <em>Hint: LEFT JOIN + IS NULL</em>",
+  code:
+`SELECT c.name, c.email
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id
+WHERE o.id IS NULL
+ORDER BY c.name ASC;`,
+  run: db => db.exec("SELECT c.name,c.email FROM customers c LEFT JOIN orders o ON c.id=o.customer_id WHERE o.id IS NULL ORDER BY c.name ASC;")
+},
+{
+  title: "Order total per order",
+  desc: "For each order: order_id, customer name, and total value (SUM of quantity × unit_price). Sort by total_value DESC.",
+  code:
+`SELECT o.id AS order_id,
+       c.name AS customer_name,
+       SUM(oi.quantity * oi.unit_price) AS total_value
+FROM orders o
+JOIN customers c ON o.customer_id = c.id
+JOIN order_items oi ON o.id = oi.order_id
+GROUP BY o.id, c.name
+ORDER BY total_value DESC;`,
+  run: db => db.exec("SELECT o.id AS order_id,c.name AS customer_name,SUM(oi.quantity*oi.unit_price) AS total_value FROM orders o JOIN customers c ON o.customer_id=c.id JOIN order_items oi ON o.id=oi.order_id GROUP BY o.id,c.name ORDER BY total_value DESC;")
+},
+{
+  title: "Top 5 customers by spending",
+  desc: "Top 5 customers by total amount spent (SUM of quantity × unit_price across all orders). Show name and total_spent. Sort DESC.",
+  code:
+`SELECT c.name AS customer_name,
+       SUM(oi.quantity * oi.unit_price) AS total_spent
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+JOIN order_items oi ON o.id = oi.order_id
+GROUP BY c.id, c.name
+ORDER BY total_spent DESC
+LIMIT 5;`,
+  run: db => db.exec("SELECT c.name AS customer_name,SUM(oi.quantity*oi.unit_price) AS total_spent FROM customers c JOIN orders o ON c.id=o.customer_id JOIN order_items oi ON o.id=oi.order_id GROUP BY c.id,c.name ORDER BY total_spent DESC LIMIT 5;")
+}
+];
+
+// ──────────────────────────────────────────────────
+// DB SETUP
+// ──────────────────────────────────────────────────
+let sqlDB = null;
+async function getDB(){
+  if(sqlDB) return sqlDB;
+  const SQL = await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`});
+  sqlDB = new SQL.Database();
+  sqlDB.run(`
+    CREATE TABLE customers(id INTEGER PRIMARY KEY,name TEXT,email TEXT,country TEXT,sign_up_date TEXT);
+    CREATE TABLE products(id INTEGER PRIMARY KEY,name TEXT,price REAL,stock INTEGER);
+    CREATE TABLE orders(id INTEGER PRIMARY KEY,customer_id INTEGER,order_date TEXT);
+    CREATE TABLE order_items(id INTEGER PRIMARY KEY,order_id INTEGER,product_id INTEGER,quantity INTEGER,unit_price REAL);
+
+    INSERT INTO customers VALUES
+      (1,'Ardita Berisha','ardita@mail.com','Kosovo','2023-05-12'),
+      (2,'Jon Smith','jon@mail.com','USA','2023-01-08'),
+      (3,'Blerta Krasniqi','blerta@mail.com','Kosovo','2022-11-30'),
+      (4,'Maria Santos','maria@mail.com','Brazil','2023-07-21'),
+      (5,'Faton Gashi','faton@mail.com','Kosovo','2024-02-14'),
+      (6,'Lena Mueller','lena@mail.com','Germany','2022-09-05'),
+      (7,'Vesa Morina','vesa@mail.com','Kosovo','2021-03-18'),
+      (8,'Carlos Lopez','carlos@mail.com','Spain','2023-12-01'),
+      (9,'Rina Hoxha','rina@mail.com','Kosovo','2024-01-20'),
+      (10,'Ahmed Ali','ahmed@mail.com','USA','2022-06-15');
+
+    INSERT INTO products VALUES
+      (1,'Laptop',899.99,5),
+      (2,'Mouse',19.99,150),
+      (3,'Keyboard',49.99,18),
+      (4,'Monitor',299.99,3),
+      (5,'USB Hub',24.99,200),
+      (6,'Webcam',79.99,12),
+      (7,'Headphones',149.99,40);
+
+    INSERT INTO orders VALUES
+      (1,1,'2024-01-10'),(2,1,'2024-02-20'),(3,2,'2024-01-15'),
+      (4,3,'2024-03-05'),(5,5,'2024-02-28'),(6,7,'2023-12-10'),
+      (7,8,'2024-01-22'),(8,2,'2024-03-01');
+
+    INSERT INTO order_items VALUES
+      (1,1,1,1,899.99),(2,1,2,2,19.99),(3,2,3,1,49.99),(4,2,7,1,149.99),
+      (5,3,4,2,299.99),(6,4,1,1,899.99),(7,4,5,3,24.99),(8,5,6,1,79.99),
+      (9,5,2,1,19.99),(10,6,7,2,149.99),(11,7,3,1,49.99),(12,7,4,1,299.99),
+      (13,8,1,1,899.99),(14,8,6,2,79.99);
+  `);
+  return sqlDB;
+}
+
+// ──────────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────────
+let lang = 'python';
+let cur  = 0;
+const done = {python:new Set(), sql:new Set()};
+
+// ──────────────────────────────────────────────────
+// RENDER
+// ──────────────────────────────────────────────────
+const H = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function render(){
+  const tasks = lang==='python'?PYTHON:SQL;
+  const sidebar = document.getElementById('sidebar');
+  const content = document.getElementById('content');
+  sidebar.innerHTML=''; content.innerHTML='';
+
+  // sidebar
+  const sec=document.createElement('div');
+  const lbl=document.createElement('div');
+  lbl.className='sb-section-title';
+  lbl.textContent=lang==='python'?'Python Tasks':'SQL Queries';
+  sec.appendChild(lbl);
+  tasks.forEach((t,i)=>{
+    const el=document.createElement('div');
+    el.className='sb-item'+(i===cur?' active':'')+(done[lang].has(i)?' ok':'');
+    el.id=`sb-${lang}-${i}`;
+    el.onclick=()=>show(i);
+    el.innerHTML=`<span class="sb-dot">${String(i+1).padStart(2,'0')}</span><span class="sb-label">${t.title}</span>`;
+    sec.appendChild(el);
+  });
+  sidebar.appendChild(sec);
+
+  // panels
+  const isSQL = lang==='sql';
+  const schemaBlock=`
+    <div class="schema-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+      📋 <span>View DB Schema</span>
+    </div>
+    <div class="schema-box">
+      <strong>customers</strong>(id, name, email, country, sign_up_date)<br>
+      <strong>products</strong>(id, name, price, stock)<br>
+      <strong>orders</strong>(id, customer_id, order_date)<br>
+      <strong>order_items</strong>(id, order_id, product_id, quantity, unit_price)
+    </div>`;
+
+  tasks.forEach((t,i)=>{
+    const p=document.createElement('div');
+    p.className='panel'+(i===cur?' active':'');
+    p.id=`panel-${lang}-${i}`;
+    const runAttr = isSQL
+      ? `onclick="runSQL(${i})"`
+      : `onclick="runPy(${i})"`;
+    p.innerHTML=`
+      ${isSQL?schemaBlock:''}
+      <div class="task-badge"><span></span>${lang.toUpperCase()} &mdash; ${String(i+1).padStart(2,'0')}</div>
+      <div class="task-h1">${t.title}</div>
+      <div class="task-desc">${t.desc}</div>
+      <div class="code-wrap">
+        <div class="code-label">// CODE</div>
+        <pre class="code-block">${H(t.code)}</pre>
+      </div>
+      <div class="run-row">
+        <button class="run-btn" ${runAttr}>
+          <svg viewBox="0 0 16 16" fill="currentColor"><polygon points="3,1 13,8 3,15"/></svg>
+          Run
+        </button>
+        <span class="run-hint">Click to execute and see the result</span>
+      </div>
+      <div class="out-label">// OUTPUT</div>
+      <div class="out-box" id="out-${lang}-${i}">Output will appear here...</div>
+      <div class="task-nav">
+        <button class="nav-btn" onclick="show(${i-1})" ${i===0?'disabled':''}>← Previous</button>
+        <button class="nav-btn" onclick="show(${i+1})" ${i===tasks.length-1?'disabled':''}>Next →</button>
+      </div>`;
+    content.appendChild(p);
+  });
+
+  updateStats();
+}
+
+function show(i){
+  const tasks=lang==='python'?PYTHON:SQL;
+  if(i<0||i>=tasks.length)return;
+  document.getElementById(`panel-${lang}-${cur}`)?.classList.remove('active');
+  document.getElementById(`sb-${lang}-${cur}`)?.classList.remove('active');
+  cur=i;
+  document.getElementById(`panel-${lang}-${cur}`)?.classList.add('active');
+  const sb=document.getElementById(`sb-${lang}-${cur}`);
+  if(sb){sb.classList.add('active');sb.scrollIntoView({block:'nearest'})}
+  updateStats();
+}
+
+function markOK(i){
+  done[lang].add(i);
+  document.getElementById(`sb-${lang}-${i}`)?.classList.add('ok');
+  updateStats();
+}
+
+function updateStats(){
+  const tasks=lang==='python'?PYTHON:SQL;
+  const n=done[lang].size;
+  document.getElementById('done-n').textContent=n;
+  document.getElementById('tot-n').textContent=tasks.length;
+  document.getElementById('pbar').style.width=(n/tasks.length*100)+'%';
+}
+
+function switchLang(l,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  lang=l; cur=0;
+  render();
+}
+
+// ──────────────────────────────────────────────────
+// RUNNERS
+// ──────────────────────────────────────────────────
+function runPy(i){
+  const box=document.getElementById(`out-python-${i}`);
+  box.className='out-box ok';
+  box.textContent=PYTHON[i].out;
+  markOK(i);
+}
+
+async function runSQL(i){
+  const box=document.getElementById(`out-sql-${i}`);
+  box.className='out-box';
+  box.textContent='Running...';
+  try{
+    const db=await getDB();
+    const res=SQL[i].run(db);
+    if(!res||!res.length){
+      box.className='out-box ok';
+      box.textContent='✓ Query executed. No rows returned.';
+      markOK(i); return;
+    }
+    const{columns,values}=res[0];
+    let h=`<div class="tbl-wrap"><table class="rtable"><thead><tr>`;
+    columns.forEach(c=>h+=`<th>${c}</th>`);
+    h+=`</tr></thead><tbody>`;
+    values.forEach(r=>{h+='<tr>';r.forEach(v=>h+=`<td>${v??'NULL'}</td>`);h+='</tr>';});
+    h+=`</tbody></table></div><div class="row-info">${values.length} row(s) returned</div>`;
+    box.className='out-box ok';
+    box.innerHTML=h;
+    markOK(i);
+  }catch(e){
+    box.className='out-box fail';
+    box.textContent='Error: '+e.message;
+  }
+}
+
+// ──────────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
