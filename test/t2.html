@@ -6,335 +6,132 @@
 <title>Detyrat – Python & SQL</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --border: #1e1e2e;
-    --accent1: #7c3aed;
-    --accent2: #06b6d4;
-    --accent3: #f59e0b;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --py: #3b82f6;
-    --sql: #10b981;
-    --hard: #ef4444;
-    --med: #f59e0b;
-    --easy: #22c55e;
-  }
+:root {
+  --bg: #0a0a0f;
+  --surface: #13131a;
+  --border: #1e1e2e;
+  --accent1: #7c3aed;
+  --accent2: #06b6d4;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --py: #3b82f6;
+  --sql: #10b981;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none; z-index:0;
+}
+.glow-orb { position:fixed; border-radius:50%; filter:blur(120px); pointer-events:none; z-index:0; }
+.orb1 { width:500px; height:500px; background:rgba(124,58,237,0.12); top:-100px; left:-100px; }
+.orb2 { width:400px; height:400px; background:rgba(6,182,212,0.08); bottom:0; right:-50px; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+header { position:relative; z-index:10; padding:60px 40px 40px; max-width:1100px; margin:0 auto; }
+.header-tag {
+  display:inline-block; font-family:'Space Mono',monospace; font-size:11px;
+  color:var(--accent2); border:1px solid rgba(6,182,212,0.3); padding:4px 12px;
+  border-radius:2px; letter-spacing:2px; text-transform:uppercase; margin-bottom:20px;
+  animation:fadeDown 0.6s ease both;
+}
+h1 { font-size:clamp(2.5rem,6vw,5rem); font-weight:800; line-height:1.05; letter-spacing:-2px; animation:fadeDown 0.7s ease both; }
+h1 .hl-py { color:var(--py); }
+h1 .hl-sql { color:var(--sql); }
+.subtitle { margin-top:16px; color:var(--muted); font-size:1.05rem; font-weight:400; max-width:520px; line-height:1.6; animation:fadeDown 0.8s ease both; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+.stats-bar { display:flex; gap:24px; flex-wrap:wrap; margin:36px 0 0; animation:fadeDown 0.9s ease both; }
+.stat-pill { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:100px; padding:8px 18px; font-family:'Space Mono',monospace; font-size:13px; }
+.stat-dot { width:8px; height:8px; border-radius:50%; }
+.dot-py  { background:var(--py);  box-shadow:0 0 8px var(--py); }
+.dot-sql { background:var(--sql); box-shadow:0 0 8px var(--sql); }
+.dot-all { background:var(--accent1); box-shadow:0 0 8px var(--accent1); }
 
-  /* Animated grid bg */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+.filters { position:relative; z-index:10; max-width:1100px; margin:50px auto 0; padding:0 40px; display:flex; gap:8px; flex-wrap:wrap; }
+.filter-btn { background:var(--surface); border:1px solid var(--border); color:var(--muted); padding:8px 20px; border-radius:4px; font-family:'Space Mono',monospace; font-size:12px; cursor:pointer; transition:all 0.2s; text-transform:uppercase; letter-spacing:1px; }
+.filter-btn:hover, .filter-btn.active { color:var(--text); border-color:var(--accent1); background:rgba(124,58,237,0.12); }
+.filter-btn.active { box-shadow:0 0 12px rgba(124,58,237,0.3); }
 
-  .glow-orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .orb1 { width: 500px; height: 500px; background: rgba(124,58,237,0.12); top: -100px; left: -100px; }
-  .orb2 { width: 400px; height: 400px; background: rgba(6,182,212,0.08); bottom: 0; right: -50px; }
+.grid { position:relative; z-index:10; max-width:1100px; margin:36px auto 80px; padding:0 40px; display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px; }
 
-  /* HEADER */
-  header {
-    position: relative;
-    z-index: 10;
-    padding: 60px 40px 40px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:28px; position:relative; overflow:hidden; cursor:default; transition:transform 0.25s, border-color 0.25s, box-shadow 0.25s; animation:fadeUp 0.5s ease both; }
+.card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.card.py::before  { background:linear-gradient(90deg, var(--py), transparent); }
+.card.sql::before { background:linear-gradient(90deg, var(--sql), transparent); }
+.card:hover { transform:translateY(-4px); box-shadow:0 20px 40px rgba(0,0,0,0.4); }
+.card.py:hover  { border-color:rgba(59,130,246,0.4); }
+.card.sql:hover { border-color:rgba(16,185,129,0.4); }
 
-  .header-tag {
-    display: inline-block;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--accent2);
-    border: 1px solid rgba(6,182,212,0.3);
-    padding: 4px 12px;
-    border-radius: 2px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-    animation: fadeDown 0.6s ease both;
-  }
+.card-num { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:2px; margin-bottom:12px; }
+.card-badges { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.badge { font-family:'Space Mono',monospace; font-size:10px; padding:3px 10px; border-radius:2px; letter-spacing:1px; text-transform:uppercase; font-weight:700; }
+.badge-py   { background:rgba(59,130,246,0.15);  color:#60a5fa; border:1px solid rgba(59,130,246,0.25); }
+.badge-sql  { background:rgba(16,185,129,0.15);  color:#34d399; border:1px solid rgba(16,185,129,0.25); }
+.badge-easy { background:rgba(34,197,94,0.12);   color:#4ade80; border:1px solid rgba(34,197,94,0.2); }
+.badge-med  { background:rgba(245,158,11,0.12);  color:#fbbf24; border:1px solid rgba(245,158,11,0.2); }
+.badge-hard { background:rgba(239,68,68,0.12);   color:#f87171; border:1px solid rgba(239,68,68,0.2); }
 
-  h1 {
-    font-size: clamp(2.5rem, 6vw, 5rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -2px;
-    animation: fadeDown 0.7s ease both;
-  }
+.card h3 { font-size:1.05rem; font-weight:600; line-height:1.4; margin-bottom:10px; }
+.card p   { font-size:0.88rem; color:var(--muted); line-height:1.6; font-weight:400; margin-bottom:18px; }
+.card p code { font-family:'Space Mono',monospace; font-size:10px; color:#a5b4fc; background:rgba(165,180,252,0.1); padding:1px 5px; border-radius:3px; }
 
-  h1 span.hl-py { color: var(--py); }
-  h1 span.hl-sql { color: var(--sql); }
+.big-num { position:absolute; right:20px; top:16px; font-family:'Space Mono',monospace; font-size:3.5rem; font-weight:700; opacity:0.04; pointer-events:none; line-height:1; }
 
-  .subtitle {
-    margin-top: 16px;
-    color: var(--muted);
-    font-size: 1.05rem;
-    font-weight: 400;
-    max-width: 520px;
-    line-height: 1.6;
-    animation: fadeDown 0.8s ease both;
-  }
+/* ── CODE BLOCK ── */
+.code-block {
+  display: none;
+  margin-top: 14px;
+  background: #0d0d14;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.code-block.visible { display:block; animation:fadeUp 0.3s ease; }
 
-  /* STATS BAR */
-  .stats-bar {
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-    margin: 36px 0 0;
-    animation: fadeDown 0.9s ease both;
-  }
+.code-block pre {
+  margin: 0;
+  padding: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: #a5b4fc;
+  white-space: pre;
+  overflow-x: auto;
+}
 
-  .stat-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 8px 18px;
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-  }
+/* syntax colours */
+.kw  { color:#c084fc; }
+.fn  { color:#60a5fa; }
+.str { color:#86efac; }
+.cm  { color:#475569; font-style:italic; }
+.num { color:#fbbf24; }
+.op  { color:#94a3b8; }
 
-  .stat-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .dot-py { background: var(--py); box-shadow: 0 0 8px var(--py); }
-  .dot-sql { background: var(--sql); box-shadow: 0 0 8px var(--sql); }
-  .dot-all { background: var(--accent1); box-shadow: 0 0 8px var(--accent1); }
+.toggle-btn { display:flex; align-items:center; gap:6px; font-family:'Space Mono',monospace; font-size:11px; color:var(--accent1); background:none; border:none; cursor:pointer; padding:0; letter-spacing:0.5px; transition:color 0.2s; }
+.toggle-btn:hover { color:#a78bfa; }
+.toggle-arrow { transition:transform 0.2s; display:inline-block; }
+.toggle-arrow.open { transform:rotate(90deg); }
 
-  /* FILTER TABS */
-  .filters {
-    position: relative;
-    z-index: 10;
-    max-width: 1100px;
-    margin: 50px auto 0;
-    padding: 0 40px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    animation: fadeUp 1s ease both;
-  }
+footer { position:relative; z-index:10; text-align:center; padding:30px; border-top:1px solid var(--border); font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:1px; }
 
-  .filter-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 8px 20px;
-    border-radius: 4px;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+@keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
 
-  .filter-btn:hover, .filter-btn.active {
-    color: var(--text);
-    border-color: var(--accent1);
-    background: rgba(124,58,237,0.12);
-  }
-
-  .filter-btn.active { box-shadow: 0 0 12px rgba(124,58,237,0.3); }
-
-  /* GRID */
-  .grid {
-    position: relative;
-    z-index: 10;
-    max-width: 1100px;
-    margin: 36px auto 80px;
-    padding: 0 40px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
-  }
-
-  /* CARD */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 28px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-
-  .card.py::before { background: linear-gradient(90deg, var(--py), transparent); }
-  .card.sql::before { background: linear-gradient(90deg, var(--sql), transparent); }
-
-  .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  }
-
-  .card.py:hover { border-color: rgba(59,130,246,0.4); }
-  .card.sql:hover { border-color: rgba(16,185,129,0.4); }
-
-  .card-num {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-  }
-
-  .card-badges {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-
-  .badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 2px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    font-weight: 700;
-  }
-
-  .badge-py { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
-  .badge-sql { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
-  .badge-easy { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
-  .badge-med { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
-  .badge-hard { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
-
-  .card h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    line-height: 1.4;
-    margin-bottom: 12px;
-    color: var(--text);
-  }
-
-  .card p {
-    font-size: 0.88rem;
-    color: var(--muted);
-    line-height: 1.6;
-    font-weight: 400;
-    margin-bottom: 20px;
-  }
-
-  /* Code block */
-  .code-block {
-    background: #0d0d14;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 6px;
-    padding: 16px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11.5px;
-    line-height: 1.7;
-    color: #a5b4fc;
-    overflow-x: auto;
-    display: none;
-    margin-top: 4px;
-    position: relative;
-  }
-
-  .code-block.visible { display: block; animation: fadeUp 0.3s ease; }
-
-  .code-block .kw { color: #c084fc; }
-  .code-block .fn { color: #60a5fa; }
-  .code-block .str { color: #86efac; }
-  .code-block .cm { color: #475569; font-style: italic; }
-  .code-block .num { color: #fbbf24; }
-  .code-block .op { color: #94a3b8; }
-
-  .toggle-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--accent1);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    letter-spacing: 0.5px;
-    transition: color 0.2s;
-  }
-
-  .toggle-btn:hover { color: #a78bfa; }
-  .toggle-arrow { transition: transform 0.2s; display: inline-block; }
-  .toggle-arrow.open { transform: rotate(90deg); }
-
-  /* Decorative number */
-  .big-num {
-    position: absolute;
-    right: 20px;
-    top: 16px;
-    font-family: 'Space Mono', monospace;
-    font-size: 3.5rem;
-    font-weight: 700;
-    opacity: 0.04;
-    pointer-events: none;
-    line-height: 1;
-  }
-
-  /* FOOTER */
-  footer {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 30px;
-    border-top: 1px solid var(--border);
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 600px) {
-    header, .filters, .grid { padding: 0 20px; }
-    header { padding-top: 40px; }
-    .grid { grid-template-columns: 1fr; }
-  }
+@media (max-width:600px) {
+  header, .filters, .grid { padding:0 20px; }
+  header { padding-top:40px; }
+  .grid { grid-template-columns:1fr; }
+}
 </style>
 </head>
 <body>
@@ -344,13 +141,8 @@
 
 <header>
   <div class="header-tag">// Detyrat Praktike</div>
-  <h1>
-    <span class="hl-py">Python</span><br>
-    <span class="hl-sql">& SQL</span>
-  </h1>
-  <p class="subtitle">
-    15 detyra praktike – nga SELECT e thjeshtë deri te gjetja e numrave që mungojnë dhe llogaritjet me formula.
-  </p>
+  <h1><span class="hl-py">Python</span><br><span class="hl-sql">&amp; SQL</span></h1>
+  <p class="subtitle">15 detyra praktike – nga SELECT e thjeshtë deri te gjetja e numrave që mungojnë dhe llogaritjet me formula.</p>
   <div class="stats-bar">
     <div class="stat-pill"><span class="stat-dot dot-all"></span> 15 Detyra</div>
     <div class="stat-pill"><span class="stat-dot dot-py"></span> 8 Python</div>
@@ -359,227 +151,165 @@
 </header>
 
 <div class="filters">
-  <button class="filter-btn active" onclick="filterCards('all', this)">TË GJITHA</button>
-  <button class="filter-btn" onclick="filterCards('py', this)">PYTHON</button>
-  <button class="filter-btn" onclick="filterCards('sql', this)">SQL</button>
-  <button class="filter-btn" onclick="filterCards('easy', this)">E LEHTË</button>
-  <button class="filter-btn" onclick="filterCards('med', this)">MESATARE</button>
-  <button class="filter-btn" onclick="filterCards('hard', this)">E VËSHTIRË</button>
+  <button class="filter-btn active" onclick="filterCards('all',this)">TË GJITHA</button>
+  <button class="filter-btn" onclick="filterCards('py',this)">PYTHON</button>
+  <button class="filter-btn" onclick="filterCards('sql',this)">SQL</button>
+  <button class="filter-btn" onclick="filterCards('easy',this)">E LEHTË</button>
+  <button class="filter-btn" onclick="filterCards('med',this)">MESATARE</button>
+  <button class="filter-btn" onclick="filterCards('hard',this)">E VËSHTIRË</button>
 </div>
 
 <div class="grid" id="grid">
 
-  <!-- DETYRE 1 -->
-  <div class="card sql" data-tags="sql easy">
-    <span class="big-num">01</span>
-    <div class="card-num">DETYRË // 01</div>
-    <div class="card-badges">
-      <span class="badge badge-sql">SQL</span>
-      <span class="badge badge-easy">E LEHTË</span>
-    </div>
-    <h3>SELECT Basic – Shfaq të gjithë studentët</h3>
-    <p>Shkruaj një query SQL që zgjedh të gjitha kolonat nga tabela <code>studentet</code>.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="cm">-- Zgjidhja me SELECT e thjeshtë</span>
+<!-- 01 -->
+<div class="card sql" data-tags="sql easy">
+  <span class="big-num">01</span>
+  <div class="card-num">DETYRË // 01</div>
+  <div class="card-badges"><span class="badge badge-sql">SQL</span><span class="badge badge-easy">E LEHTË</span></div>
+  <h3>SELECT Basic – Shfaq të gjithë studentët</h3>
+  <p>Shkruaj një query SQL që zgjedh të gjitha kolonat nga tabela <code>studentet</code>.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="cm">-- Zgjidhja me SELECT e thjeshtë</span>
 <span class="kw">SELECT</span> *
 <span class="kw">FROM</span> studentet;
 
 <span class="cm">-- Ose me kolona specifike:</span>
 <span class="kw">SELECT</span> id, emri, mbiemri, nota
-<span class="kw">FROM</span> studentet;
-    </div>
-  </div>
+<span class="kw">FROM</span> studentet;</pre></div>
+</div>
 
-  <!-- DETYRE 2 -->
-  <div class="card sql" data-tags="sql easy">
-    <span class="big-num">02</span>
-    <div class="card-num">DETYRË // 02</div>
-    <div class="card-badges">
-      <span class="badge badge-sql">SQL</span>
-      <span class="badge badge-easy">E LEHTË</span>
-    </div>
-    <h3>SELECT me WHERE – Filtro sipas kushtit</h3>
-    <p>Gjej të gjithë studentët me notë mbi 80. Përdor WHERE për të filtruar rezultatet.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">SELECT</span> emri, mbiemri, nota
+<!-- 02 -->
+<div class="card sql" data-tags="sql easy">
+  <span class="big-num">02</span>
+  <div class="card-num">DETYRË // 02</div>
+  <div class="card-badges"><span class="badge badge-sql">SQL</span><span class="badge badge-easy">E LEHTË</span></div>
+  <h3>SELECT me WHERE – Filtro sipas kushtit</h3>
+  <p>Gjej të gjithë studentët me notë mbi 80. Përdor <code>WHERE</code> për të filtruar rezultatet.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">SELECT</span> emri, mbiemri, nota
 <span class="kw">FROM</span> studentet
 <span class="kw">WHERE</span> nota <span class="op">&gt;</span> <span class="num">80</span>
-<span class="kw">ORDER BY</span> nota <span class="kw">DESC</span>;
-    </div>
-  </div>
+<span class="kw">ORDER BY</span> nota <span class="kw">DESC</span>;</pre></div>
+</div>
 
-  <!-- DETYRE 3 -->
-  <div class="card sql" data-tags="sql med">
-    <span class="big-num">03</span>
-    <div class="card-num">DETYRË // 03</div>
-    <div class="card-badges">
-      <span class="badge badge-sql">SQL</span>
-      <span class="badge badge-med">MESATARE</span>
-    </div>
-    <h3>SUM / TOTAL – Gjej totalin e shitjeve</h3>
-    <p>Nga tabela <code>shitjet</code>, llogarit shumën totale të të gjitha shitjeve me funksionin agregat SUM.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="cm">-- Totali i të gjitha shitjeve</span>
+<!-- 03 -->
+<div class="card sql" data-tags="sql med">
+  <span class="big-num">03</span>
+  <div class="card-num">DETYRË // 03</div>
+  <div class="card-badges"><span class="badge badge-sql">SQL</span><span class="badge badge-med">MESATARE</span></div>
+  <h3>SUM / TOTAL – Gjej totalin e shitjeve</h3>
+  <p>Nga tabela <code>shitjet</code>, llogarit shumën totale të të gjitha shitjeve me <code>SUM</code>.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="cm">-- Totali i të gjitha shitjeve</span>
 <span class="kw">SELECT</span>
-  <span class="fn">SUM</span>(shuma) <span class="kw">AS</span> total_shitjet,
-  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> numri_transaksioneve,
-  <span class="fn">AVG</span>(shuma) <span class="kw">AS</span> mesatarja
+    <span class="fn">SUM</span>(shuma)   <span class="kw">AS</span> total_shitjet,
+    <span class="fn">COUNT</span>(*)     <span class="kw">AS</span> nr_transaksioneve,
+    <span class="fn">AVG</span>(shuma)   <span class="kw">AS</span> mesatarja
 <span class="kw">FROM</span> shitjet;
 
 <span class="cm">-- Totali sipas muajit:</span>
 <span class="kw">SELECT</span> muaji, <span class="fn">SUM</span>(shuma) <span class="kw">AS</span> total
 <span class="kw">FROM</span> shitjet
 <span class="kw">GROUP BY</span> muaji
-<span class="kw">ORDER BY</span> muaji;
-    </div>
-  </div>
+<span class="kw">ORDER BY</span> muaji;</pre></div>
+</div>
 
-  <!-- DETYRE 4 -->
-  <div class="card sql" data-tags="sql med">
-    <span class="big-num">04</span>
-    <div class="card-num">DETYRË // 04</div>
-    <div class="card-badges">
-      <span class="badge badge-sql">SQL</span>
-      <span class="badge badge-med">MESATARE</span>
-    </div>
-    <h3>GROUP BY – Shitjet sipas produktit</h3>
-    <p>Gropo shitjet sipas emrit të produktit dhe gjej totalin për secilin produkt.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">SELECT</span>
-  produkti,
-  <span class="fn">SUM</span>(shuma) <span class="kw">AS</span> total,
-  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> nr_shitjeve
+<!-- 04 -->
+<div class="card sql" data-tags="sql med">
+  <span class="big-num">04</span>
+  <div class="card-num">DETYRË // 04</div>
+  <div class="card-badges"><span class="badge badge-sql">SQL</span><span class="badge badge-med">MESATARE</span></div>
+  <h3>GROUP BY – Shitjet sipas produktit</h3>
+  <p>Gropo shitjet sipas emrit të produktit dhe gjej totalin për secilin produkt.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">SELECT</span>
+    produkti,
+    <span class="fn">SUM</span>(shuma)  <span class="kw">AS</span> total,
+    <span class="fn">COUNT</span>(*)    <span class="kw">AS</span> nr_shitjeve
 <span class="kw">FROM</span> shitjet
 <span class="kw">GROUP BY</span> produkti
 <span class="kw">HAVING</span> <span class="fn">SUM</span>(shuma) <span class="op">&gt;</span> <span class="num">1000</span>
-<span class="kw">ORDER BY</span> total <span class="kw">DESC</span>;
-    </div>
-  </div>
+<span class="kw">ORDER BY</span> total <span class="kw">DESC</span>;</pre></div>
+</div>
 
-  <!-- DETYRE 5 -->
-  <div class="card sql" data-tags="sql hard">
-    <span class="big-num">05</span>
-    <div class="card-num">DETYRË // 05</div>
-    <div class="card-badges">
-      <span class="badge badge-sql">SQL</span>
-      <span class="badge badge-hard">E VËSHTIRË</span>
-    </div>
-    <h3>Missing Numbers – Gjej numrat që mungojnë</h3>
-    <p>Nga tabela <code>porositë</code> me kolona ID, gjej të gjithë numrat ID që mungojnë në sekuencë.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="cm">-- Metoda me sequence generator (PostgreSQL)</span>
-<span class="kw">SELECT</span> generate_series <span class="kw">AS</span> id_mungues
-<span class="kw">FROM</span> <span class="fn">generate_series</span>(
-  (<span class="kw">SELECT</span> <span class="fn">MIN</span>(id) <span class="kw">FROM</span> porosite),
-  (<span class="kw">SELECT</span> <span class="fn">MAX</span>(id) <span class="kw">FROM</span> porosite)
-)
-<span class="kw">WHERE</span> generate_series <span class="kw">NOT IN</span>
-  (<span class="kw">SELECT</span> id <span class="kw">FROM</span> porosite);
-
-<span class="cm">-- Metoda me LEFT JOIN (punon kudo):</span>
+<!-- 05 -->
+<div class="card sql" data-tags="sql hard">
+  <span class="big-num">05</span>
+  <div class="card-num">DETYRË // 05</div>
+  <div class="card-badges"><span class="badge badge-sql">SQL</span><span class="badge badge-hard">E VËSHTIRË</span></div>
+  <h3>Missing Numbers – Gjej numrat që mungojnë</h3>
+  <p>Nga tabela <code>porosite</code>, gjej të gjithë numrat ID që mungojnë në sekuencë.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="cm">-- Metoda me LEFT JOIN (punon kudo):</span>
 <span class="kw">SELECT</span> t1.id <span class="op">+</span> <span class="num">1</span> <span class="kw">AS</span> id_mungues
 <span class="kw">FROM</span> porosite t1
 <span class="kw">LEFT JOIN</span> porosite t2
-  <span class="kw">ON</span> t1.id <span class="op">+</span> <span class="num">1</span> <span class="op">=</span> t2.id
+    <span class="kw">ON</span> t1.id <span class="op">+</span> <span class="num">1</span> <span class="op">=</span> t2.id
 <span class="kw">WHERE</span> t2.id <span class="kw">IS NULL</span>
 <span class="kw">ORDER BY</span> id_mungues;
-    </div>
-  </div>
 
-  <!-- DETYRE 6 -->
-  <div class="card sql" data-tags="sql med">
-    <span class="big-num">06</span>
-    <div class="card-num">DETYRË // 06</div>
-    <div class="card-badges">
-      <span class="badge badge-sql">SQL</span>
-      <span class="badge badge-med">MESATARE</span>
-    </div>
-    <h3>JOIN – Bashko dy tabela</h3>
-    <p>Bashko tabelën <code>porosite</code> me tabelën <code>klientet</code> dhe shfaq emrin e klientit me shumën e porosisë.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">SELECT</span>
-  k.emri,
-  k.mbiemri,
-  p.data_porosise,
-  p.shuma_totale
+<span class="cm">-- PostgreSQL me generate_series:</span>
+<span class="kw">SELECT</span> gs <span class="kw">AS</span> id_mungues
+<span class="kw">FROM</span> <span class="fn">generate_series</span>(
+    (<span class="kw">SELECT</span> <span class="fn">MIN</span>(id) <span class="kw">FROM</span> porosite),
+    (<span class="kw">SELECT</span> <span class="fn">MAX</span>(id) <span class="kw">FROM</span> porosite)
+) gs
+<span class="kw">WHERE</span> gs <span class="kw">NOT IN</span> (<span class="kw">SELECT</span> id <span class="kw">FROM</span> porosite);</pre></div>
+</div>
+
+<!-- 06 -->
+<div class="card sql" data-tags="sql med">
+  <span class="big-num">06</span>
+  <div class="card-num">DETYRË // 06</div>
+  <div class="card-badges"><span class="badge badge-sql">SQL</span><span class="badge badge-med">MESATARE</span></div>
+  <h3>JOIN – Bashko dy tabela</h3>
+  <p>Bashko <code>porosite</code> me <code>klientet</code> dhe shfaq emrin e klientit me shumën e porosisë.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">SELECT</span>
+    k.emri,
+    k.mbiemri,
+    p.data_porosise,
+    p.shuma_totale
 <span class="kw">FROM</span> porosite p
 <span class="kw">INNER JOIN</span> klientet k
-  <span class="kw">ON</span> p.klient_id <span class="op">=</span> k.id
+    <span class="kw">ON</span> p.klient_id <span class="op">=</span> k.id
 <span class="kw">WHERE</span> p.shuma_totale <span class="op">&gt;</span> <span class="num">500</span>
-<span class="kw">ORDER BY</span> p.data_porosise <span class="kw">DESC</span>;
-    </div>
-  </div>
+<span class="kw">ORDER BY</span> p.data_porosise <span class="kw">DESC</span>;</pre></div>
+</div>
 
-  <!-- DETYRE 7 -->
-  <div class="card sql" data-tags="sql hard">
-    <span class="big-num">07</span>
-    <div class="card-num">DETYRË // 07</div>
-    <div class="card-badges">
-      <span class="badge badge-sql">SQL</span>
-      <span class="badge badge-hard">E VËSHTIRË</span>
-    </div>
-    <h3>Formula – Llogarit bonusin me CASE WHEN</h3>
-    <p>Krijonën një kolonë të re "bonusi" bazuar në shumën e shitjeve: nën 100 = 5%, 100–500 = 10%, mbi 500 = 15%.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">SELECT</span>
-  emri,
-  shuma,
-  <span class="kw">CASE</span>
-    <span class="kw">WHEN</span> shuma <span class="op">&lt;</span> <span class="num">100</span>  <span class="kw">THEN</span> shuma <span class="op">*</span> <span class="num">0.05</span>
-    <span class="kw">WHEN</span> shuma <span class="kw">BETWEEN</span> <span class="num">100</span> <span class="kw">AND</span> <span class="num">500</span>
-                        <span class="kw">THEN</span> shuma <span class="op">*</span> <span class="num">0.10</span>
-    <span class="kw">ELSE</span>                     shuma <span class="op">*</span> <span class="num">0.15</span>
-  <span class="kw">END</span> <span class="kw">AS</span> bonusi,
-  shuma <span class="op">+</span> <span class="kw">CASE</span>
-    <span class="kw">WHEN</span> shuma <span class="op">&lt;</span> <span class="num">100</span>  <span class="kw">THEN</span> shuma <span class="op">*</span> <span class="num">0.05</span>
-    <span class="kw">WHEN</span> shuma <span class="kw">BETWEEN</span> <span class="num">100</span> <span class="kw">AND</span> <span class="num">500</span>
-                        <span class="kw">THEN</span> shuma <span class="op">*</span> <span class="num">0.10</span>
-    <span class="kw">ELSE</span>                     shuma <span class="op">*</span> <span class="num">0.15</span>
-  <span class="kw">END</span> <span class="kw">AS</span> shuma_finale
-<span class="kw">FROM</span> shitjet;
-    </div>
-  </div>
+<!-- 07 -->
+<div class="card sql" data-tags="sql hard">
+  <span class="big-num">07</span>
+  <div class="card-num">DETYRË // 07</div>
+  <div class="card-badges"><span class="badge badge-sql">SQL</span><span class="badge badge-hard">E VËSHTIRË</span></div>
+  <h3>Formula – Llogarit bonusin me CASE WHEN</h3>
+  <p>Krijo kolonën "bonusi": nën 100 = 5%, 100–500 = 10%, mbi 500 = 15% të shumës.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">SELECT</span>
+    emri,
+    shuma,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> shuma <span class="op">&lt;</span> <span class="num">100</span>               <span class="kw">THEN</span> shuma <span class="op">*</span> <span class="num">0.05</span>
+        <span class="kw">WHEN</span> shuma <span class="kw">BETWEEN</span> <span class="num">100</span> <span class="kw">AND</span> <span class="num">500</span> <span class="kw">THEN</span> shuma <span class="op">*</span> <span class="num">0.10</span>
+        <span class="kw">ELSE</span>                               shuma <span class="op">*</span> <span class="num">0.15</span>
+    <span class="kw">END</span> <span class="kw">AS</span> bonusi
+<span class="kw">FROM</span> shitjet
+<span class="kw">ORDER BY</span> bonusi <span class="kw">DESC</span>;</pre></div>
+</div>
 
-  <!-- DETYRE 8 -->
-  <div class="card py" data-tags="py easy">
-    <span class="big-num">08</span>
-    <div class="card-num">DETYRË // 08</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-easy">E LEHTË</span>
-    </div>
-    <h3>Lista & Totali – Shuma e elementeve</h3>
-    <p>Krijo një listë me 10 numra dhe llogarit shumën totale, mesataren dhe elementin maksimal.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="cm"># Lista me numra</span>
+<!-- 08 -->
+<div class="card py" data-tags="py easy">
+  <span class="big-num">08</span>
+  <div class="card-num">DETYRË // 08</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-easy">E LEHTË</span></div>
+  <h3>Lista &amp; Totali – Shuma e elementeve</h3>
+  <p>Krijo një listë me 10 numra dhe llogarit shumën totale, mesataren dhe elementin maksimal.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="cm"># Lista me numra</span>
 numrat = [<span class="num">12</span>, <span class="num">45</span>, <span class="num">7</span>, <span class="num">89</span>, <span class="num">23</span>,
           <span class="num">56</span>, <span class="num">34</span>, <span class="num">78</span>, <span class="num">9</span>, <span class="num">100</span>]
 
-totali   = <span class="fn">sum</span>(numrat)
+totali    = <span class="fn">sum</span>(numrat)
 mesatarja = totali / <span class="fn">len</span>(numrat)
 maksimali = <span class="fn">max</span>(numrat)
 minimali  = <span class="fn">min</span>(numrat)
@@ -587,29 +317,20 @@ minimali  = <span class="fn">min</span>(numrat)
 <span class="fn">print</span>(<span class="str">f"Totali:    {totali}"</span>)
 <span class="fn">print</span>(<span class="str">f"Mesatarja: {mesatarja:.2f}"</span>)
 <span class="fn">print</span>(<span class="str">f"Maksimali: {maksimali}"</span>)
-<span class="fn">print</span>(<span class="str">f"Minimali:  {minimali}"</span>)
-    </div>
-  </div>
+<span class="fn">print</span>(<span class="str">f"Minimali:  {minimali}"</span>)</pre></div>
+</div>
 
-  <!-- DETYRE 9 -->
-  <div class="card py" data-tags="py med">
-    <span class="big-num">09</span>
-    <div class="card-num">DETYRË // 09</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-med">MESATARE</span>
-    </div>
-    <h3>Missing Numbers – Gjej numrat që mungojnë</h3>
-    <p>Jepet një listë e pazakonshme numrash 1–100. Gjej cilët numra mungojnë duke përdorur sets.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="cm"># Lista me numra (disa mungojnë)</span>
-lista = [<span class="num">1</span>,<span class="num">2</span>,<span class="num">4</span>,<span class="num">7</span>,<span class="num">8</span>,<span class="num">10</span>,<span class="num">12</span>,
-         <span class="num">15</span>,<span class="num">16</span>,<span class="num">20</span>]
+<!-- 09 -->
+<div class="card py" data-tags="py med">
+  <span class="big-num">09</span>
+  <div class="card-num">DETYRË // 09</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-med">MESATARE</span></div>
+  <h3>Missing Numbers – Gjej numrat që mungojnë</h3>
+  <p>Jepet një listë e pazakonshme numrash. Gjej cilët numra mungojnë duke përdorur <code>set</code>.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="cm"># Lista me numra (disa mungojnë)</span>
+lista = [<span class="num">1</span>,<span class="num">2</span>,<span class="num">4</span>,<span class="num">7</span>,<span class="num">8</span>,<span class="num">10</span>,<span class="num">12</span>,<span class="num">15</span>,<span class="num">16</span>,<span class="num">20</span>]
 
-<span class="cm"># Gjetja e numrave që mungojnë</span>
 te_gjitha = <span class="fn">set</span>(<span class="fn">range</span>(<span class="num">1</span>, <span class="num">21</span>))
 te_dhena  = <span class="fn">set</span>(lista)
 mungojne  = <span class="fn">sorted</span>(te_gjitha <span class="op">-</span> te_dhena)
@@ -617,40 +338,29 @@ mungojne  = <span class="fn">sorted</span>(te_gjitha <span class="op">-</span> t
 <span class="fn">print</span>(<span class="str">f"Numrat që mungojnë: {mungojne}"</span>)
 
 <span class="cm"># Versioni me loop:</span>
-<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">min</span>(lista), <span class="fn">max</span>(lista)<span class="op">+</span><span class="num">1</span>):
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">min</span>(lista), <span class="fn">max</span>(lista) <span class="op">+</span> <span class="num">1</span>):
     <span class="kw">if</span> i <span class="kw">not in</span> lista:
-        <span class="fn">print</span>(<span class="str">f"Mungon: {i}"</span>)
-    </div>
-  </div>
+        <span class="fn">print</span>(<span class="str">f"Mungon: {i}"</span>)</pre></div>
+</div>
 
-  <!-- DETYRE 10 -->
-  <div class="card py" data-tags="py med">
-    <span class="big-num">10</span>
-    <div class="card-num">DETYRË // 10</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-med">MESATARE</span>
-    </div>
-    <h3>Formula – Llogarit bonusin me funksion</h3>
-    <p>Krijo një funksion që llogarit bonusin e punonjësit bazuar në pagën mujore dhe performancën.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">def</span> <span class="fn">llogarit_bonusin</span>(paga, performanca):
-    <span class="str">"""
-    performanca: 'e keqe', 'mesatare', 'shkelqyese'
-    """</span>
+<!-- 10 -->
+<div class="card py" data-tags="py med">
+  <span class="big-num">10</span>
+  <div class="card-num">DETYRË // 10</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-med">MESATARE</span></div>
+  <h3>Formula – Llogarit bonusin me funksion</h3>
+  <p>Krijo një funksion që llogarit bonusin e punonjësit bazuar në pagë dhe performancë.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">def</span> <span class="fn">llogarit_bonusin</span>(paga, performanca):
     perqindjet = {
-        <span class="str">'e keqe'</span>:      <span class="num">0.00</span>,
-        <span class="str">'mesatare'</span>:    <span class="num">0.05</span>,
-        <span class="str">'shkelqyese'</span>:  <span class="num">0.15</span>,
+        <span class="str">'e keqe'</span>:     <span class="num">0.00</span>,
+        <span class="str">'mesatare'</span>:   <span class="num">0.05</span>,
+        <span class="str">'shkelqyese'</span>: <span class="num">0.15</span>,
     }
     p = perqindjet.get(performanca.lower(), <span class="num">0</span>)
-    bonusi = paga <span class="op">*</span> p
-    <span class="kw">return</span> <span class="fn">round</span>(bonusi, <span class="num">2</span>)
+    <span class="kw">return</span> <span class="fn">round</span>(paga <span class="op">*</span> p, <span class="num">2</span>)
 
-<span class="cm"># Testimi</span>
+<span class="cm"># Test me listë punonjësish</span>
 punonjesit = [
     (<span class="str">"Alban"</span>, <span class="num">80000</span>, <span class="str">"shkelqyese"</span>),
     (<span class="str">"Drita"</span>, <span class="num">60000</span>, <span class="str">"mesatare"</span>),
@@ -658,150 +368,112 @@ punonjesit = [
 ]
 <span class="kw">for</span> emri, paga, perf <span class="kw">in</span> punonjesit:
     b = <span class="fn">llogarit_bonusin</span>(paga, perf)
-    <span class="fn">print</span>(<span class="str">f"{emri}: bonus = {b} €"</span>)
-    </div>
-  </div>
+    <span class="fn">print</span>(<span class="str">f"{emri}: bonus = {b} €"</span>)</pre></div>
+</div>
 
-  <!-- DETYRE 11 -->
-  <div class="card py" data-tags="py hard">
-    <span class="big-num">11</span>
-    <div class="card-num">DETYRË // 11</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-hard">E VËSHTIRË</span>
-    </div>
-    <h3>Pandas – Analizë e shitjeve me DataFrame</h3>
-    <p>Ngarko një CSV me shitje dhe gjej produktin me shitjet më të larta, me Pandas dhe grupim.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<!-- 11 -->
+<div class="card py" data-tags="py hard">
+  <span class="big-num">11</span>
+  <div class="card-num">DETYRË // 11</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-hard">E VËSHTIRË</span></div>
+  <h3>Pandas – Analizë e shitjeve me DataFrame</h3>
+  <p>Ngarko një CSV me shitje dhe gjej produktin me shitjet më të larta me Pandas dhe grupim.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
 
 <span class="cm"># Ngarko të dhënat</span>
 df = pd.<span class="fn">read_csv</span>(<span class="str">"shitjet.csv"</span>)
 
 <span class="cm"># Grupim sipas produktit</span>
-totali_sipas_produktit = (
+rezultati = (
     df.<span class="fn">groupby</span>(<span class="str">"produkti"</span>)[<span class="str">"shuma"</span>]
-    .<span class="fn">agg</span>([<span class="str">"sum"</span>, <span class="str">"count"</span>, <span class="str">"mean"</span>])
-    .<span class="fn">rename</span>(columns={
-        <span class="str">"sum"</span>:   <span class="str">"totali"</span>,
-        <span class="str">"count"</span>: <span class="str">"nr_shitjeve"</span>,
-        <span class="str">"mean"</span>:  <span class="str">"mesatarja"</span>
-    })
-    .<span class="fn">sort_values</span>(<span class="str">"totali"</span>, ascending=<span class="kw">False</span>)
+      .<span class="fn">agg</span>([<span class="str">"sum"</span>, <span class="str">"count"</span>, <span class="str">"mean"</span>])
+      .<span class="fn">rename</span>(columns={
+          <span class="str">"sum"</span>:   <span class="str">"totali"</span>,
+          <span class="str">"count"</span>: <span class="str">"nr_shitjeve"</span>,
+          <span class="str">"mean"</span>:  <span class="str">"mesatarja"</span>,
+      })
+      .<span class="fn">sort_values</span>(<span class="str">"totali"</span>, ascending=<span class="kw">False</span>)
 )
 
-<span class="fn">print</span>(totali_sipas_produktit.<span class="fn">head</span>(<span class="num">10</span>))
+<span class="fn">print</span>(rezultati.<span class="fn">head</span>(<span class="num">10</span>))
+top = rezultati.index[<span class="num">0</span>]
+<span class="fn">print</span>(<span class="str">f"\nProdukti #1: {top}"</span>)</pre></div>
+</div>
 
-<span class="cm"># Produkti numër 1:</span>
-top = totali_sipas_produktit.index[<span class="num">0</span>]
-<span class="fn">print</span>(<span class="str">f"\nProdukti më i shitur: {top}"</span>)
-    </div>
-  </div>
+<!-- 12 -->
+<div class="card py" data-tags="py med">
+  <span class="big-num">12</span>
+  <div class="card-num">DETYRË // 12</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-med">MESATARE</span></div>
+  <h3>Dictionary – Frekuenca e fjalëve</h3>
+  <p>Lexo një tekst dhe gjej sa herë shfaqet çdo fjalë. Rendit sipas frekuencës.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">from</span> collections <span class="kw">import</span> Counter
 
-  <!-- DETYRE 12 -->
-  <div class="card py" data-tags="py med">
-    <span class="big-num">12</span>
-    <div class="card-num">DETYRË // 12</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-med">MESATARE</span>
-    </div>
-    <h3>Dictionary – Frekuenca e fjalëve</h3>
-    <p>Lexo një tekst dhe gjej se sa herë shfaqet çdo fjalë. Rendit sipas frekuencës.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">from</span> collections <span class="kw">import</span> Counter
+teksti = <span class="str">"""python eshte gjuhe programimi
+python perdoret per analiza te dhenave
+analiza e te dhenave eshte e rendesishme"""</span>
 
-teksti = <span class="str">"""
-  python eshte gjuhe programimi
-  python perdoret per analiza te dhenave
-  analiza e te dhenave eshte e rendesishme
-"""</span>
-
-<span class="cm"># Frekuenca me Counter</span>
-fjalet   = teksti.lower().<span class="fn">split</span>()
+fjalet    = teksti.lower().<span class="fn">split</span>()
 frekuenca = <span class="fn">Counter</span>(fjalet)
 
 <span class="fn">print</span>(<span class="str">"10 fjalët më të shpeshta:"</span>)
-<span class="kw">for</span> fjala, herë <span class="kw">in</span> frekuenca.<span class="fn">most_common</span>(<span class="num">10</span>):
-    <span class="fn">print</span>(<span class="str">f"  {fjala:<15} → {herë}x"</span>)
-    </div>
-  </div>
+<span class="kw">for</span> fjala, here <span class="kw">in</span> frekuenca.<span class="fn">most_common</span>(<span class="num">10</span>):
+    <span class="fn">print</span>(<span class="str">f"  {fjala:<15} → {here}x"</span>)</pre></div>
+</div>
 
-  <!-- DETYRE 13 -->
-  <div class="card py" data-tags="py hard">
-    <span class="big-num">13</span>
-    <div class="card-num">DETYRË // 13</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-hard">E VËSHTIRË</span>
-    </div>
-    <h3>SQLite + Python – Krijo dhe query-o bazën</h3>
-    <p>Krijo një bazë të dhënash SQLite me Python, shto të dhëna dhe ekzekuto query me JOIN.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">import</span> sqlite3
+<!-- 13 -->
+<div class="card py" data-tags="py hard">
+  <span class="big-num">13</span>
+  <div class="card-num">DETYRË // 13</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-hard">E VËSHTIRË</span></div>
+  <h3>SQLite + Python – Krijo dhe query-o bazën</h3>
+  <p>Krijo një bazë SQLite me Python, shto të dhëna dhe ekzekuto query me JOIN.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">import</span> sqlite3
 
 conn = sqlite3.<span class="fn">connect</span>(<span class="str">":memory:"</span>)
 cur  = conn.<span class="fn">cursor</span>()
 
-<span class="cm"># Krijo tabelat</span>
-cur.<span class="fn">execute</span>(<span class="str">"""
-  CREATE TABLE klientet (
-    id INTEGER PRIMARY KEY,
-    emri TEXT NOT NULL
-  )
-"""</span>)
-cur.<span class="fn">execute</span>(<span class="str">"""
-  CREATE TABLE porosite (
-    id      INTEGER PRIMARY KEY,
+cur.<span class="fn">execute</span>(<span class="str">"""CREATE TABLE klientet (
+    id    INTEGER PRIMARY KEY,
+    emri  TEXT NOT NULL)"""</span>)
+
+cur.<span class="fn">execute</span>(<span class="str">"""CREATE TABLE porosite (
+    id        INTEGER PRIMARY KEY,
     klient_id INTEGER,
-    shuma   REAL,
-    FOREIGN KEY (klient_id) REFERENCES klientet(id)
-  )
-"""</span>)
+    shuma     REAL,
+    FOREIGN KEY (klient_id) REFERENCES klientet(id))"""</span>)
 
-<span class="cm"># Shto të dhëna</span>
 cur.<span class="fn">executemany</span>(<span class="str">"INSERT INTO klientet VALUES (?,?)"</span>,
-  [(<span class="num">1</span>,<span class="str">"Alban"</span>),(<span class="num">2</span>,<span class="str">"Drita"</span>),(<span class="num">3</span>,<span class="str">"Besa"</span>)])
+    [(<span class="num">1</span>,<span class="str">"Alban"</span>), (<span class="num">2</span>,<span class="str">"Drita"</span>), (<span class="num">3</span>,<span class="str">"Besa"</span>)])
+
 cur.<span class="fn">executemany</span>(<span class="str">"INSERT INTO porosite VALUES (?,?,?)"</span>,
-  [(<span class="num">1</span>,<span class="num">1</span>,<span class="num">250</span>),(<span class="num">2</span>,<span class="num">1</span>,<span class="num">180</span>),(<span class="num">3</span>,<span class="num">2</span>,<span class="num">99</span>),(<span class="num">4</span>,<span class="num">3</span>,<span class="num">420</span>)])
+    [(<span class="num">1</span>,<span class="num">1</span>,<span class="num">250</span>),(<span class="num">2</span>,<span class="num">1</span>,<span class="num">180</span>),(<span class="num">3</span>,<span class="num">2</span>,<span class="num">99</span>),(<span class="num">4</span>,<span class="num">3</span>,<span class="num">420</span>)])
 
-<span class="cm"># Query me JOIN</span>
 cur.<span class="fn">execute</span>(<span class="str">"""
-  SELECT k.emri, SUM(p.shuma) AS totali
-  FROM klientet k
-  JOIN porosite p ON k.id = p.klient_id
-  GROUP BY k.emri ORDER BY totali DESC
-"""</span>)
-<span class="kw">for</span> rresht <span class="kw">in</span> cur.<span class="fn">fetchall</span>():
-    <span class="fn">print</span>(rresht)
-conn.<span class="fn">close</span>()
-    </div>
-  </div>
+    SELECT k.emri, SUM(p.shuma) AS totali
+    FROM klientet k
+    JOIN porosite p ON k.id = p.klient_id
+    GROUP BY k.emri
+    ORDER BY totali DESC"""</span>)
 
-  <!-- DETYRE 14 -->
-  <div class="card py" data-tags="py easy">
-    <span class="big-num">14</span>
-    <div class="card-num">DETYRË // 14</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-easy">E LEHTË</span>
-    </div>
-    <h3>List Comprehension – Filtro numrat çiftë</h3>
-    <p>Nga një listë e numrave 1–50, filtro vetëm ato çiftë dhe ngrita secilin në katror.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="cm"># Lista origjinale</span>
+<span class="kw">for</span> row <span class="kw">in</span> cur.<span class="fn">fetchall</span>():
+    <span class="fn">print</span>(row)
+
+conn.<span class="fn">close</span>()</pre></div>
+</div>
+
+<!-- 14 -->
+<div class="card py" data-tags="py easy">
+  <span class="big-num">14</span>
+  <div class="card-num">DETYRË // 14</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-easy">E LEHTË</span></div>
+  <h3>List Comprehension – Filtro numrat çiftë</h3>
+  <p>Nga numrat 1–50, filtro vetëm ata çiftë dhe ngrita secilin në katror.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="cm"># Lista origjinale</span>
 numrat = <span class="fn">list</span>(<span class="fn">range</span>(<span class="num">1</span>, <span class="num">51</span>))
 
 <span class="cm"># List comprehension: çiftët në katror</span>
@@ -811,86 +483,74 @@ katrore_cifte = [
     <span class="kw">if</span> n <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>
 ]
 
-<span class="fn">print</span>(<span class="str">"Numrat çiftë (katror):"</span>)
-<span class="fn">print</span>(katrore_cifte)
-<span class="fn">print</span>(<span class="str">f"Totali: {sum(katrore_cifte)}"</span>)
-<span class="fn">print</span>(<span class="str">f"Sa numra: {len(katrore_cifte)}"</span>)
-    </div>
-  </div>
+<span class="fn">print</span>(<span class="str">f"Rezultati: {katrore_cifte}"</span>)
+<span class="fn">print</span>(<span class="str">f"Totali:    {sum(katrore_cifte)}"</span>)
+<span class="fn">print</span>(<span class="str">f"Sa numra:  {len(katrore_cifte)}"</span>)</pre></div>
+</div>
 
-  <!-- DETYRE 15 -->
-  <div class="card py" data-tags="py hard">
-    <span class="big-num">15</span>
-    <div class="card-num">DETYRË // 15</div>
-    <div class="card-badges">
-      <span class="badge badge-py">PYTHON</span>
-      <span class="badge badge-hard">E VËSHTIRË</span>
-    </div>
-    <h3>Algoritëm – Renditja Bubble Sort</h3>
-    <p>Implemento algoritmin Bubble Sort nga zeroja dhe testo me një listë të rastësishme.</p>
-    <button class="toggle-btn" onclick="toggleCode(this)">
-      <span class="toggle-arrow">▶</span> SHFAQ ZGJIDHJEN
-    </button>
-    <div class="code-block">
-<span class="kw">import</span> random
+<!-- 15 -->
+<div class="card py" data-tags="py hard">
+  <span class="big-num">15</span>
+  <div class="card-num">DETYRË // 15</div>
+  <div class="card-badges"><span class="badge badge-py">PYTHON</span><span class="badge badge-hard">E VËSHTIRË</span></div>
+  <h3>Algoritëm – Bubble Sort nga zeroja</h3>
+  <p>Implemento Bubble Sort dhe testo me një listë të rastësishme prej 10 numrash.</p>
+  <button class="toggle-btn" onclick="toggleCode(this)"><span class="toggle-arrow">▶</span><span>SHFAQ ZGJIDHJEN</span></button>
+  <div class="code-block"><pre><span class="kw">import</span> random
 
 <span class="kw">def</span> <span class="fn">bubble_sort</span>(lista):
-    n = <span class="fn">len</span>(lista)
-    lista = lista[:]  <span class="cm"># kopje</span>
+    n     = <span class="fn">len</span>(lista)
+    lista = lista[:]          <span class="cm"># punojmë me kopje</span>
     <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
-        ndërruar = <span class="kw">False</span>
-        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="num">0</span>, n<span class="op">-</span>i<span class="op">-</span><span class="num">1</span>):
-            <span class="kw">if</span> lista[j] <span class="op">&gt;</span> lista[j<span class="op">+</span><span class="num">1</span>]:
-                lista[j], lista[j<span class="op">+</span><span class="num">1</span>] = (
-                    lista[j<span class="op">+</span><span class="num">1</span>], lista[j]
-                )
-                ndërruar = <span class="kw">True</span>
-        <span class="kw">if not</span> ndërruar:
-            <span class="kw">break</span>  <span class="cm"># optimizim i hershëm</span>
+        nderruar = <span class="kw">False</span>
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="num">0</span>, n <span class="op">-</span> i <span class="op">-</span> <span class="num">1</span>):
+            <span class="kw">if</span> lista[j] <span class="op">&gt;</span> lista[j <span class="op">+</span> <span class="num">1</span>]:
+                lista[j], lista[j<span class="op">+</span><span class="num">1</span>] = lista[j<span class="op">+</span><span class="num">1</span>], lista[j]
+                nderruar = <span class="kw">True</span>
+        <span class="kw">if not</span> nderruar:
+            <span class="kw">break</span>             <span class="cm"># optimizim i hershëm</span>
     <span class="kw">return</span> lista
 
 <span class="cm"># Test</span>
-lista_random = [<span class="fn">random.randint</span>(<span class="num">1</span>, <span class="num">100</span>)
-                <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]
-<span class="fn">print</span>(<span class="str">f"Para: {lista_random}"</span>)
-<span class="fn">print</span>(<span class="str">f"Pas:  {bubble_sort(lista_random)}"</span>)
-    </div>
-  </div>
-
+lista_r = [<span class="fn">random.randint</span>(<span class="num">1</span>, <span class="num">100</span>) <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>)]
+<span class="fn">print</span>(<span class="str">f"Para: {lista_r}"</span>)
+<span class="fn">print</span>(<span class="str">f"Pas:  {bubble_sort(lista_r)}"</span>)</pre></div>
 </div>
 
-<footer>
-  &copy; 2025 – DETYRAT PYTHON & SQL // Kliko SHFAQ ZGJIDHJEN për çdo detyrë
-</footer>
+</div><!-- /grid -->
+
+<footer>&copy; 2025 – DETYRAT PYTHON &amp; SQL // Kliko "SHFAQ ZGJIDHJEN" për çdo detyrë</footer>
 
 <script>
-  function toggleCode(btn) {
-    const card = btn.closest('.card');
-    const code = card.querySelector('.code-block');
-    const arrow = btn.querySelector('.toggle-arrow');
-    const isOpen = code.classList.toggle('visible');
-    arrow.classList.toggle('open', isOpen);
-    btn.querySelector('span:last-child').textContent =
-      isOpen ? ' FSHIH ZGJIDHJEN' : ' SHFAQ ZGJIDHJEN';
-  }
+function toggleCode(btn) {
+  var card  = btn.closest('.card');
+  var block = card.querySelector('.code-block');
+  var arrow = btn.querySelector('.toggle-arrow');
+  var label = btn.querySelector('span:last-child');
+  var open  = block.classList.toggle('visible');
+  arrow.classList.toggle('open', open);
+  label.textContent = open ? 'FSHIH ZGJIDHJEN' : 'SHFAQ ZGJIDHJEN';
+}
 
-  function filterCards(tag, el) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-
-    document.querySelectorAll('.card').forEach((card, i) => {
-      const tags = card.dataset.tags || '';
-      const show = tag === 'all' || tags.includes(tag);
-      card.style.display = show ? 'block' : 'none';
-      if (show) {
-        card.style.animationDelay = (i * 0.04) + 's';
-        card.style.animation = 'none';
-        void card.offsetWidth;
-        card.style.animation = 'fadeUp 0.4s ease both';
-      }
-    });
-  }
+function filterCards(tag, el) {
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  var delay = 0;
+  document.querySelectorAll('.card').forEach(function(card) {
+    var tags = card.dataset.tags || '';
+    var show = (tag === 'all' || tags.indexOf(tag) !== -1);
+    if (show) {
+      card.style.display = 'block';
+      card.style.animationDelay = (delay * 0.05) + 's';
+      card.style.animation = 'none';
+      void card.offsetWidth;
+      card.style.animation = 'fadeUp 0.4s ease both';
+      delay++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
 </script>
-
 </body>
 </html>
