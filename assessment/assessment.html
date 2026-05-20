@@ -4,718 +4,1150 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Python & SQL Assessment</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Clash+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #080a0f;
-  --surface: #0f1117;
-  --surface2: #181b24;
-  --surface3: #1e2230;
-  --border: #252836;
-  --border2: #2e3345;
-  --py: #f7c948;
-  --sql: #2dd4bf;
-  --py-glow: rgba(247,201,72,.15);
-  --sql-glow: rgba(45,212,191,.15);
-  --py-dim: #1f1800;
-  --sql-dim: #001a17;
-  --text: #dde1ec;
-  --muted: #5a6175;
-  --correct: #34d399;
-  --wrong: #f87171;
-  --radius: 12px;
+  --bg: #07080c;
+  --s1: #0d0e14;
+  --s2: #13151d;
+  --s3: #191c27;
+  --b1: #1f2230;
+  --b2: #272b3a;
+  --py: #e8c547;
+  --sql: #3ecfb8;
+  --py-bg: #13110000;
+  --text: #cdd1e0;
+  --dim: #4a5068;
+  --ok: #3dd68c;
+  --err: #ff6b6b;
+  --r: 10px;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Syne', sans-serif;
-  min-height: 100vh;
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
 }
-body::before {
-  content:'';
-  position:fixed; inset:0;
-  background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(247,201,72,.04) 0%, transparent 60%),
-              radial-gradient(ellipse 60% 40% at 80% 100%, rgba(45,212,191,.04) 0%, transparent 60%);
-  pointer-events:none; z-index:0;
+/* subtle scanlines */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);
 }
-.wrapper { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:0 20px 100px; }
+/* glow blobs */
+.blob1,.blob2{position:fixed;border-radius:50%;filter:blur(120px);opacity:.06;pointer-events:none;z-index:0;}
+.blob1{width:600px;height:600px;background:var(--py);top:-200px;left:-200px;}
+.blob2{width:500px;height:500px;background:var(--sql);bottom:-150px;right:-150px;}
 
-/* ── HEADER ── */
-header { padding:52px 0 16px; text-align:center; }
-.badge {
-  display:inline-flex; align-items:center; gap:8px;
-  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:3px;
-  text-transform:uppercase; color:var(--muted);
-  border:1px solid var(--border2); border-radius:20px; padding:6px 18px; margin-bottom:22px;
-}
-header h1 {
-  font-size:clamp(2.2rem,5.5vw,3.6rem); font-weight:800;
-  line-height:1.05; letter-spacing:-2px;
-}
-header h1 .py { color:var(--py); }
-header h1 .sql { color:var(--sql); }
-header .sub {
-  margin-top:12px; color:var(--muted);
-  font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px;
-}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 22px 120px;}
 
-/* ── SETUP SCREEN ── */
-#setup-screen { padding:32px 0; }
-.setup-grid {
-  display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0;
+/* ══ HEADER ══ */
+.hdr{padding:56px 0 24px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+.hdr-eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;
+  text-transform:uppercase;color:var(--dim);
+  display:flex;align-items:center;gap:8px;
 }
-@media(max-width:580px){ .setup-grid { grid-template-columns:1fr; } }
-
-.cat-card {
-  background:var(--surface); border:1px solid var(--border2);
-  border-radius:var(--radius); padding:24px;
+.hdr-eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--dim);}
+.hdr h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3.5rem,8vw,6rem);
+  line-height:.92;letter-spacing:2px;
+  color:var(--text);
 }
-.cat-card h3 {
-  font-size:16px; font-weight:700; margin-bottom:6px;
-  display:flex; align-items:center; gap:8px;
-}
-.cat-card.py-card h3 { color:var(--py); }
-.cat-card.sql-card h3 { color:var(--sql); }
-.cat-card p { font-size:12px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:18px; }
-
-.count-selector { display:flex; gap:6px; flex-wrap:wrap; }
-.count-btn {
-  padding:7px 14px; border-radius:8px;
-  border:1px solid var(--border2); background:var(--surface2);
-  color:var(--muted); font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
-  cursor:pointer; transition:all .15s;
-}
-.count-btn:hover { border-color:var(--text); color:var(--text); }
-.py-card .count-btn.sel { background:var(--py-dim); border-color:var(--py); color:var(--py); }
-.sql-card .count-btn.sel { background:var(--sql-dim); border-color:var(--sql); color:var(--sql); }
-
-.diff-selector { display:flex; gap:6px; margin-top:12px; }
-.diff-btn {
-  flex:1; padding:8px; border-radius:8px;
-  border:1px solid var(--border2); background:var(--surface2);
-  color:var(--muted); font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
-  cursor:pointer; transition:all .15s;
-}
-.diff-btn:hover { color:var(--text); border-color:var(--border2); }
-.py-card .diff-btn.sel { background:var(--py-dim); border-color:var(--py); color:var(--py); }
-.sql-card .diff-btn.sel { background:var(--sql-dim); border-color:var(--sql); color:var(--sql); }
-
-.start-btn {
-  display:block; width:100%; margin-top:24px;
-  padding:18px; border-radius:var(--radius);
-  background: linear-gradient(135deg, var(--py) 0%, #e8a800 100%);
-  border:none; color:#0b0c10;
-  font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
-  cursor:pointer; letter-spacing:.5px;
-  transition:all .2s; box-shadow:0 0 30px rgba(247,201,72,.2);
-}
-.start-btn:hover { transform:translateY(-1px); box-shadow:0 0 40px rgba(247,201,72,.35); }
-.start-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
-
-/* ── QUIZ SCREEN ── */
-#quiz-screen { display:none; }
-
-/* STICKY TOPBAR */
-.topbar {
-  position:sticky; top:10px; z-index:100;
-  background:rgba(15,17,23,.9); backdrop-filter:blur(16px);
-  border:1px solid var(--border2); border-radius:14px;
-  padding:12px 20px; margin:24px 0 28px;
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-}
-.topbar-left { display:flex; align-items:center; gap:14px; }
-.topbar-title { font-size:13px; font-weight:700; color:var(--text); }
-.topbar-sub { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); }
-.topbar-stats { display:flex; gap:16px; align-items:center; }
-.stat-pill {
-  display:flex; flex-direction:column; align-items:center;
-  font-family:'Space Mono',monospace;
-}
-.stat-pill .v { font-size:18px; font-weight:700; line-height:1; }
-.stat-pill .l { font-size:9px; color:var(--muted); letter-spacing:1px; margin-top:2px; text-transform:uppercase; }
-.sep { width:1px; height:32px; background:var(--border2); }
-
-/* PROGRESS */
-.prog-wrap { margin-bottom:22px; }
-.prog-label {
-  font-family:'Space Mono',monospace; font-size:10px; color:var(--muted);
-  letter-spacing:1px; margin-bottom:6px; display:flex; justify-content:space-between;
-}
-.prog-track {
-  height:3px; background:var(--surface2); border-radius:4px; overflow:hidden;
-}
-.prog-fill { height:100%; border-radius:4px; transition:width .4s ease; }
-
-/* QUESTION CARD */
-.qcard {
-  background:var(--surface); border:1px solid var(--border2);
-  border-radius:var(--radius); padding:26px 28px 22px;
-  margin-bottom:14px; animation:slideUp .22s ease;
-}
-@keyframes slideUp {
-  from { opacity:0; transform:translateY(10px); }
-  to { opacity:1; transform:translateY(0); }
-}
-.qcard.state-correct { border-color:rgba(52,211,153,.4); background:rgba(52,211,153,.03); }
-.qcard.state-wrong   { border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.03); }
-
-.qhead { display:flex; gap:12px; align-items:flex-start; margin-bottom:16px; }
-.qbadge {
-  font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
-  padding:3px 9px; border-radius:5px; flex-shrink:0; margin-top:3px;
-  display:flex; align-items:center; gap:5px;
-}
-.py-q .qbadge { background:var(--py-dim); color:var(--py); }
-.sql-q .qbadge { background:var(--sql-dim); color:var(--sql); }
-.diff-dot { width:6px; height:6px; border-radius:50%; }
-.easy .diff-dot { background:#34d399; }
-.medium .diff-dot { background:#fbbf24; }
-.hard .diff-dot { background:#f87171; }
-
-.qtext { font-size:14.5px; font-weight:600; line-height:1.6; }
-.qtext code {
-  font-family:'Space Mono',monospace; font-size:12.5px;
-  background:var(--surface3); padding:2px 6px; border-radius:4px;
-  color:#c4b5fd;
+.hdr h1 .ac-py{color:var(--py);}
+.hdr h1 .ac-sql{color:var(--sql);}
+.hdr-desc{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--dim);margin-top:6px;line-height:1.7;
 }
 
-.opts { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
-@media(max-width:560px){ .opts { grid-template-columns:1fr; } }
+/* ══ SETUP ══ */
+#setup{padding:20px 0 0;}
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:580px){.setup-row{grid-template-columns:1fr;}}
+.setup-card{
+  background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:22px 20px;
+}
+.setup-card-title{
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.py-card .setup-card-title{color:var(--py);}
+.sql-card .setup-card-title{color:var(--sql);}
+.setup-label{font-size:11px;color:var(--dim);margin-bottom:8px;letter-spacing:.5px;}
+.pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.pill{
+  padding:6px 16px;border-radius:6px;
+  border:1px solid var(--b2);background:var(--s2);
+  color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:12px;
+  cursor:pointer;transition:all .15s;
+}
+.pill:hover{color:var(--text);border-color:var(--b2);}
+.py-card .pill.on{background:#1a1600;border-color:var(--py);color:var(--py);}
+.sql-card .pill.on{background:#001a17;border-color:var(--sql);color:var(--sql);}
 
-.opt {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:9px; padding:11px 14px;
-  color:var(--text); font-family:'Syne',sans-serif; font-size:13px; font-weight:500;
-  cursor:pointer; text-align:left; transition:all .15s;
-  display:flex; align-items:flex-start; gap:10px; line-height:1.45;
+.start-btn{
+  width:100%;padding:18px;border-radius:var(--r);
+  background:var(--py);border:none;
+  color:#07080c;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 0 40px rgba(232,197,71,.15);
+  display:flex;align-items:center;justify-content:center;gap:12px;
 }
-.opt-lbl {
-  font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
-  padding:2px 6px; border-radius:4px; flex-shrink:0; margin-top:1px;
-  background:var(--surface3);
-}
-.py-q .opt:hover:not(:disabled) { border-color:var(--py); background:var(--py-dim); }
-.sql-q .opt:hover:not(:disabled) { border-color:var(--sql); background:var(--sql-dim); }
-.opt:disabled { cursor:default; }
-.opt.hit-correct { border-color:var(--correct); background:rgba(52,211,153,.1); color:var(--correct); }
-.opt.hit-wrong   { border-color:var(--wrong);   background:rgba(248,113,113,.1); color:var(--wrong); }
+.start-btn:hover{box-shadow:0 0 60px rgba(232,197,71,.3);transform:translateY(-1px);}
 
-.feedback-box {
-  margin-top:12px; font-family:'Space Mono',monospace; font-size:11.5px;
-  line-height:1.65; padding:10px 14px; border-radius:8px; display:none;
-}
-.feedback-box.show { display:block; }
-.feedback-box.ok  { background:rgba(52,211,153,.07); color:var(--correct); border:1px solid rgba(52,211,153,.18); }
-.feedback-box.bad { background:rgba(248,113,113,.07); color:var(--wrong);  border:1px solid rgba(248,113,113,.18); }
+/* ══ QUIZ ══ */
+#quiz{display:none;}
 
-/* ── RESULT MODAL ── */
-#result-modal {
-  display:none; position:fixed; inset:0; z-index:200;
-  background:rgba(8,10,15,.85); backdrop-filter:blur(10px);
-  align-items:center; justify-content:center; padding:20px;
+/* sticky bar */
+.sbar{
+  position:sticky;top:10px;z-index:50;
+  background:rgba(13,14,20,.92);backdrop-filter:blur(20px);
+  border:1px solid var(--b1);border-radius:12px;
+  padding:13px 20px;margin:20px 0 26px;
+  display:flex;align-items:center;justify-content:space-between;
 }
-#result-modal.show { display:flex; }
-.modal-box {
-  background:var(--surface); border:1px solid var(--border2);
-  border-radius:20px; padding:40px 36px; max-width:520px; width:100%;
-  animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+.sbar-left{display:flex;flex-direction:column;gap:2px;}
+.sbar-name{font-size:13px;font-weight:600;}
+.sbar-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);}
+.sbar-stats{display:flex;gap:20px;align-items:center;}
+.sstat{text-align:center;}
+.sstat .n{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;line-height:1;}
+.sstat .l{font-size:9px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;}
+.sdiv{width:1px;height:30px;background:var(--b2);}
+
+/* progress */
+.pbar-wrap{margin-bottom:24px;}
+.pbar-top{display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);margin-bottom:5px;}
+.pbar-track{height:2px;background:var(--s3);border-radius:2px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:2px;transition:width .5s ease;background:var(--py);}
+
+/* ══ QUESTION CARD ══ */
+.qcard{
+  background:var(--s1);border:1px solid var(--b1);
+  border-radius:var(--r);margin-bottom:12px;
+  overflow:hidden;animation:rise .2s ease;
+}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.qcard.c-ok {border-color:rgba(61,214,140,.3);}
+.qcard.c-err{border-color:rgba(255,107,107,.3);}
+
+.qcard-top{
+  padding:20px 22px 16px;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.qtag{
+  display:flex;align-items:center;gap:5px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:3px 9px;border-radius:4px;flex-shrink:0;margin-top:3px;
+}
+.py-q .qtag{background:#1a1600;color:var(--py);}
+.sql-q .qtag{background:#001a17;color:var(--sql);}
+.qn{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);margin-left:auto;margin-top:4px;flex-shrink:0;}
+
+.qbody{padding:0 22px 20px;}
+.qtext{
+  font-size:14.5px;font-weight:500;line-height:1.65;color:var(--text);
+  margin-bottom:14px;
+}
+.qtext code,.qtext pre{
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  background:var(--s3);border:1px solid var(--b1);
+  border-radius:5px;padding:2px 7px;color:#a5c7ff;
+}
+.qtext pre{
+  display:block;padding:14px 16px;margin:10px 0;
+  line-height:1.6;overflow-x:auto;white-space:pre;
+}
+.qhint{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  color:var(--dim);margin-bottom:12px;font-style:italic;
+}
+
+/* input area */
+.ans-wrap{position:relative;}
+.ans-input{
+  width:100%;
+  background:var(--s2);border:1px solid var(--b2);border-radius:8px;
+  padding:12px 16px;
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;
+  resize:vertical;min-height:60px;
+  transition:border-color .15s;outline:none;line-height:1.5;
+}
+.ans-input:focus{border-color:var(--dim);}
+.py-q .ans-input:focus{border-color:rgba(232,197,71,.5);}
+.sql-q .ans-input:focus{border-color:rgba(62,207,184,.5);}
+.ans-input:disabled{opacity:.6;cursor:default;}
+.ans-input.is-ok {border-color:rgba(61,214,140,.5);background:rgba(61,214,140,.04);}
+.ans-input.is-err{border-color:rgba(255,107,107,.5);background:rgba(255,107,107,.04);}
+
+.check-btn{
+  margin-top:8px;
+  padding:10px 22px;border-radius:7px;border:none;
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:1px;
+  font-weight:500;cursor:pointer;transition:all .15s;
+}
+.py-q .check-btn{background:var(--py);color:#07080c;}
+.sql-q .check-btn{background:var(--sql);color:#07080c;}
+.check-btn:hover{filter:brightness(1.1);}
+.check-btn:disabled{opacity:.35;cursor:default;filter:none;}
+
+/* result row */
+.result-row{
+  display:none;margin-top:12px;
+  border-radius:8px;padding:14px 16px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;
+}
+.result-row.show{display:block;}
+.result-row.ok {background:rgba(61,214,140,.07);border:1px solid rgba(61,214,140,.2);}
+.result-row.err{background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);}
+.result-verdict{font-size:13px;font-weight:700;margin-bottom:6px;}
+.result-row.ok .result-verdict{color:var(--ok);}
+.result-row.err .result-verdict{color:var(--err);}
+.result-correct-ans{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);}
+.result-correct-ans span{color:var(--dim);}
+.result-correct-ans code{
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  background:var(--s3);padding:2px 6px;border-radius:4px;color:#a5c7ff;
+}
+.result-exp{margin-top:6px;color:var(--dim);font-size:11px;}
+
+/* ══ RESULT BTN (floating) ══ */
+.fab{
+  position:fixed;bottom:28px;right:28px;z-index:100;
+  display:none;align-items:center;gap:10px;
+  padding:14px 26px;border-radius:50px;border:none;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .2s;
+  background:var(--sql);color:#07080c;
+  box-shadow:0 4px 30px rgba(62,207,184,.3);
+}
+.fab.vis{display:flex;}
+.fab:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(62,207,184,.45);}
+
+/* ══ MODAL ══ */
+.modal-bg{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(7,8,12,.88);backdrop-filter:blur(12px);
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--s1);border:1px solid var(--b2);
+  border-radius:16px;padding:36px 32px;max-width:500px;width:100%;
+  animation:pop .3s cubic-bezier(.34,1.56,.64,1);
   text-align:center;
 }
-@keyframes popIn {
-  from { opacity:0; transform:scale(.85); }
-  to   { opacity:1; transform:scale(1); }
+@keyframes pop{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+.modal-ico{font-size:52px;margin-bottom:14px;}
+.modal-title{
+  font-family:'Bebas Neue',sans-serif;font-size:42px;
+  letter-spacing:2px;color:var(--text);margin-bottom:4px;
 }
-.modal-emoji { font-size:56px; margin-bottom:16px; }
-.modal-title { font-size:26px; font-weight:800; letter-spacing:-1px; margin-bottom:6px; }
-.modal-sub { font-size:13px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:28px; }
-
-.result-grid {
-  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:28px;
+.modal-meta{
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--dim);margin-bottom:26px;
 }
-.res-tile {
-  background:var(--surface2); border:1px solid var(--border2);
-  border-radius:12px; padding:16px 12px;
+.stat-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;
 }
-.res-tile .rv { font-family:'Space Mono',monospace; font-size:28px; font-weight:700; }
-.res-tile .rl { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
-
-.grade-bar-wrap { margin-bottom:24px; }
-.grade-bar-track { height:8px; background:var(--surface2); border-radius:8px; overflow:hidden; margin-top:8px; }
-.grade-bar-fill { height:100%; border-radius:8px; transition:width 1s ease; }
-.grade-label { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); text-align:left; }
-
-.breakdown { display:flex; gap:10px; margin-bottom:24px; }
-.breakdown-item {
-  flex:1; background:var(--surface2); border:1px solid var(--border2);
-  border-radius:10px; padding:12px;
+.stat-box{
+  background:var(--s2);border:1px solid var(--b1);
+  border-radius:10px;padding:16px 10px;
 }
-.breakdown-item .bcat { font-size:11px; font-weight:700; margin-bottom:4px; }
-.breakdown-item .bcat.py { color:var(--py); }
-.breakdown-item .bcat.sql { color:var(--sql); }
-.breakdown-item .bscore { font-family:'Space Mono',monospace; font-size:20px; font-weight:700; }
-.breakdown-item .bbar { height:3px; background:var(--surface3); border-radius:4px; overflow:hidden; margin-top:6px; }
-.breakdown-item .bbar-fill { height:100%; border-radius:4px; transition:width 1.2s ease; }
-
-.modal-btns { display:flex; gap:10px; }
-.modal-btn {
-  flex:1; padding:14px; border-radius:10px;
-  font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
-  cursor:pointer; transition:all .2s;
+.stat-box .bv{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;line-height:1;}
+.stat-box .bl{font-size:10px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;}
+.grade-wrap{margin-bottom:20px;}
+.grade-lbl{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);
+  text-align:left;margin-bottom:5px;
 }
-.btn-primary {
-  background:linear-gradient(135deg,var(--py),#e8a800);
-  border:none; color:#0b0c10;
-  box-shadow:0 0 20px rgba(247,201,72,.2);
+.grade-track{height:6px;background:var(--s3);border-radius:6px;overflow:hidden;}
+.grade-fill{height:100%;border-radius:6px;transition:width 1.1s ease;}
+.cat-breakdown{
+  display:flex;gap:10px;margin-bottom:24px;
 }
-.btn-primary:hover { box-shadow:0 0 30px rgba(247,201,72,.4); transform:translateY(-1px); }
-.btn-secondary {
-  background:transparent; border:1px solid var(--border2); color:var(--text);
+.cat-box{
+  flex:1;background:var(--s2);border:1px solid var(--b1);
+  border-radius:8px;padding:14px 10px;
 }
-.btn-secondary:hover { border-color:var(--text); }
-
-/* SHOW RESULT btn */
-.show-result-btn {
-  position:fixed; bottom:28px; right:28px; z-index:150;
-  padding:14px 24px; border-radius:50px;
-  background:linear-gradient(135deg,var(--sql),#0da88e);
-  border:none; color:#080a0f;
-  font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
-  cursor:pointer; transition:all .2s;
-  box-shadow:0 4px 24px rgba(45,212,191,.3);
-  display:none;
+.cat-box .cl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.cat-box .cv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;}
+.py-b .cl{color:var(--py);}
+.py-b .cv{color:var(--py);}
+.sql-b .cl{color:var(--sql);}
+.sql-b .cv{color:var(--sql);}
+.cat-mini-bar{height:3px;background:var(--s3);border-radius:3px;overflow:hidden;margin-top:6px;}
+.cat-mini-fill{height:100%;border-radius:3px;transition:width 1.2s ease .3s;}
+.modal-actions{display:flex;gap:10px;}
+.m-btn{
+  flex:1;padding:13px;border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;
+  cursor:pointer;transition:all .2s;letter-spacing:1px;
 }
-.show-result-btn.visible { display:flex; align-items:center; gap:8px; }
-.show-result-btn:hover { transform:translateY(-2px); box-shadow:0 6px 32px rgba(45,212,191,.45); }
-
-/* DIFFICULTY tag on card */
-.diff-tag {
-  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:1px;
-  text-transform:uppercase; padding:2px 8px; border-radius:4px; font-weight:700;
-}
-.diff-tag.easy   { background:rgba(52,211,153,.12); color:#34d399; }
-.diff-tag.medium { background:rgba(251,191,36,.12); color:#fbbf24; }
-.diff-tag.hard   { background:rgba(248,113,113,.12); color:#f87171; }
+.m-btn-primary{background:var(--py);border:none;color:#07080c;}
+.m-btn-primary:hover{filter:brightness(1.1);}
+.m-btn-secondary{background:transparent;border:1px solid var(--b2);color:var(--text);}
+.m-btn-secondary:hover{border-color:var(--text);}
 </style>
 </head>
 <body>
-<div class="wrapper">
+<div class="blob1"></div><div class="blob2"></div>
+<div class="wrap">
 
-<!-- ═══════════════════ SETUP ═══════════════════ -->
-<header>
-  <div class="badge">⚡ Developer Skills Test</div>
-  <h1><span class="py">Python</span> <span style="color:var(--border2)">&</span> <span class="sql">SQL</span></h1>
-  <p class="sub">// zgjedh detyrat · zgjidh · shiko rezultatin</p>
-</header>
-
-<div id="setup-screen">
-  <div class="setup-grid">
-
-    <div class="cat-card py-card">
-      <h3>🐍 Python</h3>
-      <p>Sa pyetje do bësh?</p>
-      <div class="count-selector" id="py-counts">
-        <button class="count-btn" data-cat="py" data-n="5">5</button>
-        <button class="count-btn" data-cat="py" data-n="10">10</button>
-        <button class="count-btn sel" data-cat="py" data-n="15">15</button>
-        <button class="count-btn" data-cat="py" data-n="25">25</button>
-      </div>
-      <div class="diff-selector" id="py-diffs">
-        <button class="diff-btn" data-cat="py" data-d="easy">🟢 Lehtë</button>
-        <button class="diff-btn sel" data-cat="py" data-d="mixed">🟡 Mix</button>
-        <button class="diff-btn" data-cat="py" data-d="hard">🔴 Hard</button>
-      </div>
-    </div>
-
-    <div class="cat-card sql-card">
-      <h3>🗄️ SQL</h3>
-      <p>Sa pyetje do bësh?</p>
-      <div class="count-selector" id="sql-counts">
-        <button class="count-btn" data-cat="sql" data-n="5">5</button>
-        <button class="count-btn" data-cat="sql" data-n="10">10</button>
-        <button class="count-btn sel" data-cat="sql" data-n="15">15</button>
-        <button class="count-btn" data-cat="sql" data-n="25">25</button>
-      </div>
-      <div class="diff-selector" id="sql-diffs">
-        <button class="diff-btn" data-cat="sql" data-d="easy">🟢 Lehtë</button>
-        <button class="diff-btn sel" data-cat="sql" data-d="mixed">🟡 Mix</button>
-        <button class="diff-btn" data-cat="sql" data-d="hard">🔴 Hard</button>
-      </div>
-    </div>
-
-  </div>
-  <button class="start-btn" id="start-btn" onclick="startQuiz()">▶ FILLO TESTIN</button>
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-eyebrow">Developer Assessment</div>
+  <h1><span class="ac-py">PYTHON</span><br><span class="ac-sql">& SQL</span></h1>
+  <div class="hdr-desc">// mid–hard level · write your answer · instant feedback</div>
 </div>
 
-<!-- ═══════════════════ QUIZ ═══════════════════ -->
-<div id="quiz-screen">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div>
-        <div class="topbar-title" id="tb-title">Assessment</div>
-        <div class="topbar-sub" id="tb-sub">0 pyetje</div>
+<!-- ══ SETUP ══ -->
+<div id="setup">
+  <div class="setup-row">
+    <div class="setup-card py-card">
+      <div class="setup-card-title">🐍 Python</div>
+      <div class="setup-label">Questions</div>
+      <div class="pill-row" id="py-n">
+        <button class="pill" data-v="5">5</button>
+        <button class="pill on" data-v="10">10</button>
+        <button class="pill" data-v="15">15</button>
+        <button class="pill" data-v="all">All</button>
       </div>
     </div>
-    <div class="topbar-stats">
-      <div class="stat-pill"><div class="v" id="tb-correct" style="color:var(--correct)">0</div><div class="l">Saktë</div></div>
-      <div class="sep"></div>
-      <div class="stat-pill"><div class="v" id="tb-wrong" style="color:var(--wrong)">0</div><div class="l">Gabim</div></div>
-      <div class="sep"></div>
-      <div class="stat-pill"><div class="v" id="tb-left" style="color:var(--muted)">0</div><div class="l">Mbetur</div></div>
+    <div class="setup-card sql-card">
+      <div class="setup-card-title">🗄️ SQL</div>
+      <div class="setup-label">Questions</div>
+      <div class="pill-row" id="sql-n">
+        <button class="pill" data-v="5">5</button>
+        <button class="pill on" data-v="10">10</button>
+        <button class="pill" data-v="15">15</button>
+        <button class="pill" data-v="all">All</button>
+      </div>
     </div>
   </div>
-
-  <div class="prog-wrap">
-    <div class="prog-label"><span id="prog-txt">0 / 0</span><span id="prog-pct">0%</span></div>
-    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%;background:var(--py)"></div></div>
-  </div>
-
-  <div id="cards-container"></div>
+  <button class="start-btn" onclick="startQuiz()">START ASSESSMENT</button>
 </div>
 
-<!-- SHOW RESULT button -->
-<button class="show-result-btn" id="show-result-btn" onclick="showResult()">
-  📊 Shfaq Rezultatin
-</button>
+<!-- ══ QUIZ ══ -->
+<div id="quiz">
+  <div class="sbar">
+    <div class="sbar-left">
+      <div class="sbar-name">Assessment</div>
+      <div class="sbar-count" id="sb-count">— questions</div>
+    </div>
+    <div class="sbar-stats">
+      <div class="sstat"><div class="n" id="sb-ok" style="color:var(--ok)">0</div><div class="l">Correct</div></div>
+      <div class="sdiv"></div>
+      <div class="sstat"><div class="n" id="sb-err" style="color:var(--err)">0</div><div class="l">Wrong</div></div>
+      <div class="sdiv"></div>
+      <div class="sstat"><div class="n" id="sb-left" style="color:var(--dim)">0</div><div class="l">Left</div></div>
+    </div>
+  </div>
+  <div class="pbar-wrap">
+    <div class="pbar-top"><span id="pb-txt">0 / 0</span><span id="pb-pct">0%</span></div>
+    <div class="pbar-track"><div class="pbar-fill" id="pb-fill" style="width:0%"></div></div>
+  </div>
+  <div id="cards"></div>
+</div>
 
-</div><!-- /wrapper -->
+</div><!-- /wrap -->
 
-<!-- ═══════════════════ RESULT MODAL ═══════════════════ -->
-<div id="result-modal">
-  <div class="modal-box">
-    <div class="modal-emoji" id="res-emoji">🎯</div>
-    <div class="modal-title" id="res-title">Rezultati</div>
-    <div class="modal-sub" id="res-sub">—</div>
+<!-- FLOATING BTN -->
+<button class="fab" id="fab" onclick="openModal()">📊 Show Results</button>
 
-    <div class="result-grid">
-      <div class="res-tile">
-        <div class="rv" id="res-correct" style="color:var(--correct)">0</div>
-        <div class="rl">Saktë</div>
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-ico" id="m-ico">🎯</div>
+    <div class="modal-title" id="m-title">RESULTS</div>
+    <div class="modal-meta" id="m-meta">—</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="bv" id="m-ok" style="color:var(--ok)">0</div><div class="bl">Correct</div></div>
+      <div class="stat-box"><div class="bv" id="m-err" style="color:var(--err)">0</div><div class="bl">Wrong</div></div>
+    </div>
+    <div class="grade-wrap">
+      <div class="grade-lbl">Score: <span id="m-pct">0%</span></div>
+      <div class="grade-track"><div class="grade-fill" id="m-bar" style="width:0%"></div></div>
+    </div>
+    <div class="cat-breakdown">
+      <div class="cat-box py-b">
+        <div class="cl">Python</div>
+        <div class="cv" id="m-py-score">—</div>
+        <div class="cat-mini-bar"><div class="cat-mini-fill" id="m-py-bar" style="width:0%;background:var(--py)"></div></div>
       </div>
-      <div class="res-tile">
-        <div class="rv" id="res-wrong" style="color:var(--wrong)">0</div>
-        <div class="rl">Gabim</div>
+      <div class="cat-box sql-b">
+        <div class="cl">SQL</div>
+        <div class="cv" id="m-sql-score">—</div>
+        <div class="cat-mini-bar"><div class="cat-mini-fill" id="m-sql-bar" style="width:0%;background:var(--sql)"></div></div>
       </div>
     </div>
-
-    <div class="grade-bar-wrap">
-      <div class="grade-label">Rezultat total: <span id="res-pct-lbl">0%</span></div>
-      <div class="grade-bar-track">
-        <div class="grade-bar-fill" id="grade-bar" style="width:0%"></div>
-      </div>
-    </div>
-
-    <div class="breakdown" id="res-breakdown"></div>
-
-    <div class="modal-btns">
-      <button class="modal-btn btn-secondary" onclick="closeResult()">← Vazhdo</button>
-      <button class="modal-btn btn-primary" onclick="fullReset()">↺ Test i Ri</button>
+    <div class="modal-actions">
+      <button class="m-btn m-btn-secondary" onclick="closeModal()">← Continue</button>
+      <button class="m-btn m-btn-primary" onclick="resetAll()">↺ New Test</button>
     </div>
   </div>
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// QUESTION BANK
-// ─────────────────────────────────────────────
+// ── QUESTION BANK ──────────────────────────────────────────────────────────
 const BANK = {
   py: [
-    // EASY
-    { d:'easy', q:'Cila funksion kthen gjatësinë e një liste?', opts:['len()','size()','count()','length()'], ans:0, exp:'len() është funksioni standard për numrin e elementeve.' },
-    { d:'easy', q:'Si krijohet një listë bosh në Python?', opts:['[]','{}','()','list{}'], ans:0, exp:'[] krijon listë bosh. {} krijon dict/set, () krijon tuple.' },
-    { d:'easy', q:'Cila metodë shton element në fund të listës?', opts:['append()','add()','push()','insert()'], ans:0, exp:'list.append(x) shton x në fund.' },
-    { d:'easy', q:'Çfarë kthen <code>type(3.14)</code>?', opts:["<class 'float'>",'float','3.14','number'], ans:0, exp:'type() kthen klasën e objektit.' },
-    { d:'easy', q:'Cili operator bën ndarje të plotë (floor division)?', opts:['//','/', '%','**'], ans:0, exp:'// ndan dhe rrumbullakos poshtë. / kthen float.' },
-    // MEDIUM
-    { d:'medium', q:'Çfarë printojnë këto rreshta?\n<code>x = [1,2,3]\ny = x\ny.append(4)\nprint(x)</code>', opts:['[1,2,3,4]','[1,2,3]','Error','[4]'], ans:0, exp:'y = x i referohet të njëjtit objekt. Ndryshimi i y ndryshon x gjithashtu — reference, jo kopje.' },
-    { d:'medium', q:'Cili është output i <code>print(list(map(lambda x: x**2, [1,2,3])))</code>?', opts:['[1,4,9]','[1,2,3]','[2,4,6]','Error'], ans:0, exp:'map zbaton lambdën çdo elementi: 1²=1, 2²=4, 3²=9.' },
-    { d:'medium', q:'Çfarë bën <code>*args</code> në parametrat e funksionit?', opts:['Merr çdo numër argumentesh pozicionale si tuple','Merr keyword arguments si dict','Shpërndan listën','Kthon tuple bosh'], ans:0, exp:'*args pako argumentet extra pozicionale në tuple.' },
-    { d:'medium', q:'Cila është mënyra KORREKTE për të kopjuar thellë (deep copy) një listë nested?', opts:['import copy; copy.deepcopy(lst)','lst.copy()','lst[:]','list(lst)'], ans:0, exp:'Metodat .copy(), [:], dhe list() bëjnë shallow copy. deepcopy kopjon gjithçka rekursivisht.' },
-    { d:'medium', q:'Çfarë kthen <code>sorted({"b":2,"a":1,"c":3})</code>?', opts:["['a','b','c']","['b','a','c']","[1,2,3]","{'a':1,'b':2,'c':3}"], ans:0, exp:'sorted() mbi dict iteron mbi çelësat dhe i kthen sorted.' },
-    { d:'medium', q:'Cili deklarim krijon një <code>generator</code> jo listë?', opts:['(x*2 for x in range(5))','[x*2 for x in range(5)]','{x*2 for x in range(5)}','list(x*2 for x in range(5))'], ans:0, exp:'() krijon generator expression — lazy evaluation, jo list në memorie.' },
-    { d:'medium', q:'Çfarë ndodh kur ekzekutohet ky kod?\n<code>def f(x=[]):\n  x.append(1)\n  return x\nf(); f()</code>', opts:['Kthen [1,1] në thirrjen e dytë','Kthen [1] çdo herë','Error','Kthen [1,1,1]'], ans:0, exp:'Default mutable arguments (lista) ndahen mes thirrjeve! Çdo thirrje modifikon të njëjtën listë default.' },
-    { d:'medium', q:'Cila shprehje krijo një dict nga dy lista?', opts:['dict(zip(keys,vals))','dict(keys,vals)','{keys:vals}','map(dict,keys,vals)'], ans:0, exp:'zip() bashkon dy iterable si çiftet, dict() i bën çelës-vlerë.' },
-    // HARD
-    { d:'hard', q:'Cili është output i:\n<code>def gen():\n  yield 1\n  yield 2\ng = gen()\nnext(g); print(next(g))</code>', opts:['2','1','Error','[1,2]'], ans:0, exp:'next() avancon generator-in. Thirrja e parë kthen 1, e dyta kthen 2.' },
-    { d:'hard', q:'Çfarë bën <code>@property</code> decorator?', opts:['E kthen metodën si atribut i lexueshëm','E bën metodën private','E kthen static method','Krijon konstruktor'], ans:0, exp:'@property lejon metodën të thirret si atribut: obj.name jo obj.name().' },
-    { d:'hard', q:'Cili është output i:\n<code>a = (1,2,3)\na += (4,)\nprint(len(a))</code>', opts:['4','3','Error: tuples immutable','2'], ans:0, exp:'+= mbi tuple krijon objekt të ri — a tani tregon (1,2,3,4). Immutability i referohet vlerave, jo variablës.' },
-    { d:'hard', q:'Cila metodë magic definon <code>len(obj)</code>?', opts:['__len__','__size__','__count__','__length__'], ans:0, exp:'__len__ është dunder metoda që Python thërret kur bën len(obj).' },
-    { d:'hard', q:'Çfarë kthen <code>isinstance(True, int)</code>?', opts:['True','False','Error','None'], ans:0, exp:'bool është nënklasë e int. True dhe False janë me fjalë edhe numra 1 dhe 0.' },
-    { d:'hard', q:'Cili pattern zbaton Context Manager protocol?', opts:['__enter__ dhe __exit__','__start__ dhe __stop__','__open__ dhe __close__','__init__ dhe __del__'], ans:0, exp:'with statement thërret __enter__ në hyrje dhe __exit__ me dalje (edhe nëse ka exception).' },
-    { d:'hard', q:'Cili është output:\n<code>print([i for i in range(3) for j in range(2)])</code>', opts:['[0,0,1,1,2,2]','[0,1,0,1,0,1]','[0,1,2,0,1,2]','[0,1,2]'], ans:0, exp:'Nested comprehension: for i in range(3) është outer, for j in range(2) inner. i = 0,0 → 1,1 → 2,2.' },
-    { d:'hard', q:'Çfarë ndodh nëse thirr <code>next()</code> kur generator-i ka mbaruar?', opts:['Ngre StopIteration','Kthen None','Fillon nga fillimi','Ngre ValueError'], ans:0, exp:'Kur generator exhauston, next() ngre StopIteration exception.' },
-    { d:'hard', q:'Cila strukturë të dhënash e Python garantohet ORDERED (insertion order) nga Python 3.7+?', opts:['dict','set','frozenset','tuple vetëm'], ans:0, exp:'Nga Python 3.7, dict ruan insertion order. set dhe frozenset NUK ruajnë rend.' },
-    { d:'hard', q:'Çfarë kthen:\n<code>x = {1,2,3}\nx.discard(5)\nprint(len(x))</code>', opts:['3','2','Error','4'], ans:0, exp:'discard() nuk ngre error nëse elementi nuk ekziston — ndryshim nga remove() që ngre KeyError.' },
-    { d:'hard', q:'Cila është diferenca midis <code>__str__</code> dhe <code>__repr__</code>?', opts:['__str__ për user, __repr__ për developer/debug','Janë identike','__repr__ për user, __str__ për debug','__str__ kthen bytes'], ans:0, exp:'__str__ kthen string human-readable. __repr__ kthen representim teknik, idealisht Python-evaluable.' },
-    { d:'hard', q:'Cili design pattern zbaton:\n<code>class Meta(type):\n  pass\nclass MyClass(metaclass=Meta): pass</code>', opts:['Metaclass pattern','Singleton','Factory','Observer'], ans:0, exp:'Metaclass kontrollon se si krijohet klasa vetë — "klasa e klasës". Zakonisht për framework internals.' },
+    {
+      q: "What is the output of the following code?",
+      code: `x = [1, 2, 3]
+y = x
+y.append(4)
+print(x)`,
+      hint: "Think about how Python assigns lists.",
+      accepted: ["[1, 2, 3, 4]", "[1,2,3,4]"],
+      answer: "[1, 2, 3, 4]",
+      exp: "y = x doesn't copy the list — both variables point to the same object in memory. Mutating y mutates x too. Use y = x.copy() or y = x[:] for a shallow copy."
+    },
+    {
+      q: "What does this function return when called as f() the second time?",
+      code: `def f(x=[]):
+    x.append(1)
+    return x`,
+      hint: "Mutable default arguments are evaluated once at function definition.",
+      accepted: ["[1, 1]", "[1,1]"],
+      answer: "[1, 1]",
+      exp: "Default mutable arguments (lists, dicts) are shared across calls — they're not re-created each time. The same list persists. Fix: def f(x=None): if x is None: x = []"
+    },
+    {
+      q: "What is printed?",
+      code: `print(type(True) == type(1))
+print(isinstance(True, int))`,
+      hint: "In Python, bool is a subclass of int.",
+      accepted: ["true\ntrue","True\nTrue","true true","True True"],
+      answer: "True\nTrue",
+      exp: "bool is a subclass of int in Python. True and False are literally 1 and 0. isinstance(True, int) is True."
+    },
+    {
+      q: "What does this generator yield in order? (write all values comma-separated)",
+      code: `def gen():
+    for i in range(3):
+        yield i * i
+
+g = gen()
+print(next(g))
+print(next(g))
+print(next(g))`,
+      hint: "yield pauses execution and resumes on next call.",
+      accepted: ["0\n1\n4","0 1 4","0, 1, 4"],
+      answer: "0\n1\n4",
+      exp: "yield pauses the generator at each iteration. next() resumes it. 0²=0, 1²=1, 2²=4."
+    },
+    {
+      q: "What does the following print?",
+      code: `a = (1, 2, 3)
+a += (4,)
+print(len(a))`,
+      hint: "Tuples are immutable, but += on a variable reassigns it.",
+      accepted: ["4"],
+      answer: "4",
+      exp: "+= on a tuple creates a NEW tuple (1,2,3,4) and reassigns 'a' to it. The original (1,2,3) is discarded. Immutability means you can't mutate in-place, not that the variable can't be reassigned."
+    },
+    {
+      q: "Write the output:",
+      code: `d = {'a': 1, 'b': 2, 'c': 3}
+result = {v: k for k, v in d.items()}
+print(result)`,
+      hint: "Dict comprehension — swapping keys and values.",
+      accepted: ["{1: 'a', 2: 'b', 3: 'c'}","{1:'a',2:'b',3:'c'}","{'a':1,'b':2,'c':3} reversed"],
+      answer: "{1: 'a', 2: 'b', 3: 'c'}",
+      exp: "The dict comprehension iterates key-value pairs and swaps them: values become keys, keys become values."
+    },
+    {
+      q: "What will this print?",
+      code: `funcs = []
+for i in range(3):
+    funcs.append(lambda: i)
+print([f() for f in funcs])`,
+      hint: "Python closures capture variables by reference, not by value.",
+      accepted: ["[2, 2, 2]","[2,2,2]"],
+      answer: "[2, 2, 2]",
+      exp: "All lambdas reference the same variable 'i' — which is 2 after the loop ends. This is the classic closure trap. Fix: lambda i=i: i to capture the current value."
+    },
+    {
+      q: "What does this output?",
+      code: `class Counter:
+    count = 0
+    def __init__(self):
+        Counter.count += 1
+
+a = Counter()
+b = Counter()
+print(Counter.count)`,
+      hint: "count is a class-level attribute, not instance-level.",
+      accepted: ["2"],
+      answer: "2",
+      exp: "Counter.count is a class variable shared by all instances. Each __init__ call increments it on the class itself. After 2 instantiations, Counter.count == 2."
+    },
+    {
+      q: "What is the result?",
+      code: `print(list(map(lambda x: x**2, filter(lambda x: x%2==0, range(10)))))`,
+      hint: "filter first, then map.",
+      accepted: ["[0, 4, 16, 36, 64]","[0,4,16,36,64]"],
+      answer: "[0, 4, 16, 36, 64]",
+      exp: "filter keeps even numbers: [0,2,4,6,8]. map squares them: [0,4,16,36,64]."
+    },
+    {
+      q: "What does __slots__ do in a Python class?",
+      code: `class Point:
+    __slots__ = ['x', 'y']
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y`,
+      hint: "It restricts what attributes instances can have.",
+      accepted: [
+        "prevents adding arbitrary attributes and reduces memory usage by removing __dict__",
+        "restricts instance attributes to x and y, saves memory, removes __dict__",
+        "limits attributes to x and y and saves memory",
+        "removes __dict__ and only allows x y attributes"
+      ],
+      answer: "Restricts instances to only x and y attributes; removes __dict__, reducing memory overhead.",
+      exp: "__slots__ replaces the per-instance __dict__ with a fixed-size array. You can't add new attributes dynamically (p.z = 1 raises AttributeError). Useful for large numbers of small objects."
+    },
+    {
+      q: "What is the output?",
+      code: `import functools
+
+@functools.lru_cache(maxsize=None)
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n-1) + fib(n-2)
+
+print(fib(6))`,
+      hint: "Fibonacci with memoization.",
+      accepted: ["8"],
+      answer: "8",
+      exp: "fib(6) = 8. lru_cache memoizes results so each value is computed only once instead of exponential recursion."
+    },
+    {
+      q: "What does this print?",
+      code: `x = [1, [2, 3], [4, [5, 6]]]
+import copy
+y = copy.copy(x)
+y[1].append(99)
+print(x[1])`,
+      hint: "copy.copy is a shallow copy.",
+      accepted: ["[2, 3, 99]","[2,3,99]"],
+      answer: "[2, 3, 99]",
+      exp: "copy.copy creates a new list but doesn't recursively copy nested objects. y[1] and x[1] point to the same inner list. Mutating y[1] mutates x[1]. Use copy.deepcopy to avoid this."
+    },
+    {
+      q: "What does this output?",
+      code: `class A:
+    def method(self):
+        return 'A'
+
+class B(A):
+    def method(self):
+        return 'B' + super().method()
+
+class C(A):
+    def method(self):
+        return 'C' + super().method()
+
+class D(B, C):
+    pass
+
+print(D().method())`,
+      hint: "Python MRO (Method Resolution Order) — C3 linearization.",
+      accepted: ["BCA","'BCA'"],
+      answer: "BCA",
+      exp: "MRO for D is: D → B → C → A. D().method() → B.method() → 'B' + super().method() → C.method() → 'C' + super().method() → A.method() → 'A'. Result: 'B' + 'C' + 'A' = 'BCA'."
+    },
+    {
+      q: "What does this print?",
+      code: `def outer(x):
+    def inner(y):
+        return x + y
+    return inner
+
+add5 = outer(5)
+print(add5(3))`,
+      hint: "Closures capture the enclosing scope.",
+      accepted: ["8"],
+      answer: "8",
+      exp: "outer(5) returns inner with x=5 captured in the closure. add5(3) calls inner(3), returning 5+3=8."
+    },
+    {
+      q: "What is the output?",
+      code: `s = {1, 2, 3, 4}
+s.discard(10)
+s.remove(2)
+print(len(s))`,
+      hint: "discard vs remove — one raises an error, one doesn't.",
+      accepted: ["3"],
+      answer: "3",
+      exp: "discard(10) does nothing if 10 isn't in the set (no error). remove(2) removes 2. Set becomes {1,3,4}, length 3."
+    },
+    {
+      q: "What does this output?",
+      code: `print(0.1 + 0.2 == 0.3)
+print(round(0.1 + 0.2, 1) == 0.3)`,
+      hint: "Floating point precision.",
+      accepted: ["false\ntrue","False\nTrue","false true","False True"],
+      answer: "False\nTrue",
+      exp: "0.1 + 0.2 = 0.30000000000000004 in floating point — not exactly 0.3. round() fixes the comparison."
+    },
+    {
+      q: "What is printed?",
+      code: `from itertools import chain
+a = [1, 2]
+b = [3, 4]
+c = [5, 6]
+print(list(chain(a, b, c)))`,
+      hint: "itertools.chain flattens iterables.",
+      accepted: ["[1, 2, 3, 4, 5, 6]","[1,2,3,4,5,6]"],
+      answer: "[1, 2, 3, 4, 5, 6]",
+      exp: "chain(a, b, c) lazily iterates through a, then b, then c. list() materializes it into [1,2,3,4,5,6]."
+    },
+    {
+      q: "What does *args and **kwargs allow in this function call?",
+      code: `def f(*args, **kwargs):
+    print(args, kwargs)
+
+f(1, 2, key='val', flag=True)`,
+      hint: "args captures positional, kwargs captures keyword arguments.",
+      accepted: [
+        "(1, 2) {'key': 'val', 'flag': True}",
+        "(1, 2) {'flag': True, 'key': 'val'}",
+        "(1,2) {'key':'val','flag':True}"
+      ],
+      answer: "(1, 2) {'key': 'val', 'flag': True}",
+      exp: "*args collects positional args as a tuple: (1, 2). **kwargs collects keyword args as a dict: {'key': 'val', 'flag': True}."
+    },
+    {
+      q: "What does this yield / print?",
+      code: `def countdown(n):
+    while n > 0:
+        yield n
+        n -= 1
+
+print(sum(countdown(5)))`,
+      hint: "Generator passed directly to sum().",
+      accepted: ["15"],
+      answer: "15",
+      exp: "countdown(5) generates 5,4,3,2,1. sum() consumes the generator and returns 5+4+3+2+1=15."
+    },
+    {
+      q: "What happens and what is printed?",
+      code: `try:
+    x = int('abc')
+except ValueError as e:
+    print(f'caught: {type(e).__name__}')
+finally:
+    print('done')`,
+      hint: "Both except and finally execute when an exception occurs.",
+      accepted: [
+        "caught: ValueError\ndone",
+        "caught: ValueError\n done",
+        "caught: valueerror\ndone"
+      ],
+      answer: "caught: ValueError\ndone",
+      exp: "int('abc') raises ValueError. The except block catches it and prints. The finally block ALWAYS runs after try/except, printing 'done'."
+    }
   ],
   sql: [
-    // EASY
-    { d:'easy', q:'Cila klauzolë filtron rreshtat PARA agregimit?', opts:['WHERE','HAVING','FILTER','GROUP BY'], ans:0, exp:'WHERE vepron në rreshtat individual para agregimit.' },
-    { d:'easy', q:'Cili funksion kthen numrin e rreshtave?', opts:['COUNT(*)','SUM(*)','NUM()','ROWS()'], ans:0, exp:'COUNT(*) numëron të gjitha rreshtat, duke përfshirë NULL.' },
-    { d:'easy', q:'Cili JOIN kthen vetëm rreshtat me match nga të dyja tabelat?', opts:['INNER JOIN','LEFT JOIN','FULL OUTER JOIN','CROSS JOIN'], ans:0, exp:'INNER JOIN = vetëm rreshtat që kanë match në të dyja tabelat.' },
-    { d:'easy', q:'Si renditim rezultatet nga i madhi te i vogli?', opts:['ORDER BY col DESC','ORDER BY col ASC','SORT BY col DOWN','ORDER col REVERSE'], ans:0, exp:'DESC (descending) rendit nga më i madhi.' },
-    { d:'easy', q:'Cili operator SQL teston NULL?', opts:['IS NULL','= NULL','== NULL','NULL = NULL'], ans:0, exp:'IS NULL është i vetmi operatori korrekt — = NULL gjithmonë kthen unknown/false.' },
-    // MEDIUM
-    { d:'medium', q:'Ky query çfarë kthen?\n<code>SELECT dept, COUNT(*) FROM emp GROUP BY dept HAVING COUNT(*) > 3</code>', opts:['Departamentet me mbi 3 punonjës','Punonjësit me dept > 3','Departamentet me 3 kolona','Error'], ans:0, exp:'HAVING filtron grupet pas agregimit. Kthen vetëm dept me mbi 3 rreshta.' },
-    { d:'medium', q:'Cila është diferenca midis <code>DELETE</code> dhe <code>TRUNCATE</code>?', opts:['DELETE filtron me WHERE dhe loggon; TRUNCATE fshin të gjithë pa log','Janë identike','TRUNCATE filtron me WHERE','DELETE fshin tabelën'], ans:0, exp:'DELETE mund të filtrohet, loggon çdo rresht, mund të rollback. TRUNCATE fshihet i gjithi, minimal log, zakonisht jo rollback.' },
-    { d:'medium', q:'Cila funksion window kthen rangun pa gaps?', opts:['DENSE_RANK()','RANK()','ROW_NUMBER()','NTILE()'], ans:0, exp:'DENSE_RANK() jep 1,2,2,3 (pa gap). RANK() jep 1,2,2,4 (me gap mbas tie).' },
-    { d:'medium', q:'Çfarë kthen <code>COALESCE(NULL, 0, 5)</code>?', opts:['0','NULL','5','Error'], ans:0, exp:'COALESCE kthen VLERËN E PARË JO-NULL — pra 0, jo 5.' },
-    { d:'medium', q:'Cili query gjen produktet e pashitura (jo në orders)?', opts:['SELECT p.* FROM products p LEFT JOIN orders o ON p.id=o.pid WHERE o.pid IS NULL','SELECT * FROM products MINUS orders','SELECT * FROM products WHERE id NOT EXISTS orders','SELECT * FROM products EXCEPT SELECT pid FROM orders'], ans:0, exp:'LEFT JOIN + WHERE right IS NULL = "anti-join" pattern, eficent.' },
-    { d:'medium', q:'Çfarë bën <code>ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC)</code>?', opts:['Numëron rreshtat brenda çdo departamenti nga rroga më e lartë','Rendit të gjithë tabelën','Kthen rangun global','Ndan tabelën në n grupe'], ans:0, exp:'PARTITION BY rifillon numërim për çdo dept; ORDER BY salary DESC vendos 1 tek rroga max.' },
-    { d:'medium', q:'Cili query kthen produktin bestseller PER kategori?', opts:['SELECT * FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY category ORDER BY sales DESC) rn FROM products) t WHERE rn=1','SELECT category, MAX(sales) FROM products','SELECT TOP 1 * FROM products GROUP BY category','SELECT category, product FROM products ORDER BY sales DESC LIMIT 1'], ans:0, exp:'Window function me ROW_NUMBER() + filter rn=1 jep një rresht per grup.' },
-    { d:'medium', q:'Cila është diferenca midis <code>UNION</code> dhe <code>UNION ALL</code>?', opts:['UNION heq duplikate; UNION ALL ruan të gjitha','Janë identike','UNION ALL heq duplikate','UNION ALL kërkon kolona të ndryshme'], ans:0, exp:'UNION bën DISTINCT implicit — heq duplikate. UNION ALL është më i shpejtë nëse duplikate nuk janë problem.' },
-    // HARD
-    { d:'hard', q:'Cila CTE (Common Table Expression) llogarit total kumulativ të shitjeve?', opts:['WITH cte AS (SELECT date, SUM(sales) OVER (ORDER BY date) cumul FROM sales) SELECT * FROM cte','WITH cte AS (SELECT SUM(sales) FROM sales) SELECT * FROM cte','SELECT CUMULATIVE(sales) FROM sales','SELECT SUM(sales) PARTITION BY date FROM sales'], ans:0, exp:'Running total me window function SUM() OVER (ORDER BY date) — nuk kërkon GROUP BY.' },
-    { d:'hard', q:'Çfarë bën <code>EXPLAIN</code> (ose <code>EXPLAIN ANALYZE</code>) në SQL?', opts:['Tregon execution plan — si query processor e ekzekuton queryn','Fshihet queryn pa ekzekutim','Tregon definicionin e tabelës','Kthen metadatën e kolonave'], ans:0, exp:'EXPLAIN shfaq execution plan: index scans, joins, cost estimates. Kritik për performance tuning.' },
-    { d:'hard', q:'Cili index lloj është optimal për kolona me kardinalitet shumë të ulët (p.sh. status: aktiv/pasiv)?', opts:['Bitmap Index','B-Tree Index','Hash Index','Full-Text Index'], ans:0, exp:'Bitmap indexes janë eficente për kolona me pak vlera unike (low cardinality). B-Tree është mirë për high cardinality.' },
-    { d:'hard', q:'Çfarë është "N+1 query problem"?', opts:['1 query kryesor + N queries për çdo rresht — zakonisht i zgjidhet me JOIN ose IN','N tabela me 1 kolonë','Query që kthen N+1 kolona','Ngarkim i N tabelave njëherësh'], ans:0, exp:'N+1: një query kthen N rreshta, pastaj bën N queries shtesë. Shumë i kushtueshëm. Zgjidhet me JOIN ose batch load.' },
-    { d:'hard', q:'Cili pattern i SQL quhet "upsert"?', opts:['INSERT ... ON CONFLICT DO UPDATE','INSERT OR REPLACE','MERGE INTO','Të gjitha sipër janë forma upsert'], ans:3, exp:'Të tria janë forma të upsert (INSERT nëse nuk ekziston, UPDATE nëse ekziston). Sintaksa ndryshon sipas DBMS.' },
-    { d:'hard', q:'Çfarë kthen ky query?\n<code>SELECT 1 WHERE 1=1 AND 1=NULL</code>', opts:['0 rreshta (empty result)','1','NULL','Error'], ans:0, exp:'1=NULL kthen NULL (unknown), jo FALSE. AND me NULL = NULL. WHERE NULL = asnjë rresht nuk kthehet.' },
-    { d:'hard', q:'Cili është qëllimi i <code>LATERAL JOIN</code> (ose <code>CROSS APPLY</code> në SQL Server)?', opts:['Lejon subquery të referojë kolonat e tabelës së jashtme','Kthen produkt kartezian','Bashkon me index','Ekzekuton stored procedure'], ans:0, exp:'LATERAL lejon çdo rresht të tabelës kryesore të "feed" subquery — si for-loop korrektuar me SQL.' },
-    { d:'hard', q:'Cila window function ndan rreshtat në N grupe të barabarta?', opts:['NTILE(N)','RANK()','PERCENT_RANK()','CUME_DIST()'], ans:0, exp:'NTILE(N) ndan rreshtat në N "buckets" me madhësi sa më të barabarta. Ideal për percentile analysis.' },
-    { d:'hard', q:'Çfarë ndodh me performance nëse vendos funksion mbi kolonë indexed në WHERE?', opts:['Index nuk përdoret — bëhet full table scan','Index ende përdoret','Query ndalet','Automatiksht optimizohet'], ans:0, exp:'WHERE YEAR(date_col)=2024 nuk mund të përdorë index mbi date_col. Shruaj si: WHERE date_col >= "2024-01-01" AND date_col < "2025-01-01".' },
-    { d:'hard', q:'Cili SQL isolation level parandalon "dirty reads"?', opts:['READ COMMITTED dhe lart','READ UNCOMMITTED','SERIALIZABLE vetëm','Nuk ka isolation level'], ans:0, exp:'READ UNCOMMITTED lejon dirty reads. READ COMMITTED dhe çdo nivel më lart i parandalon ato.' },
-    { d:'hard', q:'Çfarë kthen <code>LAG(salary, 1) OVER (ORDER BY hire_date)</code>?', opts:['Pagën e punonjësit të punësuar mëparë','Pagën e ardhshme','Diferencën e pagave','NULL gjithmonë'], ans:0, exp:'LAG(col, n) kthen vlerën e n rreshtave mëparë brenda window — ideal për krahasime row-over-row.' },
-    { d:'hard', q:'Cili është benefiti kryesor i <code>Materialized View</code> kundrejt View të zakonshme?', opts:['Rezultati ruhet fizikisht — lexim shumë më i shpejtë por kërkon refresh','Është gjithmonë up-to-date','Nuk kërkon memorie shtesë','Ekzekuton query çdo herë si view normale'], ans:0, exp:'Materialized View cache-on rezultatin në disk. Shumë i shpejtë për read. Duhet REFRESH kur të dhënat ndryshojnë.' },
+    {
+      q: "What is the difference between WHERE and HAVING? Write a query that uses both — customers with total orders > 500, excluding cancelled orders.",
+      code: null,
+      hint: "WHERE filters rows before grouping; HAVING filters groups after aggregation.",
+      accepted: [
+        "where filters before group by having filters after",
+        "WHERE filters individual rows before GROUP BY; HAVING filters aggregated groups after",
+        "where is before aggregation having is after aggregation",
+        "WHERE filters rows HAVING filters groups"
+      ],
+      answer: "WHERE filters rows before GROUP BY. HAVING filters groups after aggregation.\n\nSELECT customer_id, SUM(amount) AS total\nFROM orders\nWHERE status != 'cancelled'\nGROUP BY customer_id\nHAVING SUM(amount) > 500;",
+      exp: "WHERE can't reference aggregate functions — it runs before they're computed. HAVING runs after GROUP BY so you can filter on aggregates like COUNT(*) or SUM()."
+    },
+    {
+      q: "What does DENSE_RANK() return for this data? Write the ranks for each row.",
+      code: `-- Table: scores
+-- name   | score
+-- Alice  | 95
+-- Bob    | 90
+-- Carol  | 90
+-- Dave   | 85
+
+SELECT name, score,
+  DENSE_RANK() OVER (ORDER BY score DESC) AS rnk
+FROM scores;`,
+      hint: "DENSE_RANK has no gaps after ties; RANK does.",
+      accepted: [
+        "alice 1 bob 2 carol 2 dave 3",
+        "Alice:1, Bob:2, Carol:2, Dave:3",
+        "1,2,2,3",
+        "Alice=1 Bob=2 Carol=2 Dave=3"
+      ],
+      answer: "Alice:1, Bob:2, Carol:2, Dave:3",
+      exp: "DENSE_RANK: ties get the same rank and the next rank is consecutive (no gap). Alice=1, Bob & Carol both=2 (tie), Dave=3. RANK() would give Dave=4 because it skips 3."
+    },
+    {
+      q: "Write a query using a CTE to find the top-earning employee per department.",
+      code: `-- Table: employees (id, name, dept, salary)`,
+      hint: "Use ROW_NUMBER() inside the CTE, then filter rn = 1 outside.",
+      accepted: [
+        "with cte",
+        "WITH ranked",
+        "WITH cte AS",
+        "with ranked as"
+      ],
+      answer: "WITH ranked AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) AS rn\n  FROM employees\n)\nSELECT id, name, dept, salary FROM ranked WHERE rn = 1;",
+      exp: "CTE defines a named result set. ROW_NUMBER() PARTITION BY dept restarts numbering per department. ORDER BY salary DESC puts the highest earner at rn=1. Filtering WHERE rn=1 gives one row per dept."
+    },
+    {
+      q: "What is the N+1 query problem? How do you fix it in SQL?",
+      code: null,
+      hint: "It typically happens when you query a list, then query each item individually.",
+      accepted: [
+        "fetching n rows then querying each one separately making n+1 total queries fixed with join",
+        "n+1 means 1 query for list then n queries for each row fix with JOIN or IN clause",
+        "running one query to get records then one query per record, fix by joining",
+        "querying each item individually instead of joining"
+      ],
+      answer: "1 query to get N rows, then N individual queries for related data = N+1 total. Fix: JOIN all data in one query, or use WHERE id IN (...).",
+      exp: "Example: SELECT * FROM orders, then for each order: SELECT * FROM customer WHERE id=?. With 100 orders = 101 queries. Fix: SELECT o.*, c.* FROM orders o JOIN customers c ON o.customer_id = c.id — 1 query."
+    },
+    {
+      q: "What does this query return? Explain why.",
+      code: `SELECT *
+FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.id
+WHERE d.name = 'Engineering';`,
+      hint: "There's a subtle issue that negates the LEFT JOIN behavior.",
+      accepted: [
+        "same as inner join because WHERE on right table eliminates nulls",
+        "behaves like INNER JOIN because WHERE d.name filters out NULL rows from left join",
+        "only employees in engineering department same as inner join because where clause removes nulls",
+        "filters out employees with no department so acts like inner join"
+      ],
+      answer: "Returns only employees in Engineering — behaves like INNER JOIN because WHERE d.name='Engineering' filters out the NULL rows that LEFT JOIN preserved.",
+      exp: "LEFT JOIN keeps employees without a department (d columns = NULL). But WHERE d.name='Engineering' removes all NULL rows, making it identical to INNER JOIN. To fix, move the condition to ON: LEFT JOIN departments d ON e.dept_id = d.id AND d.name='Engineering'."
+    },
+    {
+      q: "Write a query to calculate a running total (cumulative sum) of daily sales, ordered by date.",
+      code: `-- Table: daily_sales (sale_date DATE, amount DECIMAL)`,
+      hint: "Use SUM() as a window function with OVER (ORDER BY date).",
+      accepted: [
+        "sum(amount) over",
+        "SUM(amount) OVER",
+        "sum() over (order by"
+      ],
+      answer: "SELECT sale_date, amount,\n  SUM(amount) OVER (ORDER BY sale_date) AS running_total\nFROM daily_sales\nORDER BY sale_date;",
+      exp: "SUM() OVER (ORDER BY sale_date) creates a running sum — for each row it sums all rows up to and including the current one. No GROUP BY needed; all original rows are kept."
+    },
+    {
+      q: "What is the output of this query given the data?",
+      code: `-- employees: id, name, manager_id
+-- 1, Alice, NULL
+-- 2, Bob,   1
+-- 3, Carol, 1
+-- 4, Dave,  2
+
+SELECT e.name, m.name AS manager
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.id;`,
+      hint: "A self-join — the table joins itself.",
+      accepted: [
+        "alice null bob alice carol alice dave bob",
+        "Alice NULL, Bob Alice, Carol Alice, Dave Bob",
+        "Alice=NULL Bob=Alice Carol=Alice Dave=Bob"
+      ],
+      answer: "Alice | NULL\nBob   | Alice\nCarol | Alice\nDave  | Bob",
+      exp: "Self-join: each employee joins the same table to find their manager. Alice has NULL manager_id → manager column is NULL. Bob and Carol report to Alice (id=1). Dave reports to Bob (id=2)."
+    },
+    {
+      q: "Why is this query slow and how would you fix it?",
+      code: `SELECT * FROM orders
+WHERE YEAR(created_at) = 2024;`,
+      hint: "Functions on indexed columns prevent index usage.",
+      accepted: [
+        "YEAR() prevents index use on created_at fix with BETWEEN or >= AND <",
+        "wrapping column in function disables index rewrite as range condition",
+        "function on indexed column causes full scan fix with date range",
+        "year() function makes index unusable use >= 2024-01-01 AND < 2025-01-01"
+      ],
+      answer: "YEAR(created_at) wraps the column in a function — the index on created_at cannot be used, causing a full table scan.\n\nFix: WHERE created_at >= '2024-01-01' AND created_at < '2025-01-01'",
+      exp: "Indexes work on raw column values. When you apply a function (YEAR, MONTH, UPPER, etc.) the database can't use the index. Always rewrite to sargable (Search ARGument ABLE) form using direct range comparisons."
+    },
+    {
+      q: "What is the difference between DELETE, TRUNCATE, and DROP?",
+      code: null,
+      hint: "Think about: can they be rolled back? Do they remove structure? Are they filtered?",
+      accepted: [
+        "delete removes rows can filter rollback, truncate removes all rows minimal log, drop removes table",
+        "DELETE=rows with WHERE rollback ok; TRUNCATE=all rows fast; DROP=table gone",
+        "delete: filtered rollback, truncate: all rows no where, drop: removes table structure"
+      ],
+      answer: "DELETE: removes rows, supports WHERE, fully logged, rollback-safe.\nTRUNCATE: removes ALL rows, no WHERE, minimal logging, fast, usually can't rollback.\nDROP: removes the entire table (structure + data).",
+      exp: "Key: DELETE is DML (transactional). TRUNCATE is DDL-like — much faster because it deallocates pages rather than logging each row. DROP removes everything including the table definition."
+    },
+    {
+      q: "Write a query to find customers who placed orders in 2024 but NOT in 2025.",
+      code: `-- Tables: customers(id, name), orders(id, customer_id, created_at)`,
+      hint: "Use EXCEPT, NOT EXISTS, or NOT IN with a subquery.",
+      accepted: [
+        "except","NOT EXISTS","not in","EXCEPT","not exists"
+      ],
+      answer: "SELECT DISTINCT customer_id FROM orders WHERE YEAR(created_at) = 2024\nEXCEPT\nSELECT DISTINCT customer_id FROM orders WHERE YEAR(created_at) = 2025;\n\n-- OR:\nSELECT DISTINCT customer_id FROM orders o1\nWHERE YEAR(created_at) = 2024\nAND NOT EXISTS (\n  SELECT 1 FROM orders o2\n  WHERE o2.customer_id = o1.customer_id AND YEAR(o2.created_at) = 2025\n);",
+      exp: "EXCEPT returns rows in the first query that don't appear in the second — perfect for set subtraction. NOT EXISTS is often more efficient on large datasets because it short-circuits on the first match."
+    },
+    {
+      q: "Explain what EXPLAIN ANALYZE does and what 'Seq Scan' vs 'Index Scan' means in the output.",
+      code: null,
+      hint: "EXPLAIN shows the execution plan; ANALYZE actually runs it.",
+      accepted: [
+        "explain shows plan analyze runs it seq scan reads whole table index scan uses index",
+        "EXPLAIN shows the query plan ANALYZE executes and shows actual times. Seq Scan = full table scan, Index Scan = uses index",
+        "shows execution plan seq scan is full table scan index scan uses index for lookup"
+      ],
+      answer: "EXPLAIN shows the planned execution steps and estimated costs. ANALYZE actually runs the query and shows real vs estimated times.\n\nSeq Scan: reads every row in the table (full scan) — slow on large tables.\nIndex Scan: uses an index to find rows directly — much faster for selective queries.",
+      exp: "EXPLAIN ANALYZE is the primary tool for query performance tuning. You look for Seq Scans on large tables (add an index), high cost nodes, and large differences between estimated vs actual rows (means stale statistics — run ANALYZE/VACUUM)."
+    },
+    {
+      q: "What does LAG() return here? Write the values for the running_diff column.",
+      code: `-- monthly_revenue table:
+-- month | revenue
+-- Jan   | 1000
+-- Feb   | 1200
+-- Mar   | 900
+
+SELECT month, revenue,
+  revenue - LAG(revenue) OVER (ORDER BY month) AS running_diff
+FROM monthly_revenue;`,
+      hint: "LAG returns the previous row's value. First row has no previous.",
+      accepted: [
+        "jan null feb 200 mar -300",
+        "NULL, 200, -300",
+        "Jan=NULL Feb=200 Mar=-300",
+        "null 200 -300"
+      ],
+      answer: "Jan: NULL\nFeb: 200 (1200-1000)\nMar: -300 (900-1200)",
+      exp: "LAG(revenue) returns the previous row's revenue value. For Jan there's no previous row → NULL. Feb: 1200-1000=200. Mar: 900-1200=-300. Great for month-over-month change calculations."
+    },
+    {
+      q: "What's wrong with this query and how do you fix it?",
+      code: `SELECT name, MAX(salary)
+FROM employees
+GROUP BY department;`,
+      hint: "Check which columns are in SELECT vs GROUP BY.",
+      accepted: [
+        "name is not in group by and not aggregated",
+        "name is neither in GROUP BY nor aggregated — ambiguous",
+        "select name is not aggregated or in group by clause",
+        "name not in group by"
+      ],
+      answer: "Bug: 'name' is in SELECT but not in GROUP BY and not aggregated — this is ambiguous (which name to show for the max salary?).\n\nFix option 1: GROUP BY department, name\nFix option 2: Use a subquery/CTE with ROW_NUMBER() to get the employee with max salary per dept.",
+      exp: "Standard SQL requires every non-aggregated column in SELECT to appear in GROUP BY. MySQL's ONLY_FULL_GROUP_BY mode enforces this. The semantically correct fix is usually a window function to find the row with max salary."
+    },
+    {
+      q: "Write a query that returns each product and the percentage of total revenue it represents.",
+      code: `-- Table: sales (product_name, revenue)`,
+      hint: "You need the total revenue — use SUM() as a window function without PARTITION BY.",
+      accepted: [
+        "sum(revenue) over()",
+        "SUM(revenue) OVER ()",
+        "sum(revenue) over ()",
+        "sum() over() total"
+      ],
+      answer: "SELECT product_name, revenue,\n  ROUND(100.0 * revenue / SUM(revenue) OVER (), 2) AS pct_of_total\nFROM sales\nORDER BY pct_of_total DESC;",
+      exp: "SUM(revenue) OVER () with an empty OVER() computes the grand total across all rows. Dividing each product's revenue by the grand total gives the percentage. No subquery needed."
+    },
+    {
+      q: "What is the difference between a Clustered and Non-Clustered index?",
+      code: null,
+      hint: "Clustered changes the physical order of data. Non-clustered is a separate structure.",
+      accepted: [
+        "clustered stores data physically in index order one per table non-clustered is separate structure",
+        "clustered = data rows stored in index order, 1 per table. non-clustered = separate index pointing to data rows",
+        "clustered physically orders data non-clustered is a separate pointer structure"
+      ],
+      answer: "Clustered: the table's data rows are physically stored in the index order. Only one per table (usually PK). Non-Clustered: a separate structure with pointers to the data rows. Multiple per table allowed.",
+      exp: "Reading clustered index = reading the actual data. Reading non-clustered means 1) look up index 2) follow pointer to data row (a 'key lookup' / RID lookup). Clustered is faster for range scans on the indexed column. Non-clustered adds overhead but is flexible."
+    },
+    {
+      q: "What does NULLIF do? What will this return?",
+      code: `SELECT NULLIF(10, 10);
+SELECT NULLIF(10, 5);`,
+      hint: "NULLIF compares two expressions and returns NULL if equal.",
+      accepted: [
+        "null then 10",
+        "NULL, 10",
+        "first is null second is 10",
+        "returns null if equal otherwise first value"
+      ],
+      answer: "NULLIF(10,10) → NULL\nNULLIF(10,5) → 10",
+      exp: "NULLIF(a, b) returns NULL if a=b, otherwise returns a. Very useful to avoid division by zero: revenue / NULLIF(units, 0) — if units=0, you get NULL instead of a divide-by-zero error."
+    },
+    {
+      q: "What isolation level prevents phantom reads? Explain what a phantom read is.",
+      code: null,
+      hint: "Phantom reads involve NEW rows appearing between two reads in the same transaction.",
+      accepted: [
+        "serializable prevents phantom reads a phantom read is when new rows appear between two reads in same transaction",
+        "SERIALIZABLE. Phantom = new rows inserted by another transaction appear in a repeated read",
+        "serializable level phantom read means transaction re-reads and finds new rows inserted by another"
+      ],
+      answer: "SERIALIZABLE prevents phantom reads.\nPhantom read: Transaction T1 reads rows matching a condition. Transaction T2 inserts a new matching row and commits. T1 re-reads and finds the new 'phantom' row.",
+      exp: "Isolation levels: READ UNCOMMITTED (dirty reads ok) → READ COMMITTED → REPEATABLE READ (prevents non-repeatable reads) → SERIALIZABLE (prevents phantoms, full isolation). Higher isolation = less concurrency."
+    },
+    {
+      q: "Rewrite this correlated subquery as a JOIN — which is typically faster?",
+      code: `SELECT name
+FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o
+  WHERE o.customer_id = c.id
+  AND o.amount > 1000
+);`,
+      hint: "EXISTS can usually be rewritten as JOIN with DISTINCT.",
+      accepted: [
+        "join with distinct",
+        "SELECT DISTINCT c.name FROM customers c JOIN orders o",
+        "join customers orders on customer_id where amount > 1000",
+        "inner join with distinct on name"
+      ],
+      answer: "SELECT DISTINCT c.name\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nWHERE o.amount > 1000;",
+      exp: "EXISTS is re-evaluated for each row of the outer query (correlated = slow on large tables). JOIN + DISTINCT lets the query optimizer pick the best execution strategy. In practice, modern optimizers often make them equivalent, but explicit JOIN form is often cleaner."
+    },
+    {
+      q: "What does PARTITION BY do in a window function vs GROUP BY?",
+      code: null,
+      hint: "Think about how many rows each returns.",
+      accepted: [
+        "partition by computes aggregate per group but keeps all rows group by reduces to one row per group",
+        "PARTITION BY like GROUP BY but doesn't collapse rows all rows remain visible",
+        "partition by divides window function scope but all rows returned group by collapses rows"
+      ],
+      answer: "GROUP BY collapses rows into one row per group — you lose individual row detail.\nPARTITION BY computes the window function per group but KEEPS ALL ROWS.",
+      exp: "Example: SELECT name, dept, salary, AVG(salary) OVER (PARTITION BY dept) — each row shows its own salary AND the dept average side by side. GROUP BY would lose the individual name/salary rows."
+    },
+    {
+      q: "Write a recursive CTE to generate numbers 1 to 10.",
+      code: null,
+      hint: "A recursive CTE has an anchor member and a recursive member joined with UNION ALL.",
+      accepted: [
+        "with recursive","WITH RECURSIVE","WITH cte AS (SELECT 1 UNION ALL","with cte as (select 1"
+      ],
+      answer: "WITH RECURSIVE nums AS (\n  SELECT 1 AS n\n  UNION ALL\n  SELECT n + 1 FROM nums WHERE n < 10\n)\nSELECT * FROM nums;",
+      exp: "Recursive CTE: anchor (SELECT 1) defines the starting point. Recursive part (SELECT n+1 ... WHERE n<10) iterates until the condition fails. UNION ALL combines results. Useful for hierarchies, date series, and tree traversal."
+    }
   ]
 };
 
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-let cfg = { py: { n: 15, d: 'mixed' }, sql: { n: 15, d: 'mixed' } };
-let quiz = []; // array of { cat, item, answered, wasCorrect }
-let stats = { correct: 0, wrong: 0 };
+// ── STATE ────────────────────────────────────────────────────────────────
+let cfg = { py:10, sql:10 };
+let quiz = [];
+let stats = { ok:0, err:0 };
 
-// ─────────────────────────────────────────────
-// SETUP LOGIC
-// ─────────────────────────────────────────────
-document.querySelectorAll('.count-btn').forEach(btn => {
+// ── SETUP ────────────────────────────────────────────────────────────────
+document.querySelectorAll('#py-n .pill').forEach(btn => {
   btn.addEventListener('click', () => {
-    const cat = btn.dataset.cat;
-    document.querySelectorAll(`#${cat}-counts .count-btn`).forEach(b => b.classList.remove('sel'));
-    btn.classList.add('sel');
-    cfg[cat].n = parseInt(btn.dataset.n);
+    document.querySelectorAll('#py-n .pill').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    cfg.py = btn.dataset.v === 'all' ? 999 : parseInt(btn.dataset.v);
   });
 });
-document.querySelectorAll('.diff-btn').forEach(btn => {
+document.querySelectorAll('#sql-n .pill').forEach(btn => {
   btn.addEventListener('click', () => {
-    const cat = btn.dataset.cat;
-    document.querySelectorAll(`#${cat}-diffs .diff-btn`).forEach(b => b.classList.remove('sel'));
-    btn.classList.add('sel');
-    cfg[cat].d = btn.dataset.d;
+    document.querySelectorAll('#sql-n .pill').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    cfg.sql = btn.dataset.v === 'all' ? 999 : parseInt(btn.dataset.v);
   });
 });
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function pickQuestions(cat, n, diff) {
-  let pool = BANK[cat];
-  if (diff === 'easy')   pool = pool.filter(q => q.d === 'easy');
-  else if (diff === 'hard')  pool = pool.filter(q => q.d === 'hard');
-  // mixed = all
-  pool = shuffle(pool);
-  return pool.slice(0, Math.min(n, pool.length));
-}
+function shuffle(a){ const b=[...a]; for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];} return b; }
 
 function startQuiz() {
-  const pyQs = pickQuestions('py', cfg.py.n, cfg.py.d);
-  const sqlQs = pickQuestions('sql', cfg.sql.n, cfg.sql.d);
+  const pyPick = shuffle(BANK.py).slice(0, Math.min(cfg.py, BANK.py.length));
+  const sqlPick = shuffle(BANK.sql).slice(0, Math.min(cfg.sql, BANK.sql.length));
+  quiz = shuffle([
+    ...pyPick.map(item => ({ cat:'py', item, done:false, correct:null })),
+    ...sqlPick.map(item => ({ cat:'sql', item, done:false, correct:null }))
+  ]);
+  stats = { ok:0, err:0 };
 
-  quiz = [];
-  pyQs.forEach(item => quiz.push({ cat:'py', item, answered:false, wasCorrect:null }));
-  sqlQs.forEach(item => quiz.push({ cat:'sql', item, answered:false, wasCorrect:null }));
-  quiz = shuffle(quiz); // mix py & sql together
-
-  stats = { correct: 0, wrong: 0 };
-
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('quiz-screen').style.display = 'block';
-
-  const total = quiz.length;
-  document.getElementById('tb-title').textContent = `Python & SQL Test`;
-  document.getElementById('tb-sub').textContent = `${total} pyetje`;
-  document.getElementById('tb-left').textContent = total;
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('sb-count').textContent = `${quiz.length} questions`;
+  document.getElementById('sb-left').textContent = quiz.length;
 
   renderCards();
-  updateTopbar();
+  updateBar();
 }
 
-// ─────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────────────────────────
 function renderCards() {
-  const container = document.getElementById('cards-container');
-  container.innerHTML = '';
-  quiz.forEach((entry, idx) => buildCard(entry, idx, container));
+  const c = document.getElementById('cards');
+  c.innerHTML = '';
+  quiz.forEach((entry, idx) => {
+    const { cat, item } = entry;
+    const card = document.createElement('div');
+    card.className = `qcard ${cat}-q`;
+    card.id = `qc-${idx}`;
+
+    const catLabel = cat === 'py' ? '🐍 Python' : '🗄️ SQL';
+    const codeBlock = item.code
+      ? `<pre><code>${escHtml(item.code.trim())}</code></pre>`
+      : '';
+
+    card.innerHTML = `
+      <div class="qcard-top">
+        <span class="qtag">${catLabel}</span>
+        <span class="qn">#${String(idx+1).padStart(2,'0')}</span>
+      </div>
+      <div class="qbody">
+        <div class="qtext">${item.q}</div>
+        ${codeBlock}
+        <div class="qhint">💡 Hint: ${item.hint}</div>
+        <div class="ans-wrap">
+          <textarea class="ans-input" id="ans-${idx}" placeholder="Write your answer here..." rows="3"></textarea>
+        </div>
+        <button class="check-btn" id="btn-${idx}" onclick="checkAnswer(${idx})">Check →</button>
+        <div class="result-row" id="res-${idx}"></div>
+      </div>
+    `;
+    c.appendChild(card);
+
+    // allow Shift+Enter to check
+    const ta = card.querySelector('textarea');
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault();
+        checkAnswer(idx);
+      }
+    });
+  });
 }
 
-function buildCard(entry, idx, container) {
-  const { cat, item } = entry;
-  const card = document.createElement('div');
-  card.className = `qcard ${cat}-q ${item.d}`;
-  card.id = `qcard-${idx}`;
-
-  const catLabel = cat === 'py' ? '🐍 Python' : '🗄️ SQL';
-  const diffMap = { easy:'🟢 Easy', medium:'🟡 Medium', hard:'🔴 Hard' };
-  const labels = ['A','B','C','D'];
-
-  const optsHTML = item.opts.map((o,j) => `
-    <button class="opt" onclick="answer(${idx},${j})">
-      <span class="opt-lbl">${labels[j]}</span>
-      <span>${o}</span>
-    </button>`).join('');
-
-  card.innerHTML = `
-    <div class="qhead">
-      <span class="qbadge"><span class="diff-dot"></span>${catLabel}</span>
-      <span class="diff-tag ${item.d}">${diffMap[item.d]}</span>
-      <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">#${String(idx+1).padStart(2,'0')}</span>
-    </div>
-    <div class="qtext">${item.q.replace(/\n/g,'<br>')}</div>
-    <div class="opts" id="opts-${idx}" style="margin-top:16px">${optsHTML}</div>
-    <div class="feedback-box" id="fb-${idx}"></div>
-  `;
-  container.appendChild(card);
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ─────────────────────────────────────────────
-// ANSWER
-// ─────────────────────────────────────────────
-function answer(idx, chosen) {
+// ── CHECK ────────────────────────────────────────────────────────────────
+function checkAnswer(idx) {
   const entry = quiz[idx];
-  if (entry.answered) return;
-  entry.answered = true;
+  if (entry.done) return;
 
+  const input = document.getElementById(`ans-${idx}`);
+  const userRaw = input.value.trim();
+  if (!userRaw) { input.focus(); return; }
+
+  const user = userRaw.toLowerCase().replace(/\s+/g,' ');
   const item = entry.item;
-  const optsEl = document.getElementById(`opts-${idx}`);
-  const fbEl = document.getElementById(`fb-${idx}`);
-  const cardEl = document.getElementById(`qcard-${idx}`);
-  const btns = optsEl.querySelectorAll('.opt');
 
-  btns.forEach(b => b.disabled = true);
+  // check if any accepted answer appears as substring (flexible)
+  const isCorrect = item.accepted.some(a => {
+    const ac = a.toLowerCase().replace(/\s+/g,' ');
+    return user.includes(ac) || ac.includes(user);
+  });
 
-  const correct = chosen === item.ans;
-  entry.wasCorrect = correct;
+  entry.done = true;
+  entry.correct = isCorrect;
 
-  btns[item.ans].classList.add('hit-correct');
-  if (!correct) {
-    btns[chosen].classList.add('hit-wrong');
-    cardEl.classList.add('state-wrong');
-    fbEl.className = 'feedback-box show bad';
-    fbEl.innerHTML = `✗ Gabim &mdash; ${item.exp}`;
-    stats.wrong++;
-  } else {
-    cardEl.classList.add('state-correct');
-    fbEl.className = 'feedback-box show ok';
-    fbEl.innerHTML = `✓ Saktë! ${item.exp}`;
-    stats.correct++;
-  }
+  // style input
+  input.disabled = true;
+  input.classList.add(isCorrect ? 'is-ok' : 'is-err');
 
-  updateTopbar();
-  checkAllDone();
+  // disable button
+  const btn = document.getElementById(`btn-${idx}`);
+  btn.disabled = true;
+
+  // result panel
+  const res = document.getElementById(`res-${idx}`);
+  res.className = `result-row show ${isCorrect ? 'ok' : 'err'}`;
+  res.innerHTML = isCorrect
+    ? `<div class="result-verdict">✓ Correct</div><div class="result-exp">${item.exp}</div>`
+    : `<div class="result-verdict">✗ Incorrect</div>
+       <div class="result-correct-ans"><span>Correct answer:</span><br><code>${escHtml(item.answer)}</code></div>
+       <div class="result-exp">${item.exp}</div>`;
+
+  // card border
+  document.getElementById(`qc-${idx}`).classList.add(isCorrect ? 'c-ok' : 'c-err');
+
+  if (isCorrect) stats.ok++; else stats.err++;
+  updateBar();
+
+  // show FAB as soon as first answer submitted
+  document.getElementById('fab').classList.add('vis');
 }
 
-function updateTopbar() {
-  const done = stats.correct + stats.wrong;
+function updateBar() {
+  const done = stats.ok + stats.err;
   const total = quiz.length;
-  document.getElementById('tb-correct').textContent = stats.correct;
-  document.getElementById('tb-wrong').textContent = stats.wrong;
-  document.getElementById('tb-left').textContent = total - done;
-
+  document.getElementById('sb-ok').textContent = stats.ok;
+  document.getElementById('sb-err').textContent = stats.err;
+  document.getElementById('sb-left').textContent = total - done;
   const pct = total > 0 ? Math.round((done/total)*100) : 0;
-  document.getElementById('prog-txt').textContent = `${done} / ${total}`;
-  document.getElementById('prog-pct').textContent = pct + '%';
-  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('pb-txt').textContent = `${done} / ${total}`;
+  document.getElementById('pb-pct').textContent = pct + '%';
+  document.getElementById('pb-fill').style.width = pct + '%';
 }
 
-function checkAllDone() {
-  const done = stats.correct + stats.wrong;
-  const btn = document.getElementById('show-result-btn');
-  if (done > 0) btn.classList.add('visible');
-  if (done === quiz.length) {
-    btn.textContent = '🏆 Shfaq Rezultatin Final';
-    btn.style.background = 'linear-gradient(135deg,var(--py),#e8a800)';
-  }
-}
-
-// ─────────────────────────────────────────────
-// RESULT MODAL
-// ─────────────────────────────────────────────
-function showResult() {
-  const done = stats.correct + stats.wrong;
+// ── MODAL ────────────────────────────────────────────────────────────────
+function openModal() {
+  const done = stats.ok + stats.err;
   const total = quiz.length;
-  const pct = done > 0 ? Math.round((stats.correct/done)*100) : 0;
+  const pct = done > 0 ? Math.round((stats.ok/done)*100) : 0;
 
-  // emoji & title
-  let emoji, title;
-  if (pct >= 90)      { emoji='🏆'; title='Legjendë!'; }
-  else if (pct >= 75) { emoji='🎯'; title='Shumë mirë!'; }
-  else if (pct >= 60) { emoji='💪'; title='Mirë, por mëso më!'; }
-  else if (pct >= 40) { emoji='📚'; title='Ka punë!'; }
-  else                { emoji='😅'; title='Fillo nga fillimi bro'; }
+  const emoji = pct>=90?'🏆':pct>=75?'🎯':pct>=60?'💪':pct>=40?'📚':'😅';
+  const title = pct>=90?'EXCELLENT':pct>=75?'SOLID':pct>=60?'DECENT':pct>=40?'NEEDS WORK':'KEEP GOING';
 
-  document.getElementById('res-emoji').textContent = emoji;
-  document.getElementById('res-title').textContent = title;
-  document.getElementById('res-sub').textContent = `${done} / ${total} pyetje u përgjigje`;
-  document.getElementById('res-correct').textContent = stats.correct;
-  document.getElementById('res-wrong').textContent = stats.wrong;
-  document.getElementById('res-pct-lbl').textContent = pct + '%';
+  document.getElementById('m-ico').textContent = emoji;
+  document.getElementById('m-title').textContent = title;
+  document.getElementById('m-meta').textContent = `${done} of ${total} answered`;
+  document.getElementById('m-ok').textContent = stats.ok;
+  document.getElementById('m-err').textContent = stats.err;
+  document.getElementById('m-pct').textContent = pct + '%';
 
-  const bar = document.getElementById('grade-bar');
+  const bar = document.getElementById('m-bar');
   bar.style.width = '0%';
-  bar.style.background = pct>=75 ? 'var(--correct)' : pct>=50 ? 'var(--py)' : 'var(--wrong)';
-  setTimeout(() => { bar.style.width = pct + '%'; }, 100);
+  bar.style.background = pct>=70 ? 'var(--ok)' : pct>=50 ? 'var(--py)' : 'var(--err)';
+  setTimeout(() => bar.style.width = pct + '%', 100);
 
-  // Breakdown by category
-  const pyDone   = quiz.filter(e => e.cat==='py' && e.answered);
-  const sqlDone  = quiz.filter(e => e.cat==='sql' && e.answered);
-  const pyOk     = pyDone.filter(e => e.wasCorrect).length;
-  const sqlOk    = sqlDone.filter(e => e.wasCorrect).length;
-  const pyPct    = pyDone.length > 0 ? Math.round((pyOk/pyDone.length)*100) : 0;
-  const sqlPct   = sqlDone.length > 0 ? Math.round((sqlOk/sqlDone.length)*100) : 0;
+  // per-category breakdown
+  const pyEntries = quiz.filter(e => e.cat==='py' && e.done);
+  const sqlEntries = quiz.filter(e => e.cat==='sql' && e.done);
+  const pyOk = pyEntries.filter(e => e.correct).length;
+  const sqlOk = sqlEntries.filter(e => e.correct).length;
+  const pyPct = pyEntries.length ? Math.round((pyOk/pyEntries.length)*100) : 0;
+  const sqlPct = sqlEntries.length ? Math.round((sqlOk/sqlEntries.length)*100) : 0;
 
-  document.getElementById('res-breakdown').innerHTML = `
-    <div class="breakdown-item">
-      <div class="bcat py">🐍 Python</div>
-      <div class="bscore" style="color:var(--py)">${pyOk}/${pyDone.length}</div>
-      <div class="bbar"><div class="bbar-fill" id="py-bar" style="width:0%;background:var(--py)"></div></div>
-    </div>
-    <div class="breakdown-item">
-      <div class="bcat sql">🗄️ SQL</div>
-      <div class="bscore" style="color:var(--sql)">${sqlOk}/${sqlDone.length}</div>
-      <div class="bbar"><div class="bbar-fill" id="sql-bar" style="width:0%;background:var(--sql)"></div></div>
-    </div>
-  `;
+  document.getElementById('m-py-score').textContent = pyEntries.length ? `${pyOk}/${pyEntries.length}` : '—';
+  document.getElementById('m-sql-score').textContent = sqlEntries.length ? `${sqlOk}/${sqlEntries.length}` : '—';
   setTimeout(() => {
-    document.getElementById('py-bar').style.width = pyPct + '%';
-    document.getElementById('sql-bar').style.width = sqlPct + '%';
+    document.getElementById('m-py-bar').style.width = pyPct + '%';
+    document.getElementById('m-sql-bar').style.width = sqlPct + '%';
   }, 200);
 
-  document.getElementById('result-modal').classList.add('show');
+  document.getElementById('modal').classList.add('open');
 }
 
-function closeResult() {
-  document.getElementById('result-modal').classList.remove('show');
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
 }
 
-function fullReset() {
-  document.getElementById('result-modal').classList.remove('show');
-  document.getElementById('quiz-screen').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'block';
-  document.getElementById('show-result-btn').classList.remove('visible');
-  document.getElementById('show-result-btn').textContent = '📊 Shfaq Rezultatin';
-  document.getElementById('show-result-btn').style.background = '';
-  document.getElementById('cards-container').innerHTML = '';
-  stats = { correct:0, wrong:0 };
+function resetAll() {
+  closeModal();
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('setup').style.display = 'block';
+  document.getElementById('fab').classList.remove('vis');
+  document.getElementById('cards').innerHTML = '';
+  stats = { ok:0, err:0 };
+  quiz = [];
 }
 </script>
 </body>
