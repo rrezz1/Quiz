@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python & SQL Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080a0f;
+  --surface: #0f1117;
+  --surface2: #181b24;
+  --surface3: #1e2230;
+  --border: #252836;
+  --border2: #2e3345;
+  --py: #f7c948;
+  --sql: #2dd4bf;
+  --py-glow: rgba(247,201,72,.15);
+  --sql-glow: rgba(45,212,191,.15);
+  --py-dim: #1f1800;
+  --sql-dim: #001a17;
+  --text: #dde1ec;
+  --muted: #5a6175;
+  --correct: #34d399;
+  --wrong: #f87171;
+  --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+}
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(247,201,72,.04) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 80% 100%, rgba(45,212,191,.04) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+.wrapper { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:0 20px 100px; }
+
+/* ── HEADER ── */
+header { padding:52px 0 16px; text-align:center; }
+.badge {
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--muted);
+  border:1px solid var(--border2); border-radius:20px; padding:6px 18px; margin-bottom:22px;
+}
+header h1 {
+  font-size:clamp(2.2rem,5.5vw,3.6rem); font-weight:800;
+  line-height:1.05; letter-spacing:-2px;
+}
+header h1 .py { color:var(--py); }
+header h1 .sql { color:var(--sql); }
+header .sub {
+  margin-top:12px; color:var(--muted);
+  font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px;
+}
+
+/* ── SETUP SCREEN ── */
+#setup-screen { padding:32px 0; }
+.setup-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:28px 0;
+}
+@media(max-width:580px){ .setup-grid { grid-template-columns:1fr; } }
+
+.cat-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:var(--radius); padding:24px;
+}
+.cat-card h3 {
+  font-size:16px; font-weight:700; margin-bottom:6px;
+  display:flex; align-items:center; gap:8px;
+}
+.cat-card.py-card h3 { color:var(--py); }
+.cat-card.sql-card h3 { color:var(--sql); }
+.cat-card p { font-size:12px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:18px; }
+
+.count-selector { display:flex; gap:6px; flex-wrap:wrap; }
+.count-btn {
+  padding:7px 14px; border-radius:8px;
+  border:1px solid var(--border2); background:var(--surface2);
+  color:var(--muted); font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all .15s;
+}
+.count-btn:hover { border-color:var(--text); color:var(--text); }
+.py-card .count-btn.sel { background:var(--py-dim); border-color:var(--py); color:var(--py); }
+.sql-card .count-btn.sel { background:var(--sql-dim); border-color:var(--sql); color:var(--sql); }
+
+.diff-selector { display:flex; gap:6px; margin-top:12px; }
+.diff-btn {
+  flex:1; padding:8px; border-radius:8px;
+  border:1px solid var(--border2); background:var(--surface2);
+  color:var(--muted); font-family:'Syne',sans-serif; font-size:12px; font-weight:700;
+  cursor:pointer; transition:all .15s;
+}
+.diff-btn:hover { color:var(--text); border-color:var(--border2); }
+.py-card .diff-btn.sel { background:var(--py-dim); border-color:var(--py); color:var(--py); }
+.sql-card .diff-btn.sel { background:var(--sql-dim); border-color:var(--sql); color:var(--sql); }
+
+.start-btn {
+  display:block; width:100%; margin-top:24px;
+  padding:18px; border-radius:var(--radius);
+  background: linear-gradient(135deg, var(--py) 0%, #e8a800 100%);
+  border:none; color:#0b0c10;
+  font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
+  cursor:pointer; letter-spacing:.5px;
+  transition:all .2s; box-shadow:0 0 30px rgba(247,201,72,.2);
+}
+.start-btn:hover { transform:translateY(-1px); box-shadow:0 0 40px rgba(247,201,72,.35); }
+.start-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+/* ── QUIZ SCREEN ── */
+#quiz-screen { display:none; }
+
+/* STICKY TOPBAR */
+.topbar {
+  position:sticky; top:10px; z-index:100;
+  background:rgba(15,17,23,.9); backdrop-filter:blur(16px);
+  border:1px solid var(--border2); border-radius:14px;
+  padding:12px 20px; margin:24px 0 28px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.topbar-left { display:flex; align-items:center; gap:14px; }
+.topbar-title { font-size:13px; font-weight:700; color:var(--text); }
+.topbar-sub { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); }
+.topbar-stats { display:flex; gap:16px; align-items:center; }
+.stat-pill {
+  display:flex; flex-direction:column; align-items:center;
+  font-family:'Space Mono',monospace;
+}
+.stat-pill .v { font-size:18px; font-weight:700; line-height:1; }
+.stat-pill .l { font-size:9px; color:var(--muted); letter-spacing:1px; margin-top:2px; text-transform:uppercase; }
+.sep { width:1px; height:32px; background:var(--border2); }
+
+/* PROGRESS */
+.prog-wrap { margin-bottom:22px; }
+.prog-label {
+  font-family:'Space Mono',monospace; font-size:10px; color:var(--muted);
+  letter-spacing:1px; margin-bottom:6px; display:flex; justify-content:space-between;
+}
+.prog-track {
+  height:3px; background:var(--surface2); border-radius:4px; overflow:hidden;
+}
+.prog-fill { height:100%; border-radius:4px; transition:width .4s ease; }
+
+/* QUESTION CARD */
+.qcard {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:var(--radius); padding:26px 28px 22px;
+  margin-bottom:14px; animation:slideUp .22s ease;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.qcard.state-correct { border-color:rgba(52,211,153,.4); background:rgba(52,211,153,.03); }
+.qcard.state-wrong   { border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.03); }
+
+.qhead { display:flex; gap:12px; align-items:flex-start; margin-bottom:16px; }
+.qbadge {
+  font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
+  padding:3px 9px; border-radius:5px; flex-shrink:0; margin-top:3px;
+  display:flex; align-items:center; gap:5px;
+}
+.py-q .qbadge { background:var(--py-dim); color:var(--py); }
+.sql-q .qbadge { background:var(--sql-dim); color:var(--sql); }
+.diff-dot { width:6px; height:6px; border-radius:50%; }
+.easy .diff-dot { background:#34d399; }
+.medium .diff-dot { background:#fbbf24; }
+.hard .diff-dot { background:#f87171; }
+
+.qtext { font-size:14.5px; font-weight:600; line-height:1.6; }
+.qtext code {
+  font-family:'Space Mono',monospace; font-size:12.5px;
+  background:var(--surface3); padding:2px 6px; border-radius:4px;
+  color:#c4b5fd;
+}
+
+.opts { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+@media(max-width:560px){ .opts { grid-template-columns:1fr; } }
+
+.opt {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:9px; padding:11px 14px;
+  color:var(--text); font-family:'Syne',sans-serif; font-size:13px; font-weight:500;
+  cursor:pointer; text-align:left; transition:all .15s;
+  display:flex; align-items:flex-start; gap:10px; line-height:1.45;
+}
+.opt-lbl {
+  font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
+  padding:2px 6px; border-radius:4px; flex-shrink:0; margin-top:1px;
+  background:var(--surface3);
+}
+.py-q .opt:hover:not(:disabled) { border-color:var(--py); background:var(--py-dim); }
+.sql-q .opt:hover:not(:disabled) { border-color:var(--sql); background:var(--sql-dim); }
+.opt:disabled { cursor:default; }
+.opt.hit-correct { border-color:var(--correct); background:rgba(52,211,153,.1); color:var(--correct); }
+.opt.hit-wrong   { border-color:var(--wrong);   background:rgba(248,113,113,.1); color:var(--wrong); }
+
+.feedback-box {
+  margin-top:12px; font-family:'Space Mono',monospace; font-size:11.5px;
+  line-height:1.65; padding:10px 14px; border-radius:8px; display:none;
+}
+.feedback-box.show { display:block; }
+.feedback-box.ok  { background:rgba(52,211,153,.07); color:var(--correct); border:1px solid rgba(52,211,153,.18); }
+.feedback-box.bad { background:rgba(248,113,113,.07); color:var(--wrong);  border:1px solid rgba(248,113,113,.18); }
+
+/* ── RESULT MODAL ── */
+#result-modal {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(8,10,15,.85); backdrop-filter:blur(10px);
+  align-items:center; justify-content:center; padding:20px;
+}
+#result-modal.show { display:flex; }
+.modal-box {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:20px; padding:40px 36px; max-width:520px; width:100%;
+  animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
+  text-align:center;
+}
+@keyframes popIn {
+  from { opacity:0; transform:scale(.85); }
+  to   { opacity:1; transform:scale(1); }
+}
+.modal-emoji { font-size:56px; margin-bottom:16px; }
+.modal-title { font-size:26px; font-weight:800; letter-spacing:-1px; margin-bottom:6px; }
+.modal-sub { font-size:13px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:28px; }
+
+.result-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:28px;
+}
+.res-tile {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:12px; padding:16px 12px;
+}
+.res-tile .rv { font-family:'Space Mono',monospace; font-size:28px; font-weight:700; }
+.res-tile .rl { font-size:11px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+
+.grade-bar-wrap { margin-bottom:24px; }
+.grade-bar-track { height:8px; background:var(--surface2); border-radius:8px; overflow:hidden; margin-top:8px; }
+.grade-bar-fill { height:100%; border-radius:8px; transition:width 1s ease; }
+.grade-label { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); text-align:left; }
+
+.breakdown { display:flex; gap:10px; margin-bottom:24px; }
+.breakdown-item {
+  flex:1; background:var(--surface2); border:1px solid var(--border2);
+  border-radius:10px; padding:12px;
+}
+.breakdown-item .bcat { font-size:11px; font-weight:700; margin-bottom:4px; }
+.breakdown-item .bcat.py { color:var(--py); }
+.breakdown-item .bcat.sql { color:var(--sql); }
+.breakdown-item .bscore { font-family:'Space Mono',monospace; font-size:20px; font-weight:700; }
+.breakdown-item .bbar { height:3px; background:var(--surface3); border-radius:4px; overflow:hidden; margin-top:6px; }
+.breakdown-item .bbar-fill { height:100%; border-radius:4px; transition:width 1.2s ease; }
+
+.modal-btns { display:flex; gap:10px; }
+.modal-btn {
+  flex:1; padding:14px; border-radius:10px;
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all .2s;
+}
+.btn-primary {
+  background:linear-gradient(135deg,var(--py),#e8a800);
+  border:none; color:#0b0c10;
+  box-shadow:0 0 20px rgba(247,201,72,.2);
+}
+.btn-primary:hover { box-shadow:0 0 30px rgba(247,201,72,.4); transform:translateY(-1px); }
+.btn-secondary {
+  background:transparent; border:1px solid var(--border2); color:var(--text);
+}
+.btn-secondary:hover { border-color:var(--text); }
+
+/* SHOW RESULT btn */
+.show-result-btn {
+  position:fixed; bottom:28px; right:28px; z-index:150;
+  padding:14px 24px; border-radius:50px;
+  background:linear-gradient(135deg,var(--sql),#0da88e);
+  border:none; color:#080a0f;
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:800;
+  cursor:pointer; transition:all .2s;
+  box-shadow:0 4px 24px rgba(45,212,191,.3);
+  display:none;
+}
+.show-result-btn.visible { display:flex; align-items:center; gap:8px; }
+.show-result-btn:hover { transform:translateY(-2px); box-shadow:0 6px 32px rgba(45,212,191,.45); }
+
+/* DIFFICULTY tag on card */
+.diff-tag {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:1px;
+  text-transform:uppercase; padding:2px 8px; border-radius:4px; font-weight:700;
+}
+.diff-tag.easy   { background:rgba(52,211,153,.12); color:#34d399; }
+.diff-tag.medium { background:rgba(251,191,36,.12); color:#fbbf24; }
+.diff-tag.hard   { background:rgba(248,113,113,.12); color:#f87171; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- ═══════════════════ SETUP ═══════════════════ -->
+<header>
+  <div class="badge">⚡ Developer Skills Test</div>
+  <h1><span class="py">Python</span> <span style="color:var(--border2)">&</span> <span class="sql">SQL</span></h1>
+  <p class="sub">// zgjedh detyrat · zgjidh · shiko rezultatin</p>
+</header>
+
+<div id="setup-screen">
+  <div class="setup-grid">
+
+    <div class="cat-card py-card">
+      <h3>🐍 Python</h3>
+      <p>Sa pyetje do bësh?</p>
+      <div class="count-selector" id="py-counts">
+        <button class="count-btn" data-cat="py" data-n="5">5</button>
+        <button class="count-btn" data-cat="py" data-n="10">10</button>
+        <button class="count-btn sel" data-cat="py" data-n="15">15</button>
+        <button class="count-btn" data-cat="py" data-n="25">25</button>
+      </div>
+      <div class="diff-selector" id="py-diffs">
+        <button class="diff-btn" data-cat="py" data-d="easy">🟢 Lehtë</button>
+        <button class="diff-btn sel" data-cat="py" data-d="mixed">🟡 Mix</button>
+        <button class="diff-btn" data-cat="py" data-d="hard">🔴 Hard</button>
+      </div>
+    </div>
+
+    <div class="cat-card sql-card">
+      <h3>🗄️ SQL</h3>
+      <p>Sa pyetje do bësh?</p>
+      <div class="count-selector" id="sql-counts">
+        <button class="count-btn" data-cat="sql" data-n="5">5</button>
+        <button class="count-btn" data-cat="sql" data-n="10">10</button>
+        <button class="count-btn sel" data-cat="sql" data-n="15">15</button>
+        <button class="count-btn" data-cat="sql" data-n="25">25</button>
+      </div>
+      <div class="diff-selector" id="sql-diffs">
+        <button class="diff-btn" data-cat="sql" data-d="easy">🟢 Lehtë</button>
+        <button class="diff-btn sel" data-cat="sql" data-d="mixed">🟡 Mix</button>
+        <button class="diff-btn" data-cat="sql" data-d="hard">🔴 Hard</button>
+      </div>
+    </div>
+
+  </div>
+  <button class="start-btn" id="start-btn" onclick="startQuiz()">▶ FILLO TESTIN</button>
+</div>
+
+<!-- ═══════════════════ QUIZ ═══════════════════ -->
+<div id="quiz-screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="topbar-title" id="tb-title">Assessment</div>
+        <div class="topbar-sub" id="tb-sub">0 pyetje</div>
+      </div>
+    </div>
+    <div class="topbar-stats">
+      <div class="stat-pill"><div class="v" id="tb-correct" style="color:var(--correct)">0</div><div class="l">Saktë</div></div>
+      <div class="sep"></div>
+      <div class="stat-pill"><div class="v" id="tb-wrong" style="color:var(--wrong)">0</div><div class="l">Gabim</div></div>
+      <div class="sep"></div>
+      <div class="stat-pill"><div class="v" id="tb-left" style="color:var(--muted)">0</div><div class="l">Mbetur</div></div>
+    </div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-label"><span id="prog-txt">0 / 0</span><span id="prog-pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%;background:var(--py)"></div></div>
+  </div>
+
+  <div id="cards-container"></div>
+</div>
+
+<!-- SHOW RESULT button -->
+<button class="show-result-btn" id="show-result-btn" onclick="showResult()">
+  📊 Shfaq Rezultatin
+</button>
+
+</div><!-- /wrapper -->
+
+<!-- ═══════════════════ RESULT MODAL ═══════════════════ -->
+<div id="result-modal">
+  <div class="modal-box">
+    <div class="modal-emoji" id="res-emoji">🎯</div>
+    <div class="modal-title" id="res-title">Rezultati</div>
+    <div class="modal-sub" id="res-sub">—</div>
+
+    <div class="result-grid">
+      <div class="res-tile">
+        <div class="rv" id="res-correct" style="color:var(--correct)">0</div>
+        <div class="rl">Saktë</div>
+      </div>
+      <div class="res-tile">
+        <div class="rv" id="res-wrong" style="color:var(--wrong)">0</div>
+        <div class="rl">Gabim</div>
+      </div>
+    </div>
+
+    <div class="grade-bar-wrap">
+      <div class="grade-label">Rezultat total: <span id="res-pct-lbl">0%</span></div>
+      <div class="grade-bar-track">
+        <div class="grade-bar-fill" id="grade-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="breakdown" id="res-breakdown"></div>
+
+    <div class="modal-btns">
+      <button class="modal-btn btn-secondary" onclick="closeResult()">← Vazhdo</button>
+      <button class="modal-btn btn-primary" onclick="fullReset()">↺ Test i Ri</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// QUESTION BANK
+// ─────────────────────────────────────────────
+const BANK = {
+  py: [
+    // EASY
+    { d:'easy', q:'Cila funksion kthen gjatësinë e një liste?', opts:['len()','size()','count()','length()'], ans:0, exp:'len() është funksioni standard për numrin e elementeve.' },
+    { d:'easy', q:'Si krijohet një listë bosh në Python?', opts:['[]','{}','()','list{}'], ans:0, exp:'[] krijon listë bosh. {} krijon dict/set, () krijon tuple.' },
+    { d:'easy', q:'Cila metodë shton element në fund të listës?', opts:['append()','add()','push()','insert()'], ans:0, exp:'list.append(x) shton x në fund.' },
+    { d:'easy', q:'Çfarë kthen <code>type(3.14)</code>?', opts:["<class 'float'>",'float','3.14','number'], ans:0, exp:'type() kthen klasën e objektit.' },
+    { d:'easy', q:'Cili operator bën ndarje të plotë (floor division)?', opts:['//','/', '%','**'], ans:0, exp:'// ndan dhe rrumbullakos poshtë. / kthen float.' },
+    // MEDIUM
+    { d:'medium', q:'Çfarë printojnë këto rreshta?\n<code>x = [1,2,3]\ny = x\ny.append(4)\nprint(x)</code>', opts:['[1,2,3,4]','[1,2,3]','Error','[4]'], ans:0, exp:'y = x i referohet të njëjtit objekt. Ndryshimi i y ndryshon x gjithashtu — reference, jo kopje.' },
+    { d:'medium', q:'Cili është output i <code>print(list(map(lambda x: x**2, [1,2,3])))</code>?', opts:['[1,4,9]','[1,2,3]','[2,4,6]','Error'], ans:0, exp:'map zbaton lambdën çdo elementi: 1²=1, 2²=4, 3²=9.' },
+    { d:'medium', q:'Çfarë bën <code>*args</code> në parametrat e funksionit?', opts:['Merr çdo numër argumentesh pozicionale si tuple','Merr keyword arguments si dict','Shpërndan listën','Kthon tuple bosh'], ans:0, exp:'*args pako argumentet extra pozicionale në tuple.' },
+    { d:'medium', q:'Cila është mënyra KORREKTE për të kopjuar thellë (deep copy) një listë nested?', opts:['import copy; copy.deepcopy(lst)','lst.copy()','lst[:]','list(lst)'], ans:0, exp:'Metodat .copy(), [:], dhe list() bëjnë shallow copy. deepcopy kopjon gjithçka rekursivisht.' },
+    { d:'medium', q:'Çfarë kthen <code>sorted({"b":2,"a":1,"c":3})</code>?', opts:["['a','b','c']","['b','a','c']","[1,2,3]","{'a':1,'b':2,'c':3}"], ans:0, exp:'sorted() mbi dict iteron mbi çelësat dhe i kthen sorted.' },
+    { d:'medium', q:'Cili deklarim krijon një <code>generator</code> jo listë?', opts:['(x*2 for x in range(5))','[x*2 for x in range(5)]','{x*2 for x in range(5)}','list(x*2 for x in range(5))'], ans:0, exp:'() krijon generator expression — lazy evaluation, jo list në memorie.' },
+    { d:'medium', q:'Çfarë ndodh kur ekzekutohet ky kod?\n<code>def f(x=[]):\n  x.append(1)\n  return x\nf(); f()</code>', opts:['Kthen [1,1] në thirrjen e dytë','Kthen [1] çdo herë','Error','Kthen [1,1,1]'], ans:0, exp:'Default mutable arguments (lista) ndahen mes thirrjeve! Çdo thirrje modifikon të njëjtën listë default.' },
+    { d:'medium', q:'Cila shprehje krijo një dict nga dy lista?', opts:['dict(zip(keys,vals))','dict(keys,vals)','{keys:vals}','map(dict,keys,vals)'], ans:0, exp:'zip() bashkon dy iterable si çiftet, dict() i bën çelës-vlerë.' },
+    // HARD
+    { d:'hard', q:'Cili është output i:\n<code>def gen():\n  yield 1\n  yield 2\ng = gen()\nnext(g); print(next(g))</code>', opts:['2','1','Error','[1,2]'], ans:0, exp:'next() avancon generator-in. Thirrja e parë kthen 1, e dyta kthen 2.' },
+    { d:'hard', q:'Çfarë bën <code>@property</code> decorator?', opts:['E kthen metodën si atribut i lexueshëm','E bën metodën private','E kthen static method','Krijon konstruktor'], ans:0, exp:'@property lejon metodën të thirret si atribut: obj.name jo obj.name().' },
+    { d:'hard', q:'Cili është output i:\n<code>a = (1,2,3)\na += (4,)\nprint(len(a))</code>', opts:['4','3','Error: tuples immutable','2'], ans:0, exp:'+= mbi tuple krijon objekt të ri — a tani tregon (1,2,3,4). Immutability i referohet vlerave, jo variablës.' },
+    { d:'hard', q:'Cila metodë magic definon <code>len(obj)</code>?', opts:['__len__','__size__','__count__','__length__'], ans:0, exp:'__len__ është dunder metoda që Python thërret kur bën len(obj).' },
+    { d:'hard', q:'Çfarë kthen <code>isinstance(True, int)</code>?', opts:['True','False','Error','None'], ans:0, exp:'bool është nënklasë e int. True dhe False janë me fjalë edhe numra 1 dhe 0.' },
+    { d:'hard', q:'Cili pattern zbaton Context Manager protocol?', opts:['__enter__ dhe __exit__','__start__ dhe __stop__','__open__ dhe __close__','__init__ dhe __del__'], ans:0, exp:'with statement thërret __enter__ në hyrje dhe __exit__ me dalje (edhe nëse ka exception).' },
+    { d:'hard', q:'Cili është output:\n<code>print([i for i in range(3) for j in range(2)])</code>', opts:['[0,0,1,1,2,2]','[0,1,0,1,0,1]','[0,1,2,0,1,2]','[0,1,2]'], ans:0, exp:'Nested comprehension: for i in range(3) është outer, for j in range(2) inner. i = 0,0 → 1,1 → 2,2.' },
+    { d:'hard', q:'Çfarë ndodh nëse thirr <code>next()</code> kur generator-i ka mbaruar?', opts:['Ngre StopIteration','Kthen None','Fillon nga fillimi','Ngre ValueError'], ans:0, exp:'Kur generator exhauston, next() ngre StopIteration exception.' },
+    { d:'hard', q:'Cila strukturë të dhënash e Python garantohet ORDERED (insertion order) nga Python 3.7+?', opts:['dict','set','frozenset','tuple vetëm'], ans:0, exp:'Nga Python 3.7, dict ruan insertion order. set dhe frozenset NUK ruajnë rend.' },
+    { d:'hard', q:'Çfarë kthen:\n<code>x = {1,2,3}\nx.discard(5)\nprint(len(x))</code>', opts:['3','2','Error','4'], ans:0, exp:'discard() nuk ngre error nëse elementi nuk ekziston — ndryshim nga remove() që ngre KeyError.' },
+    { d:'hard', q:'Cila është diferenca midis <code>__str__</code> dhe <code>__repr__</code>?', opts:['__str__ për user, __repr__ për developer/debug','Janë identike','__repr__ për user, __str__ për debug','__str__ kthen bytes'], ans:0, exp:'__str__ kthen string human-readable. __repr__ kthen representim teknik, idealisht Python-evaluable.' },
+    { d:'hard', q:'Cili design pattern zbaton:\n<code>class Meta(type):\n  pass\nclass MyClass(metaclass=Meta): pass</code>', opts:['Metaclass pattern','Singleton','Factory','Observer'], ans:0, exp:'Metaclass kontrollon se si krijohet klasa vetë — "klasa e klasës". Zakonisht për framework internals.' },
+  ],
+  sql: [
+    // EASY
+    { d:'easy', q:'Cila klauzolë filtron rreshtat PARA agregimit?', opts:['WHERE','HAVING','FILTER','GROUP BY'], ans:0, exp:'WHERE vepron në rreshtat individual para agregimit.' },
+    { d:'easy', q:'Cili funksion kthen numrin e rreshtave?', opts:['COUNT(*)','SUM(*)','NUM()','ROWS()'], ans:0, exp:'COUNT(*) numëron të gjitha rreshtat, duke përfshirë NULL.' },
+    { d:'easy', q:'Cili JOIN kthen vetëm rreshtat me match nga të dyja tabelat?', opts:['INNER JOIN','LEFT JOIN','FULL OUTER JOIN','CROSS JOIN'], ans:0, exp:'INNER JOIN = vetëm rreshtat që kanë match në të dyja tabelat.' },
+    { d:'easy', q:'Si renditim rezultatet nga i madhi te i vogli?', opts:['ORDER BY col DESC','ORDER BY col ASC','SORT BY col DOWN','ORDER col REVERSE'], ans:0, exp:'DESC (descending) rendit nga më i madhi.' },
+    { d:'easy', q:'Cili operator SQL teston NULL?', opts:['IS NULL','= NULL','== NULL','NULL = NULL'], ans:0, exp:'IS NULL është i vetmi operatori korrekt — = NULL gjithmonë kthen unknown/false.' },
+    // MEDIUM
+    { d:'medium', q:'Ky query çfarë kthen?\n<code>SELECT dept, COUNT(*) FROM emp GROUP BY dept HAVING COUNT(*) > 3</code>', opts:['Departamentet me mbi 3 punonjës','Punonjësit me dept > 3','Departamentet me 3 kolona','Error'], ans:0, exp:'HAVING filtron grupet pas agregimit. Kthen vetëm dept me mbi 3 rreshta.' },
+    { d:'medium', q:'Cila është diferenca midis <code>DELETE</code> dhe <code>TRUNCATE</code>?', opts:['DELETE filtron me WHERE dhe loggon; TRUNCATE fshin të gjithë pa log','Janë identike','TRUNCATE filtron me WHERE','DELETE fshin tabelën'], ans:0, exp:'DELETE mund të filtrohet, loggon çdo rresht, mund të rollback. TRUNCATE fshihet i gjithi, minimal log, zakonisht jo rollback.' },
+    { d:'medium', q:'Cila funksion window kthen rangun pa gaps?', opts:['DENSE_RANK()','RANK()','ROW_NUMBER()','NTILE()'], ans:0, exp:'DENSE_RANK() jep 1,2,2,3 (pa gap). RANK() jep 1,2,2,4 (me gap mbas tie).' },
+    { d:'medium', q:'Çfarë kthen <code>COALESCE(NULL, 0, 5)</code>?', opts:['0','NULL','5','Error'], ans:0, exp:'COALESCE kthen VLERËN E PARË JO-NULL — pra 0, jo 5.' },
+    { d:'medium', q:'Cili query gjen produktet e pashitura (jo në orders)?', opts:['SELECT p.* FROM products p LEFT JOIN orders o ON p.id=o.pid WHERE o.pid IS NULL','SELECT * FROM products MINUS orders','SELECT * FROM products WHERE id NOT EXISTS orders','SELECT * FROM products EXCEPT SELECT pid FROM orders'], ans:0, exp:'LEFT JOIN + WHERE right IS NULL = "anti-join" pattern, eficent.' },
+    { d:'medium', q:'Çfarë bën <code>ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC)</code>?', opts:['Numëron rreshtat brenda çdo departamenti nga rroga më e lartë','Rendit të gjithë tabelën','Kthen rangun global','Ndan tabelën në n grupe'], ans:0, exp:'PARTITION BY rifillon numërim për çdo dept; ORDER BY salary DESC vendos 1 tek rroga max.' },
+    { d:'medium', q:'Cili query kthen produktin bestseller PER kategori?', opts:['SELECT * FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY category ORDER BY sales DESC) rn FROM products) t WHERE rn=1','SELECT category, MAX(sales) FROM products','SELECT TOP 1 * FROM products GROUP BY category','SELECT category, product FROM products ORDER BY sales DESC LIMIT 1'], ans:0, exp:'Window function me ROW_NUMBER() + filter rn=1 jep një rresht per grup.' },
+    { d:'medium', q:'Cila është diferenca midis <code>UNION</code> dhe <code>UNION ALL</code>?', opts:['UNION heq duplikate; UNION ALL ruan të gjitha','Janë identike','UNION ALL heq duplikate','UNION ALL kërkon kolona të ndryshme'], ans:0, exp:'UNION bën DISTINCT implicit — heq duplikate. UNION ALL është më i shpejtë nëse duplikate nuk janë problem.' },
+    // HARD
+    { d:'hard', q:'Cila CTE (Common Table Expression) llogarit total kumulativ të shitjeve?', opts:['WITH cte AS (SELECT date, SUM(sales) OVER (ORDER BY date) cumul FROM sales) SELECT * FROM cte','WITH cte AS (SELECT SUM(sales) FROM sales) SELECT * FROM cte','SELECT CUMULATIVE(sales) FROM sales','SELECT SUM(sales) PARTITION BY date FROM sales'], ans:0, exp:'Running total me window function SUM() OVER (ORDER BY date) — nuk kërkon GROUP BY.' },
+    { d:'hard', q:'Çfarë bën <code>EXPLAIN</code> (ose <code>EXPLAIN ANALYZE</code>) në SQL?', opts:['Tregon execution plan — si query processor e ekzekuton queryn','Fshihet queryn pa ekzekutim','Tregon definicionin e tabelës','Kthen metadatën e kolonave'], ans:0, exp:'EXPLAIN shfaq execution plan: index scans, joins, cost estimates. Kritik për performance tuning.' },
+    { d:'hard', q:'Cili index lloj është optimal për kolona me kardinalitet shumë të ulët (p.sh. status: aktiv/pasiv)?', opts:['Bitmap Index','B-Tree Index','Hash Index','Full-Text Index'], ans:0, exp:'Bitmap indexes janë eficente për kolona me pak vlera unike (low cardinality). B-Tree është mirë për high cardinality.' },
+    { d:'hard', q:'Çfarë është "N+1 query problem"?', opts:['1 query kryesor + N queries për çdo rresht — zakonisht i zgjidhet me JOIN ose IN','N tabela me 1 kolonë','Query që kthen N+1 kolona','Ngarkim i N tabelave njëherësh'], ans:0, exp:'N+1: një query kthen N rreshta, pastaj bën N queries shtesë. Shumë i kushtueshëm. Zgjidhet me JOIN ose batch load.' },
+    { d:'hard', q:'Cili pattern i SQL quhet "upsert"?', opts:['INSERT ... ON CONFLICT DO UPDATE','INSERT OR REPLACE','MERGE INTO','Të gjitha sipër janë forma upsert'], ans:3, exp:'Të tria janë forma të upsert (INSERT nëse nuk ekziston, UPDATE nëse ekziston). Sintaksa ndryshon sipas DBMS.' },
+    { d:'hard', q:'Çfarë kthen ky query?\n<code>SELECT 1 WHERE 1=1 AND 1=NULL</code>', opts:['0 rreshta (empty result)','1','NULL','Error'], ans:0, exp:'1=NULL kthen NULL (unknown), jo FALSE. AND me NULL = NULL. WHERE NULL = asnjë rresht nuk kthehet.' },
+    { d:'hard', q:'Cili është qëllimi i <code>LATERAL JOIN</code> (ose <code>CROSS APPLY</code> në SQL Server)?', opts:['Lejon subquery të referojë kolonat e tabelës së jashtme','Kthen produkt kartezian','Bashkon me index','Ekzekuton stored procedure'], ans:0, exp:'LATERAL lejon çdo rresht të tabelës kryesore të "feed" subquery — si for-loop korrektuar me SQL.' },
+    { d:'hard', q:'Cila window function ndan rreshtat në N grupe të barabarta?', opts:['NTILE(N)','RANK()','PERCENT_RANK()','CUME_DIST()'], ans:0, exp:'NTILE(N) ndan rreshtat në N "buckets" me madhësi sa më të barabarta. Ideal për percentile analysis.' },
+    { d:'hard', q:'Çfarë ndodh me performance nëse vendos funksion mbi kolonë indexed në WHERE?', opts:['Index nuk përdoret — bëhet full table scan','Index ende përdoret','Query ndalet','Automatiksht optimizohet'], ans:0, exp:'WHERE YEAR(date_col)=2024 nuk mund të përdorë index mbi date_col. Shruaj si: WHERE date_col >= "2024-01-01" AND date_col < "2025-01-01".' },
+    { d:'hard', q:'Cili SQL isolation level parandalon "dirty reads"?', opts:['READ COMMITTED dhe lart','READ UNCOMMITTED','SERIALIZABLE vetëm','Nuk ka isolation level'], ans:0, exp:'READ UNCOMMITTED lejon dirty reads. READ COMMITTED dhe çdo nivel më lart i parandalon ato.' },
+    { d:'hard', q:'Çfarë kthen <code>LAG(salary, 1) OVER (ORDER BY hire_date)</code>?', opts:['Pagën e punonjësit të punësuar mëparë','Pagën e ardhshme','Diferencën e pagave','NULL gjithmonë'], ans:0, exp:'LAG(col, n) kthen vlerën e n rreshtave mëparë brenda window — ideal për krahasime row-over-row.' },
+    { d:'hard', q:'Cili është benefiti kryesor i <code>Materialized View</code> kundrejt View të zakonshme?', opts:['Rezultati ruhet fizikisht — lexim shumë më i shpejtë por kërkon refresh','Është gjithmonë up-to-date','Nuk kërkon memorie shtesë','Ekzekuton query çdo herë si view normale'], ans:0, exp:'Materialized View cache-on rezultatin në disk. Shumë i shpejtë për read. Duhet REFRESH kur të dhënat ndryshojnë.' },
+  ]
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let cfg = { py: { n: 15, d: 'mixed' }, sql: { n: 15, d: 'mixed' } };
+let quiz = []; // array of { cat, item, answered, wasCorrect }
+let stats = { correct: 0, wrong: 0 };
+
+// ─────────────────────────────────────────────
+// SETUP LOGIC
+// ─────────────────────────────────────────────
+document.querySelectorAll('.count-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cat = btn.dataset.cat;
+    document.querySelectorAll(`#${cat}-counts .count-btn`).forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    cfg[cat].n = parseInt(btn.dataset.n);
+  });
+});
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cat = btn.dataset.cat;
+    document.querySelectorAll(`#${cat}-diffs .diff-btn`).forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    cfg[cat].d = btn.dataset.d;
+  });
+});
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickQuestions(cat, n, diff) {
+  let pool = BANK[cat];
+  if (diff === 'easy')   pool = pool.filter(q => q.d === 'easy');
+  else if (diff === 'hard')  pool = pool.filter(q => q.d === 'hard');
+  // mixed = all
+  pool = shuffle(pool);
+  return pool.slice(0, Math.min(n, pool.length));
+}
+
+function startQuiz() {
+  const pyQs = pickQuestions('py', cfg.py.n, cfg.py.d);
+  const sqlQs = pickQuestions('sql', cfg.sql.n, cfg.sql.d);
+
+  quiz = [];
+  pyQs.forEach(item => quiz.push({ cat:'py', item, answered:false, wasCorrect:null }));
+  sqlQs.forEach(item => quiz.push({ cat:'sql', item, answered:false, wasCorrect:null }));
+  quiz = shuffle(quiz); // mix py & sql together
+
+  stats = { correct: 0, wrong: 0 };
+
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+
+  const total = quiz.length;
+  document.getElementById('tb-title').textContent = `Python & SQL Test`;
+  document.getElementById('tb-sub').textContent = `${total} pyetje`;
+  document.getElementById('tb-left').textContent = total;
+
+  renderCards();
+  updateTopbar();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderCards() {
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  quiz.forEach((entry, idx) => buildCard(entry, idx, container));
+}
+
+function buildCard(entry, idx, container) {
+  const { cat, item } = entry;
+  const card = document.createElement('div');
+  card.className = `qcard ${cat}-q ${item.d}`;
+  card.id = `qcard-${idx}`;
+
+  const catLabel = cat === 'py' ? '🐍 Python' : '🗄️ SQL';
+  const diffMap = { easy:'🟢 Easy', medium:'🟡 Medium', hard:'🔴 Hard' };
+  const labels = ['A','B','C','D'];
+
+  const optsHTML = item.opts.map((o,j) => `
+    <button class="opt" onclick="answer(${idx},${j})">
+      <span class="opt-lbl">${labels[j]}</span>
+      <span>${o}</span>
+    </button>`).join('');
+
+  card.innerHTML = `
+    <div class="qhead">
+      <span class="qbadge"><span class="diff-dot"></span>${catLabel}</span>
+      <span class="diff-tag ${item.d}">${diffMap[item.d]}</span>
+      <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">#${String(idx+1).padStart(2,'0')}</span>
+    </div>
+    <div class="qtext">${item.q.replace(/\n/g,'<br>')}</div>
+    <div class="opts" id="opts-${idx}" style="margin-top:16px">${optsHTML}</div>
+    <div class="feedback-box" id="fb-${idx}"></div>
+  `;
+  container.appendChild(card);
+}
+
+// ─────────────────────────────────────────────
+// ANSWER
+// ─────────────────────────────────────────────
+function answer(idx, chosen) {
+  const entry = quiz[idx];
+  if (entry.answered) return;
+  entry.answered = true;
+
+  const item = entry.item;
+  const optsEl = document.getElementById(`opts-${idx}`);
+  const fbEl = document.getElementById(`fb-${idx}`);
+  const cardEl = document.getElementById(`qcard-${idx}`);
+  const btns = optsEl.querySelectorAll('.opt');
+
+  btns.forEach(b => b.disabled = true);
+
+  const correct = chosen === item.ans;
+  entry.wasCorrect = correct;
+
+  btns[item.ans].classList.add('hit-correct');
+  if (!correct) {
+    btns[chosen].classList.add('hit-wrong');
+    cardEl.classList.add('state-wrong');
+    fbEl.className = 'feedback-box show bad';
+    fbEl.innerHTML = `✗ Gabim &mdash; ${item.exp}`;
+    stats.wrong++;
+  } else {
+    cardEl.classList.add('state-correct');
+    fbEl.className = 'feedback-box show ok';
+    fbEl.innerHTML = `✓ Saktë! ${item.exp}`;
+    stats.correct++;
+  }
+
+  updateTopbar();
+  checkAllDone();
+}
+
+function updateTopbar() {
+  const done = stats.correct + stats.wrong;
+  const total = quiz.length;
+  document.getElementById('tb-correct').textContent = stats.correct;
+  document.getElementById('tb-wrong').textContent = stats.wrong;
+  document.getElementById('tb-left').textContent = total - done;
+
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+  document.getElementById('prog-txt').textContent = `${done} / ${total}`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function checkAllDone() {
+  const done = stats.correct + stats.wrong;
+  const btn = document.getElementById('show-result-btn');
+  if (done > 0) btn.classList.add('visible');
+  if (done === quiz.length) {
+    btn.textContent = '🏆 Shfaq Rezultatin Final';
+    btn.style.background = 'linear-gradient(135deg,var(--py),#e8a800)';
+  }
+}
+
+// ─────────────────────────────────────────────
+// RESULT MODAL
+// ─────────────────────────────────────────────
+function showResult() {
+  const done = stats.correct + stats.wrong;
+  const total = quiz.length;
+  const pct = done > 0 ? Math.round((stats.correct/done)*100) : 0;
+
+  // emoji & title
+  let emoji, title;
+  if (pct >= 90)      { emoji='🏆'; title='Legjendë!'; }
+  else if (pct >= 75) { emoji='🎯'; title='Shumë mirë!'; }
+  else if (pct >= 60) { emoji='💪'; title='Mirë, por mëso më!'; }
+  else if (pct >= 40) { emoji='📚'; title='Ka punë!'; }
+  else                { emoji='😅'; title='Fillo nga fillimi bro'; }
+
+  document.getElementById('res-emoji').textContent = emoji;
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-sub').textContent = `${done} / ${total} pyetje u përgjigje`;
+  document.getElementById('res-correct').textContent = stats.correct;
+  document.getElementById('res-wrong').textContent = stats.wrong;
+  document.getElementById('res-pct-lbl').textContent = pct + '%';
+
+  const bar = document.getElementById('grade-bar');
+  bar.style.width = '0%';
+  bar.style.background = pct>=75 ? 'var(--correct)' : pct>=50 ? 'var(--py)' : 'var(--wrong)';
+  setTimeout(() => { bar.style.width = pct + '%'; }, 100);
+
+  // Breakdown by category
+  const pyDone   = quiz.filter(e => e.cat==='py' && e.answered);
+  const sqlDone  = quiz.filter(e => e.cat==='sql' && e.answered);
+  const pyOk     = pyDone.filter(e => e.wasCorrect).length;
+  const sqlOk    = sqlDone.filter(e => e.wasCorrect).length;
+  const pyPct    = pyDone.length > 0 ? Math.round((pyOk/pyDone.length)*100) : 0;
+  const sqlPct   = sqlDone.length > 0 ? Math.round((sqlOk/sqlDone.length)*100) : 0;
+
+  document.getElementById('res-breakdown').innerHTML = `
+    <div class="breakdown-item">
+      <div class="bcat py">🐍 Python</div>
+      <div class="bscore" style="color:var(--py)">${pyOk}/${pyDone.length}</div>
+      <div class="bbar"><div class="bbar-fill" id="py-bar" style="width:0%;background:var(--py)"></div></div>
+    </div>
+    <div class="breakdown-item">
+      <div class="bcat sql">🗄️ SQL</div>
+      <div class="bscore" style="color:var(--sql)">${sqlOk}/${sqlDone.length}</div>
+      <div class="bbar"><div class="bbar-fill" id="sql-bar" style="width:0%;background:var(--sql)"></div></div>
+    </div>
+  `;
+  setTimeout(() => {
+    document.getElementById('py-bar').style.width = pyPct + '%';
+    document.getElementById('sql-bar').style.width = sqlPct + '%';
+  }, 200);
+
+  document.getElementById('result-modal').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('result-modal').classList.remove('show');
+}
+
+function fullReset() {
+  document.getElementById('result-modal').classList.remove('show');
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'block';
+  document.getElementById('show-result-btn').classList.remove('visible');
+  document.getElementById('show-result-btn').textContent = '📊 Shfaq Rezultatin';
+  document.getElementById('show-result-btn').style.background = '';
+  document.getElementById('cards-container').innerHTML = '';
+  stats = { correct:0, wrong:0 };
+}
+</script>
+</body>
+</html>
