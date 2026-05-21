@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Mid-Level · Rrugëtimi</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #18181f;
+    --card: #1a1a24;
+    --border: rgba(255,255,255,0.07);
+    --accent: #7c6af7;
+    --accent2: #4ecfa3;
+    --accent3: #f97c5d;
+    --accent4: #f5c94a;
+    --text: #e8e6f0;
+    --muted: #8884a0;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 15px; font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .nav-logo span { color: var(--text); }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a {
+    color: var(--muted); font-size: 13px; font-weight: 500;
+    text-decoration: none; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-badge {
+    background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px;
+    font-family: var(--mono);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative; z-index: 1;
+    padding: 140px 32px 80px;
+    text-align: center;
+    max-width: 900px; margin: 0 auto;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px; font-weight: 600;
+    color: var(--accent); letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 20px;
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid rgba(124,106,247,0.3);
+    border-radius: 20px;
+    background: rgba(124,106,247,0.08);
+  }
+  .hero h1 {
+    font-size: clamp(40px, 7vw, 80px);
+    font-weight: 800; line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+  }
+  .hero h1 .py { color: var(--accent); }
+  .hero h1 .mid { color: var(--accent2); }
+  .hero-desc {
+    font-size: 17px; color: var(--muted);
+    max-width: 580px; margin: 0 auto 40px;
+    line-height: 1.7; font-weight: 300;
+  }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 48px;
+    margin-top: 48px; padding-top: 48px;
+    border-top: 1px solid var(--border);
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-family: var(--mono); font-size: 32px;
+    font-weight: 700; color: var(--text);
+    display: block;
+  }
+  .stat-label {
+    font-size: 12px; color: var(--muted);
+    font-weight: 500; margin-top: 4px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar-container {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 200; padding: 16px 32px;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .progress-label {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); white-space: nowrap;
+  }
+  .progress-track {
+    flex: 1; height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+  .progress-pct {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--accent); font-weight: 600;
+  }
+
+  /* MAIN CONTENT */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  /* SECTION HEADER */
+  .section-label {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 24px; margin-top: 64px;
+  }
+  .section-label h2 {
+    font-size: 13px; font-weight: 600;
+    color: var(--muted); letter-spacing: 1.5px;
+    text-transform: uppercase; font-family: var(--mono);
+  }
+  .section-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* ROADMAP GRID */
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* TOPIC CARD */
+  .topic-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .topic-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--card-accent, var(--accent));
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .topic-card:hover {
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+  .topic-card:hover::before { opacity: 1; }
+  .topic-card.done { border-color: rgba(78,207,163,0.25); }
+  .topic-card.done::before { opacity: 1; background: var(--accent2); }
+  .topic-card.active {
+    border-color: rgba(124,106,247,0.4);
+    box-shadow: 0 0 0 1px rgba(124,106,247,0.2), 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .card-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; margin-bottom: 14px;
+  }
+  .card-num {
+    font-family: var(--mono); font-size: 11px;
+    font-weight: 700; color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .card-check {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  }
+  .card-check:hover { border-color: var(--accent2); }
+  .topic-card.done .card-check {
+    background: var(--accent2);
+    border-color: var(--accent2);
+  }
+  .card-check svg { opacity: 0; transition: opacity 0.2s; }
+  .topic-card.done .card-check svg { opacity: 1; }
+
+  .card-title {
+    font-size: 16px; font-weight: 700;
+    margin-bottom: 6px; line-height: 1.3;
+    color: var(--text);
+  }
+  .card-sub {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--muted); line-height: 1.6;
+  }
+  .card-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 14px;
+  }
+  .tag {
+    font-family: var(--mono); font-size: 10px;
+    font-weight: 600; padding: 3px 8px;
+    border-radius: 6px; letter-spacing: 0.3px;
+  }
+
+  /* COLOR VARIANTS */
+  .v-purple { --card-accent: #7c6af7; }
+  .v-purple .tag { background: rgba(124,106,247,0.12); color: #a99cf8; }
+  .v-purple .card-num { color: #7c6af7; }
+
+  .v-green { --card-accent: #4ecfa3; }
+  .v-green .tag { background: rgba(78,207,163,0.1); color: #6ddbb5; }
+  .v-green .card-num { color: #4ecfa3; }
+
+  .v-blue { --card-accent: #5ab4f5; }
+  .v-blue .tag { background: rgba(90,180,245,0.1); color: #7dc6f7; }
+  .v-blue .card-num { color: #5ab4f5; }
+
+  .v-orange { --card-accent: #f97c5d; }
+  .v-orange .tag { background: rgba(249,124,93,0.1); color: #fa9b80; }
+  .v-orange .card-num { color: #f97c5d; }
+
+  .v-yellow { --card-accent: #f5c94a; }
+  .v-yellow .tag { background: rgba(245,201,74,0.1); color: #f7d570; }
+  .v-yellow .card-num { color: #f5c94a; }
+
+  .v-lime { --card-accent: #97c459; }
+  .v-lime .tag { background: rgba(151,196,89,0.1); color: #b0d178; }
+  .v-lime .card-num { color: #97c459; }
+
+  /* LESSON PANEL */
+  #lesson-panel {
+    display: none;
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(640px, 100vw);
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    z-index: 300;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #lesson-panel.open { display: flex; }
+
+  .panel-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-size: 14px; font-weight: 700;
+    color: var(--text);
+  }
+  .panel-close {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.06);
+    border: none; border-radius: 8px;
+    color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: all 0.2s;
+  }
+  .panel-close:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+  .panel-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-tab {
+    flex: 1; padding: 14px;
+    background: none; border: none;
+    font-family: var(--sans); font-size: 12px; font-weight: 600;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s; letter-spacing: 0.3px;
+  }
+  .panel-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  .panel-body {
+    flex: 1; overflow-y: auto; padding: 28px;
+  }
+  .panel-body::-webkit-scrollbar { width: 4px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* LESSON CONTENT STYLES */
+  .lesson-intro {
+    font-size: 15px; color: var(--muted);
+    line-height: 1.75; margin-bottom: 28px;
+    padding-bottom: 28px; border-bottom: 1px solid var(--border);
+  }
+
+  .lesson-section {
+    margin-bottom: 28px;
+  }
+  .lesson-section h3 {
+    font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 12px;
+    letter-spacing: 0.3px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .lesson-section h3::before {
+    content: ''; width: 3px; height: 14px;
+    background: var(--accent); border-radius: 2px; display: inline-block;
+  }
+  .lesson-section p {
+    font-size: 14px; color: var(--muted);
+    line-height: 1.75; margin-bottom: 10px;
+  }
+
+  pre {
+    background: #0d0d14;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 18px 20px;
+    overflow-x: auto; margin: 12px 0;
+    position: relative;
+  }
+  pre code {
+    font-family: var(--mono); font-size: 13px;
+    color: #c9c7e8; line-height: 1.7;
+  }
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .num { color: #f78c6c; }
+  .cls { color: #ffcb6b; }
+
+  .tip-box {
+    background: rgba(124,106,247,0.08);
+    border: 1px solid rgba(124,106,247,0.2);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 14px 16px;
+    margin: 16px 0;
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+  }
+  .tip-box strong { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-question {
+    font-size: 15px; font-weight: 600;
+    color: var(--text); margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-option {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+    cursor: pointer; transition: all 0.2s;
+    font-size: 13px; color: var(--muted);
+    text-align: left; font-family: var(--sans);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .quiz-option:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+  .quiz-option.correct { background: rgba(78,207,163,0.1); border-color: rgba(78,207,163,0.4); color: #4ecfa3; }
+  .quiz-option.wrong { background: rgba(249,124,93,0.1); border-color: rgba(249,124,93,0.4); color: #f97c5d; }
+  .quiz-letter {
+    width: 22px; height: 22px; flex-shrink: 0;
+    background: rgba(255,255,255,0.06); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    color: var(--muted);
+  }
+  .quiz-result {
+    margin-top: 16px; padding: 14px 16px;
+    border-radius: 10px; font-size: 13px; line-height: 1.6;
+    display: none;
+  }
+  .quiz-result.show { display: block; }
+  .quiz-result.ok { background: rgba(78,207,163,0.08); color: #4ecfa3; border: 1px solid rgba(78,207,163,0.2); }
+  .quiz-result.fail { background: rgba(249,124,93,0.08); color: #f97c5d; border: 1px solid rgba(249,124,93,0.2); }
+  .quiz-next-btn {
+    margin-top: 14px; padding: 12px 20px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 10px;
+    font-family: var(--sans); font-size: 13px; font-weight: 700;
+    cursor: pointer; width: 100%; transition: opacity 0.2s;
+    display: none;
+  }
+  .quiz-next-btn.show { display: block; }
+  .quiz-next-btn:hover { opacity: 0.85; }
+
+  /* RESOURCES */
+  .resource-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .resource-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 16px;
+  }
+  .resource-name {
+    font-size: 13px; font-weight: 700; color: var(--text);
+    margin-bottom: 3px;
+  }
+  .resource-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .resource-link {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--accent); text-decoration: none;
+    display: inline-block; margin-top: 4px;
+  }
+
+  /* FINAL CARD */
+  .final-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(124,106,247,0.1), rgba(78,207,163,0.08));
+    border: 1px solid rgba(124,106,247,0.2);
+    border-radius: 14px; padding: 28px;
+    text-align: center; cursor: pointer;
+    transition: all 0.25s;
+  }
+  .final-card:hover {
+    border-color: rgba(124,106,247,0.4);
+    transform: translateY(-2px);
+  }
+  .final-card h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .final-card p { font-size: 14px; color: var(--muted); }
+
+  /* OVERLAY */
+  #overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 290;
+    backdrop-filter: blur(4px);
+  }
+  #overlay.show { display: block; }
+
+  /* FLOATING GLOW */
+  .glow-blob {
+    position: fixed; border-radius: 50%;
+    filter: blur(120px); pointer-events: none; z-index: 0;
+    opacity: 0.12;
+  }
+  .glow-1 { width: 600px; height: 600px; background: #7c6af7; top: -200px; right: -200px; }
+  .glow-2 { width: 400px; height: 400px; background: #4ecfa3; bottom: 100px; left: -100px; }
+
+  @media (max-width: 700px) {
+    .roadmap-grid { grid-template-columns: 1fr; }
+    nav { padding: 14px 20px; }
+    .hero { padding: 100px 20px 60px; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-blob glow-1"></div>
+<div class="glow-blob glow-2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>py</span>mid<span>.learn</span></div>
+  <div class="nav-links">
+    <a href="#roadmap">Roadmap</a>
+    <a href="#resources">Resurse</a>
+  </div>
+  <div class="nav-badge" id="done-count">0 / 12</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">🐍 Rrugëtimi i Plotë</div>
+  <h1><span class="py">Python</span><br><span class="mid">Mid-Level</span></h1>
+  <p class="hero-desc">
+    Nga OOP e thelluar deri tek Design Patterns — 12 tema esenciale për të bërë kalimin nga fillestar në zhvillues Python të mirëfilltë.
+  </p>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num">12</span>
+      <span class="stat-label">Tema</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">~40h</span>
+      <span class="stat-label">Orë mësim</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">3</span>
+      <span class="stat-label">Nivele</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- BAZA E MESME -->
+  <div class="section-label" id="roadmap">
+    <h2>Bazat e mesme</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="roadmap-grid">
+
+    <!-- 1. OOP -->
+    <div class="topic-card v-purple" data-id="1" onclick="openLesson(1)">
+      <div class="card-header">
+        <span class="card-num">01</span>
+        <div class="card-check" onclick="toggleDone(event,1)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">OOP e thelluar</div>
+      <div class="card-sub">Klasa, trashëgimi, encapsulation, dunder methods, @property</div>
+      <div class="card-tags">
+        <span class="tag">class</span>
+        <span class="tag">inheritance</span>
+        <span class="tag">__dunder__</span>
+        <span class="tag">@property</span>
+      </div>
+    </div>
+
+    <!-- 2. Functional -->
+    <div class="topic-card v-purple" data-id="2" onclick="openLesson(2)">
+      <div class="card-header">
+        <span class="card-num">02</span>
+        <div class="card-check" onclick="toggleDone(event,2)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Programim funksional</div>
+      <div class="card-sub">lambda, map/filter/reduce, closures, decorators</div>
+      <div class="card-tags">
+        <span class="tag">lambda</span>
+        <span class="tag">decorators</span>
+        <span class="tag">closures</span>
+        <span class="tag">functools</span>
+      </div>
+    </div>
+
+    <!-- 3. Data Structures -->
+    <div class="topic-card v-green" data-id="3" onclick="openLesson(3)">
+      <div class="card-header">
+        <span class="card-num">03</span>
+        <div class="card-check" onclick="toggleDone(event,3)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Strukturat e të dhënave</div>
+      <div class="card-sub">list/dict/set comprehensions, collections, heapq, deque</div>
+      <div class="card-tags">
+        <span class="tag">comprehension</span>
+        <span class="tag">collections</span>
+        <span class="tag">heapq</span>
+        <span class="tag">deque</span>
+      </div>
+    </div>
+
+    <!-- 4. Generators -->
+    <div class="topic-card v-green" data-id="4" onclick="openLesson(4)">
+      <div class="card-header">
+        <span class="card-num">04</span>
+        <div class="card-check" onclick="toggleDone(event,4)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Generators & Iterators</div>
+      <div class="card-sub">yield, generator expressions, lazy evaluation, protokolli iterator</div>
+      <div class="card-tags">
+        <span class="tag">yield</span>
+        <span class="tag">__iter__</span>
+        <span class="tag">lazy</span>
+        <span class="tag">itertools</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NIVEL I MESËM -->
+  <div class="section-label">
+    <h2>Nivel i mesëm</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="roadmap-grid">
+
+    <!-- 5. Error Handling -->
+    <div class="topic-card v-blue" data-id="5" onclick="openLesson(5)">
+      <div class="card-header">
+        <span class="card-num">05</span>
+        <div class="card-check" onclick="toggleDone(event,5)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Error Handling & Logging</div>
+      <div class="card-sub">try/except/finally, exceptions të personalizuara, logging module</div>
+      <div class="card-tags">
+        <span class="tag">try/except</span>
+        <span class="tag">logging</span>
+        <span class="tag">custom exceptions</span>
+      </div>
+    </div>
+
+    <!-- 6. Modules -->
+    <div class="topic-card v-blue" data-id="6" onclick="openLesson(6)">
+      <div class="card-header">
+        <span class="card-num">06</span>
+        <div class="card-check" onclick="toggleDone(event,6)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Modules & Packages</div>
+      <div class="card-sub">__init__.py, import system, virtual environments, pip</div>
+      <div class="card-tags">
+        <span class="tag">packages</span>
+        <span class="tag">venv</span>
+        <span class="tag">pip</span>
+        <span class="tag">__init__</span>
+      </div>
+    </div>
+
+    <!-- 7. File I/O -->
+    <div class="topic-card v-blue" data-id="7" onclick="openLesson(7)">
+      <div class="card-header">
+        <span class="card-num">07</span>
+        <div class="card-check" onclick="toggleDone(event,7)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">File I/O & Context Managers</div>
+      <div class="card-sub">open(), with statement, pathlib, CSV, JSON</div>
+      <div class="card-tags">
+        <span class="tag">pathlib</span>
+        <span class="tag">with/as</span>
+        <span class="tag">JSON</span>
+        <span class="tag">CSV</span>
+      </div>
+    </div>
+
+    <!-- 8. Testing -->
+    <div class="topic-card v-blue" data-id="8" onclick="openLesson(8)">
+      <div class="card-header">
+        <span class="card-num">08</span>
+        <div class="card-check" onclick="toggleDone(event,8)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Testing me pytest</div>
+      <div class="card-sub">unit tests, fixtures, mocking, coverage, TDD basics</div>
+      <div class="card-tags">
+        <span class="tag">pytest</span>
+        <span class="tag">fixtures</span>
+        <span class="tag">mock</span>
+        <span class="tag">TDD</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AVANCUAR -->
+  <div class="section-label">
+    <h2>Avancuar</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="roadmap-grid">
+
+    <!-- 9. Concurrency -->
+    <div class="topic-card v-orange" data-id="9" onclick="openLesson(9)">
+      <div class="card-header">
+        <span class="card-num">09</span>
+        <div class="card-check" onclick="toggleDone(event,9)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Concurrency & Async</div>
+      <div class="card-sub">threading, asyncio, await/async, GIL, multiprocessing</div>
+      <div class="card-tags">
+        <span class="tag">asyncio</span>
+        <span class="tag">threading</span>
+        <span class="tag">GIL</span>
+        <span class="tag">await</span>
+      </div>
+    </div>
+
+    <!-- 10. Type Hints -->
+    <div class="topic-card v-orange" data-id="10" onclick="openLesson(10)">
+      <div class="card-header">
+        <span class="card-num">10</span>
+        <div class="card-check" onclick="toggleDone(event,10)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Type Hints & Mypy</div>
+      <div class="card-sub">typing module, Protocol, TypeVar, dataclasses, Pydantic</div>
+      <div class="card-tags">
+        <span class="tag">typing</span>
+        <span class="tag">Protocol</span>
+        <span class="tag">dataclass</span>
+        <span class="tag">mypy</span>
+      </div>
+    </div>
+
+    <!-- 11. Performance -->
+    <div class="topic-card v-lime" data-id="11" onclick="openLesson(11)">
+      <div class="card-header">
+        <span class="card-num">11</span>
+        <div class="card-check" onclick="toggleDone(event,11)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Performancë & Profiling</div>
+      <div class="card-sub">cProfile, __slots__, memory profiling, numpy basics</div>
+      <div class="card-tags">
+        <span class="tag">cProfile</span>
+        <span class="tag">__slots__</span>
+        <span class="tag">timeit</span>
+        <span class="tag">numpy</span>
+      </div>
+    </div>
+
+    <!-- 12. Design Patterns -->
+    <div class="topic-card v-lime" data-id="12" onclick="openLesson(12)">
+      <div class="card-header">
+        <span class="card-num">12</span>
+        <div class="card-check" onclick="toggleDone(event,12)">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-title">Design Patterns</div>
+      <div class="card-sub">Singleton, Factory, Observer, Strategy, Dependency Injection</div>
+      <div class="card-tags">
+        <span class="tag">Singleton</span>
+        <span class="tag">Factory</span>
+        <span class="tag">Observer</span>
+        <span class="tag">Strategy</span>
+      </div>
+    </div>
+
+    <!-- FINAL -->
+    <div class="final-card" onclick="openLesson(0)">
+      <h3>🚀 Praktikë e avancuar</h3>
+      <p>Ide projektesh, kodi i pastër, code review, GitHub portfolio</p>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- OVERLAY -->
+<div id="overlay" onclick="closeLesson()"></div>
+
+<!-- LESSON PANEL -->
+<div id="lesson-panel">
+  <div class="panel-header">
+    <div class="panel-title" id="panel-title">—</div>
+    <button class="panel-close" onclick="closeLesson()">✕</button>
+  </div>
+  <div class="panel-tabs">
+    <button class="panel-tab active" onclick="switchTab('lesson')">📖 Mësimi</button>
+    <button class="panel-tab" onclick="switchTab('quiz')">🧠 Quiz</button>
+    <button class="panel-tab" onclick="switchTab('resources')">🔗 Resurse</button>
+  </div>
+  <div class="panel-body">
+    <div class="tab-content active" id="tab-lesson"></div>
+    <div class="tab-content" id="tab-quiz"></div>
+    <div class="tab-content" id="tab-resources"></div>
+  </div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-container">
+  <span class="progress-label">Progresi juaj</span>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <span class="progress-pct" id="progress-pct">0%</span>
+</div>
+
+<script>
+const LESSONS = {
+  0: {
+    title: "🚀 Praktikë e avancuar",
+    intro: "Tani që ke mësuar teoritë, koha është për projekte të vërteta. Praktika dallon zhvilluesit e mirë nga të mesëmit.",
+    sections: [
+      {
+        h3: "Ide projektesh për portfolio",
+        p: `1. <strong>CLI Task Manager</strong> – me OOP, file I/O, type hints<br>
+            2. <strong>Web Scraper</strong> – requests + BeautifulSoup + async<br>
+            3. <strong>REST API</strong> – FastAPI + Pydantic + pytest<br>
+            4. <strong>Data Pipeline</strong> – pandas, generators, profiling<br>
+            5. <strong>Design Pattern Library</strong> – zbato çdo pattern me shembuj real`
+      },
+      {
+        h3: "Kodi i pastër",
+        p: "Ndiq PEP 8, shkruaj docstrings, bëj code review me kolegë. Lexo 'Clean Code' të Robert Martin.",
+        code: `# BAD
+def f(x,y):return x+y
+
+# GOOD
+def calculate_sum(a: int, b: int) -> int:
+    """Return the sum of two integers."""
+    return a + b`
+      }
+    ],
+    quiz: {
+      q: "Çfarë është PEP 8?",
+      opts: ["A library for testing", "Python's style guide", "A web framework", "A package manager"],
+      correct: 1,
+      explanation: "PEP 8 është guida zyrtare e stilit për kodin Python — rregulla për hapësirat, emërtimin e variablave, gjatësinë e rreshtave etj."
+    },
+    resources: [
+      { icon: "📘", name: "PEP 8", desc: "Guida zyrtare e stilit Python", url: "https://pep8.org" },
+      { icon: "🎯", name: "Real Python Projects", desc: "Projekte praktike me tutoriale", url: "https://realpython.com/tutorials/projects/" },
+      { icon: "⭐", name: "Awesome Python", desc: "Koleksion i bibliotekave Python", url: "https://awesome-python.com" }
+    ]
+  },
+  1: {
+    title: "01 · OOP e thelluar",
+    intro: "Object-Oriented Programming (OOP) është mënyra si Python organizon kodin në objekte. Kur e kupton mirë, kodi bëhet i ripërdorshëm, i lexueshëm dhe i mirëmbajtur.",
+    sections: [
+      {
+        h3: "Klasat dhe Objektet",
+        p: "Një klasë është si një plan ndërtimi — objekti është shtëpia e ndërtuar nga ky plan.",
+        code: `<span class="kw">class</span> <span class="cls">Animal</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, name: str, age: int):
+        self.name = name        <span class="cm"># public attribute</span>
+        self._age = age         <span class="cm"># protected (konventë)</span>
+        self.__secret = <span class="str">"hidden"</span> <span class="cm"># private (name mangling)</span>
+
+    <span class="kw">def</span> <span class="fn">speak</span>(self) -> str:
+        <span class="kw">return</span> <span class="str">f"I am {self.name}"</span>
+
+dog = <span class="cls">Animal</span>(<span class="str">"Rex"</span>, <span class="num">3</span>)
+<span class="fn">print</span>(dog.speak())  <span class="cm"># I am Rex</span>`
+      },
+      {
+        h3: "Trashëgimia (Inheritance)",
+        p: "Klasa fëmijë merr të gjithë metodat e klasës prind, dhe mund t'i mbizotërojë (override) ato.",
+        code: `<span class="kw">class</span> <span class="cls">Dog</span>(<span class="cls">Animal</span>):
+    <span class="kw">def</span> <span class="fn">speak</span>(self) -> str:         <span class="cm"># override</span>
+        <span class="kw">return</span> <span class="str">f"{self.name} says: Woof!"</span>
+
+    <span class="kw">def</span> <span class="fn">fetch</span>(self, item: str) -> str:
+        <span class="kw">return</span> <span class="str">f"{self.name} fetches {item}"</span>
+
+rex = <span class="cls">Dog</span>(<span class="str">"Rex"</span>, <span class="num">3</span>)
+<span class="fn">print</span>(rex.speak())   <span class="cm"># Rex says: Woof!</span>
+<span class="fn">print</span>(rex.fetch(<span class="str">"ball"</span>))  <span class="cm"># Rex fetches ball</span>`
+      },
+      {
+        h3: "Dunder Methods (Magic Methods)",
+        p: "__dunder__ metodat i lejojnë objektet të sillen si tipin ndërtues të Python.",
+        code: `<span class="kw">class</span> <span class="cls">Vector</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, x, y):
+        self.x = x; self.y = y
+
+    <span class="kw">def</span> <span class="fn">__repr__</span>(self):
+        <span class="kw">return</span> <span class="str">f"Vector({self.x}, {self.y})"</span>
+
+    <span class="kw">def</span> <span class="fn">__add__</span>(self, other):  <span class="cm"># v1 + v2</span>
+        <span class="kw">return</span> <span class="cls">Vector</span>(self.x + other.x, self.y + other.y)
+
+    <span class="kw">def</span> <span class="fn">__len__</span>(self):
+        <span class="kw">return</span> <span class="fn">int</span>((self.x**<span class="num">2</span> + self.y**<span class="num">2</span>)**<span class="num">0.5</span>)
+
+v = <span class="cls">Vector</span>(<span class="num">3</span>, <span class="num">4</span>)
+<span class="fn">print</span>(<span class="fn">len</span>(v))   <span class="cm"># 5</span>`
+      },
+      {
+        h3: "@property decorator",
+        p: "property të lejon të kesh kontroll mbi leximin/shkrëmin e atributeve.",
+        code: `<span class="kw">class</span> <span class="cls">Circle</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, radius: float):
+        self._radius = radius
+
+    <span class="cm">@property</span>
+    <span class="kw">def</span> <span class="fn">radius</span>(self): <span class="kw">return</span> self._radius
+
+    <span class="cm">@radius.setter</span>
+    <span class="kw">def</span> <span class="fn">radius</span>(self, val):
+        <span class="kw">if</span> val < <span class="num">0</span>: <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">"Negative radius!"</span>)
+        self._radius = val
+
+    <span class="cm">@property</span>
+    <span class="kw">def</span> <span class="fn">area</span>(self):
+        <span class="kw">import</span> math
+        <span class="kw">return</span> math.pi * self._radius ** <span class="num">2</span>
+
+c = <span class="cls">Circle</span>(<span class="num">5</span>)
+<span class="fn">print</span>(c.area)   <span class="cm"># 78.53...</span>`
+      }
+    ],
+    quiz: {
+      q: "Çfarë bën __repr__ në Python?",
+      opts: [
+        "Fshin objektin nga memoria",
+        "Kthon string-in zyrtar të objektit",
+        "Krahason dy objekte",
+        "Inicializon objektin"
+      ],
+      correct: 1,
+      explanation: "__repr__ kthon string-in 'zyrtar' të objektit — idealisht një shprehje Python që mund ta rindërtojë objektin. Përdoret nga debugger dhe shell."
+    },
+    resources: [
+      { icon: "📗", name: "Python Docs – Classes", desc: "Dokumentacioni zyrtar për OOP në Python", url: "https://docs.python.org/3/tutorial/classes.html" },
+      { icon: "🎥", name: "Corey Schafer – OOP", desc: "Seri video OOP në YouTube (falas)", url: "https://www.youtube.com/watch?v=ZDa-Z5JzLYM" },
+      { icon: "📕", name: "Fluent Python (kap. 1-3)", desc: "Libri më i mirë për Python të thelluar", url: "https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/" }
+    ]
+  },
+  2: {
+    title: "02 · Programim funksional",
+    intro: "Programimi funksional trajton funksionet si qytetarë të klasit të parë — mund t'i kalosh, t'i kthesh, t'i vendosësh brenda funksioneve të tjera.",
+    sections: [
+      {
+        h3: "Lambda & Funksionet e Rendit të Lartë",
+        p: "lambda krijon funksione anonime. map(), filter() dhe reduce() janë funksionet kryesore funksionale.",
+        code: `<span class="cm"># Lambda — funksion anonim</span>
+square = <span class="kw">lambda</span> x: x ** <span class="num">2</span>
+
+<span class="cm"># map() — aplikon funksionin mbi çdo element</span>
+nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+squared = <span class="fn">list</span>(<span class="fn">map</span>(<span class="kw">lambda</span> x: x**<span class="num">2</span>, nums))  <span class="cm"># [1,4,9,16,25]</span>
+
+<span class="cm"># filter() — filtron bazuar në kusht</span>
+evens = <span class="fn">list</span>(<span class="fn">filter</span>(<span class="kw">lambda</span> x: x % <span class="num">2</span> == <span class="num">0</span>, nums))  <span class="cm"># [2,4]</span>
+
+<span class="cm"># reduce() — redukton në një vlerë</span>
+<span class="kw">from</span> functools <span class="kw">import</span> reduce
+total = <span class="fn">reduce</span>(<span class="kw">lambda</span> a, b: a + b, nums)  <span class="cm"># 15</span>`
+      },
+      {
+        h3: "Closures",
+        p: "Closure është funksion i brendshëm që 'kujton' variablat e scope-it të jashtëm.",
+        code: `<span class="kw">def</span> <span class="fn">make_multiplier</span>(n: int):
+    <span class="kw">def</span> <span class="fn">multiplier</span>(x: int) -> int:
+        <span class="kw">return</span> x * n   <span class="cm"># 'n' kapet nga scope i jashtëm</span>
+    <span class="kw">return</span> multiplier
+
+double = <span class="fn">make_multiplier</span>(<span class="num">2</span>)
+triple = <span class="fn">make_multiplier</span>(<span class="num">3</span>)
+<span class="fn">print</span>(<span class="fn">double</span>(<span class="num">5</span>))  <span class="cm"># 10</span>
+<span class="fn">print</span>(<span class="fn">triple</span>(<span class="num">5</span>))  <span class="cm"># 15</span>`
+      },
+      {
+        h3: "Decorators",
+        p: "Decorator modifikon sjelljen e funksionit pa ndryshuar kodin e tij.",
+        code: `<span class="kw">import</span> time
+
+<span class="kw">def</span> <span class="fn">timer</span>(func):
+    <span class="kw">def</span> <span class="fn">wrapper</span>(*args, **kwargs):
+        start = time.<span class="fn">time</span>()
+        result = <span class="fn">func</span>(*args, **kwargs)
+        end = time.<span class="fn">time</span>()
+        <span class="fn">print</span>(<span class="str">f"{func.__name__}: {end-start:.4f}s"</span>)
+        <span class="kw">return</span> result
+    <span class="kw">return</span> wrapper
+
+<span class="cm">@timer</span>
+<span class="kw">def</span> <span class="fn">slow_function</span>():
+    time.<span class="fn">sleep</span>(<span class="num">0.1</span>)
+    <span class="kw">return</span> <span class="str">"done"</span>
+
+<span class="fn">slow_function</span>()  <span class="cm"># slow_function: 0.1001s</span>`
+      }
+    ],
+    quiz: {
+      q: "Çfarë kthen ky kod?\nlist(filter(lambda x: x > 3, [1,2,3,4,5]))",
+      opts: ["[1, 2, 3]", "[4, 5]", "[3, 4, 5]", "Error"],
+      correct: 1,
+      explanation: "filter() mban vetëm elementet ku funksioni kthehet True. x > 3 është i vërtetë vetëm për 4 dhe 5."
+    },
+    resources: [
+      { icon: "📗", name: "Python Decorators", desc: "Real Python — tutorial dekoratorësh", url: "https://realpython.com/primer-on-python-decorators/" },
+      { icon: "📘", name: "functools docs", desc: "Dokumentacioni zyrtar i functools", url: "https://docs.python.org/3/library/functools.html" },
+      { icon: "🎥", name: "Closures Explained", desc: "Video e shkurtër dhe e qartë", url: "https://www.youtube.com/watch?v=swU3c34d2NQ" }
+    ]
+  },
+  3: {
+    title: "03 · Strukturat e të dhënave",
+    intro: "Python ka strukturat e duhura të të dhënave gati. Dija e tyre ndikon drejtpërdrejt në performancën dhe lexueshmërinë e kodit.",
+    sections: [
+      {
+        h3: "Comprehensions",
+        p: "Mënyra Pythonike e krijimit të list, dict dhe set-eve.",
+        code: `<span class="cm"># List comprehension</span>
+squares = [x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10</span>) <span class="kw">if</span> x % <span class="num">2</span> == <span class="num">0</span>]
+
+<span class="cm"># Dict comprehension</span>
+word_len = {word: <span class="fn">len</span>(word) <span class="kw">for</span> word <span class="kw">in</span> [<span class="str">"hello"</span>, <span class="str">"world"</span>]}
+
+<span class="cm"># Set comprehension</span>
+unique_letters = {ch.lower() <span class="kw">for</span> ch <span class="kw">in</span> <span class="str">"Hello World"</span> <span class="kw">if</span> ch.isalpha()}
+
+<span class="cm"># Nested comprehension</span>
+matrix = [[i * j <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>)] <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">3</span>)]`
+      },
+      {
+        h3: "Collections module",
+        p: "collections jep struktura të specializuara shumë të dobishme.",
+        code: `<span class="kw">from</span> collections <span class="kw">import</span> defaultdict, Counter, deque, OrderedDict
+
+<span class="cm"># Counter — numëron elemente</span>
+words = [<span class="str">"apple"</span>, <span class="str">"banana"</span>, <span class="str">"apple"</span>, <span class="str">"cherry"</span>]
+count = <span class="cls">Counter</span>(words)
+<span class="fn">print</span>(count.most_common(<span class="num">2</span>))  <span class="cm"># [('apple',2), ('banana',1)]</span>
+
+<span class="cm"># defaultdict — nuk hedh KeyError</span>
+graph = <span class="fn">defaultdict</span>(list)
+graph[<span class="str">"A"</span>].<span class="fn">append</span>(<span class="str">"B"</span>)
+
+<span class="cm"># deque — stack/queue efikase</span>
+dq = <span class="fn">deque</span>([<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>], maxlen=<span class="num">5</span>)
+dq.<span class="fn">appendleft</span>(<span class="num">0</span>)   <span class="cm"># O(1)</span>`
+      },
+      {
+        h3: "heapq — Priority Queue",
+        p: "heapq zbaton min-heap — gjithmonë e mban elementin më të vogël sipër.",
+        code: `<span class="kw">import</span> heapq
+
+tasks = []
+<span class="fn">heapq.heappush</span>(tasks, (<span class="num">3</span>, <span class="str">"low priority"</span>))
+<span class="fn">heapq.heappush</span>(tasks, (<span class="num">1</span>, <span class="str">"urgent"</span>))
+<span class="fn">heapq.heappush</span>(tasks, (<span class="num">2</span>, <span class="str">"normal"</span>))
+
+<span class="kw">while</span> tasks:
+    priority, task = <span class="fn">heapq.heappop</span>(tasks)
+    <span class="fn">print</span>(<span class="str">f"[{priority}] {task}"</span>)
+<span class="cm"># [1] urgent → [2] normal → [3] low priority</span>`
+      }
+    ],
+    quiz: {
+      q: "Cila strukturë e collections duhet për të numëruar sa herë shfaqet çdo fjalë?",
+      opts: ["defaultdict", "OrderedDict", "Counter", "deque"],
+      correct: 2,
+      explanation: "Counter është bërë pikërisht për numërimin e elementeve. Counter(['a','b','a']) → Counter({'a':2, 'b':1})"
+    },
+    resources: [
+      { icon: "📗", name: "collections docs", desc: "Dokumentacioni zyrtar i collections", url: "https://docs.python.org/3/library/collections.html" },
+      { icon: "🎯", name: "Real Python – Collections", desc: "Tutorial i thelluar për collections", url: "https://realpython.com/python-collections-module/" },
+      { icon: "📘", name: "heapq docs", desc: "Heap queue algorithm", url: "https://docs.python.org/3/library/heapq.html" }
+    ]
+  },
+  4: {
+    title: "04 · Generators & Iterators",
+    intro: "Generators dhe iterators të lejojnë të punosh me sasi të mëdha të dhënash pa i ngarkuar të gjitha në memorie — lazy evaluation.",
+    sections: [
+      {
+        h3: "yield dhe Generators",
+        p: "yield pauzon funksionin dhe kthon vlerën. Herën tjetër vazhdon nga aty ku u ndal.",
+        code: `<span class="kw">def</span> <span class="fn">fibonacci</span>(n: int):
+    a, b = <span class="num">0</span>, <span class="num">1</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">yield</span> a          <span class="cm"># pauzon këtu</span>
+        a, b = b, a + b
+
+<span class="kw">for</span> num <span class="kw">in</span> <span class="fn">fibonacci</span>(<span class="num">8</span>):
+    <span class="fn">print</span>(num, end=<span class="str">" "</span>)
+<span class="cm"># 0 1 1 2 3 5 8 13</span>
+
+<span class="cm"># Generator expression (si list comprehension por me ())</span>
+gen = (x**<span class="num">2</span> <span class="kw">for</span> x <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1000000</span>))  <span class="cm"># nuk zë memorie</span>
+<span class="fn">next</span>(gen)  <span class="cm"># 0, pastaj 1, pastaj 4...</span>`
+      },
+      {
+        h3: "Protokolli Iterator",
+        p: "Çdo objekt që zbaton __iter__ dhe __next__ është iterator.",
+        code: `<span class="kw">class</span> <span class="cls">CountDown</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, start):
+        self.current = start
+
+    <span class="kw">def</span> <span class="fn">__iter__</span>(self):
+        <span class="kw">return</span> self
+
+    <span class="kw">def</span> <span class="fn">__next__</span>(self):
+        <span class="kw">if</span> self.current <= <span class="num">0</span>:
+            <span class="kw">raise</span> <span class="cls">StopIteration</span>
+        val = self.current
+        self.current -= <span class="num">1</span>
+        <span class="kw">return</span> val
+
+<span class="kw">for</span> n <span class="kw">in</span> <span class="cls">CountDown</span>(<span class="num">5</span>):
+    <span class="fn">print</span>(n, end=<span class="str">" "</span>)  <span class="cm"># 5 4 3 2 1</span>`
+      },
+      {
+        h3: "itertools — Superpowers",
+        p: "itertools jep kombinime, permutacione dhe shumë operacione lazy.",
+        code: `<span class="kw">import</span> itertools
+
+<span class="cm"># chain — bashkon iterables</span>
+<span class="fn">list</span>(itertools.<span class="fn">chain</span>([<span class="num">1</span>,<span class="num">2</span>], [<span class="num">3</span>,<span class="num">4</span>]))  <span class="cm"># [1,2,3,4]</span>
+
+<span class="cm"># product — kartezi</span>
+<span class="fn">list</span>(itertools.<span class="fn">product</span>(<span class="str">"AB"</span>, <span class="fn">repeat</span>=<span class="num">2</span>))
+<span class="cm"># [('A','A'),('A','B'),('B','A'),('B','B')]</span>
+
+<span class="cm"># islice — slice lazy</span>
+first_5 = itertools.<span class="fn">islice</span>(<span class="fn">fibonacci</span>(<span class="num">100</span>), <span class="num">5</span>)
+
+<span class="cm"># groupby — grupon të dhënat</span>
+data = [(<span class="str">"A"</span>, <span class="num">1</span>), (<span class="str">"A"</span>, <span class="num">2</span>), (<span class="str">"B"</span>, <span class="num">3</span>)]
+<span class="kw">for</span> key, group <span class="kw">in</span> itertools.<span class="fn">groupby</span>(data, key=<span class="kw">lambda</span> x: x[<span class="num">0</span>]):
+    <span class="fn">print</span>(key, <span class="fn">list</span>(group))`
+      }
+    ],
+    quiz: {
+      q: "Pse generator expression (x**2 for x in range(1M)) është më i mirë se list comprehension?",
+      opts: [
+        "Është më i shpejtë gjithmonë",
+        "Nuk i ngark të gjitha vlerat në memorie",
+        "Punon vetëm me numra",
+        "Mund të kthejë None"
+      ],
+      correct: 1,
+      explanation: "Generators janë lazy — prodhojnë vlerat një nga një sipas nevojës. List comprehension krijon të gjithë listën menjëherë në RAM."
+    },
+    resources: [
+      { icon: "📗", name: "Python Generators", desc: "Real Python – generators tutorial", url: "https://realpython.com/introduction-to-python-generators/" },
+      { icon: "📘", name: "itertools docs", desc: "Dokumentacioni zyrtar i itertools", url: "https://docs.python.org/3/library/itertools.html" }
+    ]
+  },
+  5: {
+    title: "05 · Error Handling & Logging",
+    intro: "Koha ka gabime. Pyetja nuk është nëse do të ndodhin, por si do t'i trajtosh. Error handling i mirë e bën aplikacionin të besueshëm.",
+    sections: [
+      {
+        h3: "try / except / finally",
+        p: "Struktura bazë e trajtimit të gabimeve.",
+        code: `<span class="kw">try</span>:
+    result = <span class="num">10</span> / <span class="num">0</span>
+<span class="kw">except</span> <span class="cls">ZeroDivisionError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"Gabim: {e}"</span>)
+<span class="kw">except</span> (<span class="cls">TypeError</span>, <span class="cls">ValueError</span>) <span class="kw">as</span> e:
+    <span class="fn">print</span>(<span class="str">f"Type/Value error: {e}"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="str">"Asnjë gabim!"</span>)    <span class="cm"># ekzekutohet nëse nuk ka gabim</span>
+<span class="kw">finally</span>:
+    <span class="fn">print</span>(<span class="str">"Gjithmonë ekzekutohet"</span>)  <span class="cm"># cleanup</span>`
+      },
+      {
+        h3: "Custom Exceptions",
+        p: "Krijo exceptions të veta për gabimet e aplikacionit tënd.",
+        code: `<span class="kw">class</span> <span class="cls">AppError</span>(<span class="cls">Exception</span>):
+    <span class="cm">"""Gabim bazë i aplikacionit."""</span>
+    <span class="kw">pass</span>
+
+<span class="kw">class</span> <span class="cls">ValidationError</span>(<span class="cls">AppError</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, field: str, msg: str):
+        self.field = field
+        <span class="fn">super</span>().__init__(<span class="str">f"Field '{field}': {msg}"</span>)
+
+<span class="kw">def</span> <span class="fn">validate_age</span>(age: int):
+    <span class="kw">if</span> age < <span class="num">0</span> <span class="kw">or</span> age > <span class="num">150</span>:
+        <span class="kw">raise</span> <span class="cls">ValidationError</span>(<span class="str">"age"</span>, <span class="str">"duhet 0-150"</span>)
+
+<span class="kw">try</span>:
+    <span class="fn">validate_age</span>(-<span class="num">5</span>)
+<span class="kw">except</span> <span class="cls">ValidationError</span> <span class="kw">as</span> e:
+    <span class="fn">print</span>(e)  <span class="cm"># Field 'age': duhet 0-150</span>`
+      },
+      {
+        h3: "Logging module",
+        p: "Mos përdor print() për debug — përdor logging.",
+        code: `<span class="kw">import</span> logging
+
+logging.<span class="fn">basicConfig</span>(
+    level=logging.DEBUG,
+    format=<span class="str">'%(asctime)s - %(name)s - %(levelname)s - %(message)s'</span>
+)
+logger = logging.<span class="fn">getLogger</span>(__name__)
+
+logger.<span class="fn">debug</span>(<span class="str">"Detaje debugging"</span>)
+logger.<span class="fn">info</span>(<span class="str">"Aplikacioni startoi"</span>)
+logger.<span class="fn">warning</span>(<span class="str">"Vëmendje!"</span>)
+logger.<span class="fn">error</span>(<span class="str">"Gabim i rëndësishëm"</span>)
+logger.<span class="fn">critical</span>(<span class="str">"Katastrofë!"</span>)`
+      }
+    ],
+    quiz: {
+      q: "Kur ekzekutohet blloku 'finally'?",
+      opts: [
+        "Vetëm kur nuk ka gabim",
+        "Vetëm kur ka gabim",
+        "Gjithmonë, me ose pa gabim",
+        "Vetëm me ZeroDivisionError"
+      ],
+      correct: 2,
+      explanation: "finally gjithmonë ekzekutohet — qoftë me gabim, qoftë pa. Përdoret për cleanup: mbyllje file-sh, lidhje DB etj."
+    },
+    resources: [
+      { icon: "📗", name: "Python Exceptions", desc: "Real Python – Exception Handling", url: "https://realpython.com/python-exceptions/" },
+      { icon: "📘", name: "logging docs", desc: "Dokumentacioni zyrtar i logging", url: "https://docs.python.org/3/library/logging.html" }
+    ]
+  },
+  6: { title: "06 · Modules & Packages", intro: "Python ka ekosistem gjigand. Të kuptuarit e sistemit të moduleve dhe packages-ve është thelbësor.", sections: [{h3:"Struktura e paketës", p:"Çdo direktori me __init__.py bëhet paketë Python.", code:`<span class="cm"># mypackage/__init__.py</span>
+<span class="kw">from</span> .utils <span class="kw">import</span> helper_function
+<span class="kw">from</span> .models <span class="kw">import</span> User
+
+<span class="cm"># mypackage/utils.py</span>
+<span class="kw">def</span> <span class="fn">helper_function</span>():
+    <span class="kw">return</span> <span class="str">"helper"</span>
+
+<span class="cm"># main.py</span>
+<span class="kw">from</span> mypackage <span class="kw">import</span> User, helper_function`}, {h3:"Virtual Environments", p:"Izolo varësitë e çdo projekti.", code:`<span class="cm"># Krijo venv</span>
+python -m venv .venv
+
+<span class="cm"># Aktivo (Linux/Mac)</span>
+source .venv/bin/activate
+
+<span class="cm"># Aktivo (Windows)</span>
+.venv\\Scripts\\activate
+
+<span class="cm"># Instalo varësi</span>
+pip install requests
+pip freeze > requirements.txt
+pip install -r requirements.txt`}], quiz:{q:"Çfarë bën skedari __init__.py?",opts:["Inicializon variablat globale","E shndërron direktorinë në paketë Python","Startoi aplikacionin","Instalonë varësitë"],correct:1,explanation:"__init__.py e shënon direktorinë si paketë Python, duke lejuar importin prej saj."}, resources:[{icon:"📗",name:"Python Modules",desc:"Si funksionon sistemi import",url:"https://docs.python.org/3/tutorial/modules.html"},{icon:"🛠️",name:"pip docs",desc:"Menaxhimi i paketave",url:"https://pip.pypa.io"}] },
+  7: { title: "07 · File I/O & Context Managers", intro: "Leximi dhe shkrëmi i skedarëve, si dhe menaxhimi i burimeve me 'with' statement.", sections: [{h3:"File I/O bazike", p:"Gjithmonë përdor 'with' — mbyll automatikisht skedarin.", code:`<span class="cm"># Lexo</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"data.txt"</span>, <span class="str">"r"</span>, encoding=<span class="str">"utf-8"</span>) <span class="kw">as</span> f:
+    content = f.<span class="fn">read</span>()
+    lines = f.<span class="fn">readlines</span>()
+
+<span class="cm"># Shkruaj</span>
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"output.txt"</span>, <span class="str">"w"</span>) <span class="kw">as</span> f:
+    f.<span class="fn">write</span>(<span class="str">"Hello!\n"</span>)
+
+<span class="cm"># JSON</span>
+<span class="kw">import</span> json
+<span class="kw">with</span> <span class="fn">open</span>(<span class="str">"data.json"</span>) <span class="kw">as</span> f:
+    data = json.<span class="fn">load</span>(f)  <span class="cm"># dict</span>`},{h3:"pathlib", p:"Mënyra moderne e punës me shtegje (paths).", code:`<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+p = <span class="cls">Path</span>(<span class="str">"data"</span>) / <span class="str">"users"</span> / <span class="str">"file.txt"</span>
+p.parent.<span class="fn">mkdir</span>(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)
+p.<span class="fn">write_text</span>(<span class="str">"Hello"</span>)
+
+<span class="cm"># Listo skedarë</span>
+<span class="kw">for</span> f <span class="kw">in</span> <span class="cls">Path</span>(<span class="str">"."</span>).<span class="fn">glob</span>(<span class="str">"**/*.py"</span>):
+    <span class="fn">print</span>(f)`}], quiz:{q:"Pse duhet të përdorim 'with open()' dhe jo open() drejtpërdrejt?",opts:["Është faster","Mbyll automatikisht skedarin edhe nëse ndodh gabim","Mbështet Unicode","Kërkon më pak memorie"],correct:1,explanation:"'with' garanton mbyllje të skedarit edhe nëse hidhet exception — prevent resource leaks."}, resources:[{icon:"📗",name:"pathlib docs",desc:"Punë moderne me shtegje",url:"https://docs.python.org/3/library/pathlib.html"},{icon:"🎯",name:"Real Python – Files",desc:"Tutorial i plotë i/o",url:"https://realpython.com/read-write-files-python/"}] },
+  8: { title: "08 · Testing me pytest", intro: "Kodi pa teste është kod i pabesueshëm. pytest e bën testimin të thjeshtë dhe të fuqishëm.", sections: [{h3:"Testet e para me pytest", p:"Çdo funksion që fillon me 'test_' ekzekutohet automatikisht.", code:`<span class="cm"># test_calculator.py</span>
+<span class="kw">def</span> <span class="fn">add</span>(a: int, b: int) -> int:
+    <span class="kw">return</span> a + b
+
+<span class="kw">def</span> <span class="fn">test_add_positive</span>():
+    <span class="kw">assert</span> <span class="fn">add</span>(<span class="num">2</span>, <span class="num">3</span>) == <span class="num">5</span>
+
+<span class="kw">def</span> <span class="fn">test_add_negative</span>():
+    <span class="kw">assert</span> <span class="fn">add</span>(-<span class="num">1</span>, <span class="num">1</span>) == <span class="num">0</span>
+
+<span class="kw">def</span> <span class="fn">test_add_raises</span>():
+    <span class="kw">import</span> pytest
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(<span class="cls">TypeError</span>):
+        <span class="fn">add</span>(<span class="str">"a"</span>, <span class="num">1</span>)
+
+<span class="cm"># Ekzekuto: pytest test_calculator.py -v</span>`},{h3:"Fixtures dhe Mocking", p:"Fixtures pregatisin të dhëna testimi. Mock zëvendëson objekte reale.", code:`<span class="kw">import</span> pytest
+<span class="kw">from</span> unittest.mock <span class="kw">import</span> Mock, patch
+
+<span class="cm">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">sample_user</span>():
+    <span class="kw">return</span> {<span class="str">"id"</span>: <span class="num">1</span>, <span class="str">"name"</span>: <span class="str">"Agim"</span>}
+
+<span class="kw">def</span> <span class="fn">test_user_name</span>(sample_user):
+    <span class="kw">assert</span> sample_user[<span class="str">"name"</span>] == <span class="str">"Agim"</span>
+
+<span class="cm">@patch("requests.get")</span>
+<span class="kw">def</span> <span class="fn">test_api_call</span>(mock_get):
+    mock_get.<span class="fn">return_value</span>.json.<span class="fn">return_value</span> = {<span class="str">"data"</span>: <span class="str">"test"</span>}
+    <span class="cm"># testi nuk bën kërkesë reale HTTP</span>`}], quiz:{q:"Çfarë bën dekoratori @pytest.fixture?",opts:["Ekzekuton testin dy herë","Krijon të dhëna testimi të ripërdorshme","Shënon testin si të dështuar","Fsheh output-in"],correct:1,explanation:"@pytest.fixture krijon funksione setup të ripërdorshme — merren si parametra nga funksionet e testit."}, resources:[{icon:"📗",name:"pytest docs",desc:"Dokumentacioni zyrtar i pytest",url:"https://docs.pytest.org"},{icon:"🎯",name:"Real Python – Testing",desc:"Tutorial i plotë testing",url:"https://realpython.com/pytest-python-testing/"}] },
+  9: { title: "09 · Concurrency & Async", intro: "Concurrency të lejon të bësh shumë gjëra njëkohësisht. Python ka dy qasje kryesore: threading dhe asyncio.", sections: [{h3:"asyncio dhe async/await", p:"Ideale për I/O-bound tasks (HTTP, database). Një thread, shumë coroutines.", code:`<span class="kw">import</span> asyncio
+<span class="kw">import</span> aiohttp
+
+<span class="kw">async def</span> <span class="fn">fetch_url</span>(session, url: str) -> str:
+    <span class="kw">async with</span> session.<span class="fn">get</span>(url) <span class="kw">as</span> resp:
+        <span class="kw">return await</span> resp.<span class="fn">text</span>()
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    urls = [<span class="str">"https://api1.com"</span>, <span class="str">"https://api2.com"</span>]
+    <span class="kw">async with</span> aiohttp.<span class="cls">ClientSession</span>() <span class="kw">as</span> session:
+        tasks = [<span class="fn">fetch_url</span>(session, u) <span class="kw">for</span> u <span class="kw">in</span> urls]
+        results = <span class="kw">await</span> asyncio.<span class="fn">gather</span>(*tasks)
+
+asyncio.<span class="fn">run</span>(<span class="fn">main</span>())`},{h3:"Threading vs Multiprocessing", p:"threading: I/O tasks. multiprocessing: CPU tasks (kalon GIL-in).", code:`<span class="kw">from</span> concurrent.futures <span class="kw">import</span> ThreadPoolExecutor, ProcessPoolExecutor
+
+<span class="cm"># Threading — I/O bound</span>
+<span class="kw">with</span> <span class="cls">ThreadPoolExecutor</span>(max_workers=<span class="num">5</span>) <span class="kw">as</span> ex:
+    results = <span class="fn">list</span>(ex.<span class="fn">map</span>(fetch_data, urls))
+
+<span class="cm"># Multiprocessing — CPU bound</span>
+<span class="kw">with</span> <span class="cls">ProcessPoolExecutor</span>() <span class="kw">as</span> ex:
+    results = <span class="fn">list</span>(ex.<span class="fn">map</span>(heavy_computation, data))`}], quiz:{q:"Kur duhet të përdorësh asyncio vs multiprocessing?",opts:["asyncio gjithmonë","asyncio për I/O, multiprocessing për CPU","multiprocessing gjithmonë","Nuk ka dallim"],correct:1,explanation:"asyncio shkëlqen me I/O-bound tasks (API calls, file reads). Multiprocessing kalon GIL-in dhe është i duhur për CPU-intensive tasks si image processing."}, resources:[{icon:"📗",name:"asyncio docs",desc:"Dokumentacioni zyrtar asyncio",url:"https://docs.python.org/3/library/asyncio.html"},{icon:"🎥",name:"Async Python Tutorial",desc:"ArjanCodes – async i qartë",url:"https://www.youtube.com/watch?v=GpqAQzH1Nf0"}] },
+  10: { title: "10 · Type Hints & Mypy", intro: "Type hints nuk janë vetëm dokumentacion — ato bëjnë kodin më të sigurt, më të lexueshëm dhe lejojnë IDE-n të ndihmojë më shumë.", sections: [{h3:"Sintaksa bazike", p:"Python 3.10+ ka sintaksë të thjeshtuar me | dhe built-in generics.", code:`<span class="kw">from</span> typing <span class="kw">import</span> Optional, Union, List, Dict, Tuple
+
+<span class="kw">def</span> <span class="fn">greet</span>(name: str, times: int = <span class="num">1</span>) -> str:
+    <span class="kw">return</span> name * times
+
+<span class="cm"># Python 3.10+ syntax</span>
+<span class="kw">def</span> <span class="fn">find_user</span>(user_id: int) -> dict | <span class="kw">None</span>:
+    ...
+
+<span class="kw">def</span> <span class="fn">process</span>(items: list[str | int]) -> dict[str, int]:
+    <span class="kw">return</span> {<span class="fn">str</span>(i): idx <span class="kw">for</span> idx, i <span class="kw">in</span> <span class="fn">enumerate</span>(items)}`},{h3:"dataclasses dhe Protocol", p:"dataclasses krijon klasa të të dhënave automatikisht. Protocol zbaton duck typing me type checking.", code:`<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass, field
+<span class="kw">from</span> typing <span class="kw">import</span> Protocol
+
+<span class="cm">@dataclass</span>
+<span class="kw">class</span> <span class="cls">User</span>:
+    name: str
+    age: int
+    tags: list[str] = <span class="fn">field</span>(default_factory=list)
+
+<span class="kw">class</span> <span class="cls">Drawable</span>(<span class="cls">Protocol</span>):
+    <span class="kw">def</span> <span class="fn">draw</span>(self) -> <span class="kw">None</span>: ...
+
+<span class="kw">class</span> <span class="cls">Circle</span>:
+    <span class="kw">def</span> <span class="fn">draw</span>(self): <span class="fn">print</span>(<span class="str">"○"</span>)
+
+<span class="kw">def</span> <span class="fn">render</span>(shape: <span class="cls">Drawable</span>) -> <span class="kw">None</span>:
+    shape.<span class="fn">draw</span>()  <span class="cm"># works for any class with draw()</span>`}], quiz:{q:"Çfarë bën @dataclass në Python?",opts:["Bën klasën immutable","Gjeneron automatikisht __init__, __repr__, __eq__","Shton type checking runtime","Optimizon memorie"],correct:1,explanation:"@dataclass gjeneron automatikisht metodat boilerplate: __init__, __repr__, __eq__ bazuar në atributet e shënuara me type hints."}, resources:[{icon:"📗",name:"typing docs",desc:"Dokumentacioni zyrtar i typing",url:"https://docs.python.org/3/library/typing.html"},{icon:"🛠️",name:"mypy",desc:"Static type checker për Python",url:"https://mypy-lang.org"}] },
+  11: { title: "11 · Performancë & Profiling", intro: "Optimizo vetëm kur ke nevojë — dhe gjithmonë profile para se të optimizosh. 'Premature optimization is the root of all evil.'", sections: [{h3:"cProfile — Gjej bottlenecks", p:"cProfile tregon ku harxhohet koha në kodin tënd.", code:`<span class="kw">import</span> cProfile
+<span class="kw">import</span> pstats
+
+<span class="cm"># Run profiler</span>
+<span class="kw">with</span> cProfile.<span class="cls">Profile</span>() <span class="kw">as</span> pr:
+    my_slow_function()
+
+stats = pstats.<span class="cls">Stats</span>(pr)
+stats.<span class="fn">sort_stats</span>(<span class="str">'cumulative'</span>)
+stats.<span class="fn">print_stats</span>(<span class="num">10</span>)  <span class="cm"># top 10 funksionet</span>
+
+<span class="cm"># Ose me timeit për snippet-e</span>
+<span class="kw">import</span> timeit
+t = timeit.<span class="fn">timeit</span>(<span class="str">'[x**2 for x in range(1000)]'</span>, number=<span class="num">1000</span>)
+<span class="fn">print</span>(<span class="str">f"{t:.4f}s"</span>)`},{h3:"__slots__ — Kursim memorie", p:"__slots__ parandalon krijimin e __dict__ për çdo instancë.", code:`<span class="kw">class</span> <span class="cls">WithDict</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, x, y):
+        self.x = x; self.y = y
+<span class="cm"># ~232 bytes per instance</span>
+
+<span class="kw">class</span> <span class="cls">WithSlots</span>:
+    __slots__ = [<span class="str">'x'</span>, <span class="str">'y'</span>]
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, x, y):
+        self.x = x; self.y = y
+<span class="cm"># ~56 bytes per instance — 4x smaller!</span>
+
+<span class="cm"># Kur ke miliona objekte, kjo ka rëndësi!</span>`}], quiz:{q:"Çfarë duhet të bësh PARA se të optimizosh kodin?",opts:["Shto __slots__ kudo","Profile kodin për të gjetur bottleneck-un","Shkruaj kodin sërish në C","Ri-instalo Python"],correct:1,explanation:"Gjithmonë profile para optimizimit — 90% e kohës harxhohet në 10% të kodit. Pa profiling, mund të optimizosh pjesë që nuk kanë rëndësi."}, resources:[{icon:"📗",name:"cProfile docs",desc:"Profiling i kodit Python",url:"https://docs.python.org/3/library/profile.html"},{icon:"🎯",name:"Python Performance",desc:"Real Python – Speed Tips",url:"https://realpython.com/python-performance-analysis/"}] },
+  12: { title: "12 · Design Patterns", intro: "Design patterns janë zgjidhje të provuara për probleme të përsëritura. Mos i përdor ngado — përdori kur zgjidhin problemin konkret.", sections: [{h3:"Singleton & Factory", p:"Singleton siguron vetëm një instancë. Factory delegon krijimin e objekteve.", code:`<span class="kw">class</span> <span class="cls">Singleton</span>:
+    _instance = <span class="kw">None</span>
+    <span class="kw">def</span> <span class="fn">__new__</span>(cls):
+        <span class="kw">if not</span> cls._instance:
+            cls._instance = <span class="fn">super</span>().__new__(cls)
+        <span class="kw">return</span> cls._instance
+
+<span class="cm"># Factory Pattern</span>
+<span class="kw">class</span> <span class="cls">AnimalFactory</span>:
+    <span class="cm">@staticmethod</span>
+    <span class="kw">def</span> <span class="fn">create</span>(animal_type: str):
+        animals = {<span class="str">"dog"</span>: <span class="cls">Dog</span>, <span class="str">"cat"</span>: <span class="cls">Cat</span>}
+        <span class="kw">if</span> animal_type <span class="kw">not in</span> animals:
+            <span class="kw">raise</span> <span class="cls">ValueError</span>(<span class="str">f"Unknown: {animal_type}"</span>)
+        <span class="kw">return</span> animals[animal_type]()`},{h3:"Observer & Strategy", p:"Observer zbaton event system. Strategy ndryshon algoritmin runtime.", code:`<span class="cm"># Observer Pattern</span>
+<span class="kw">class</span> <span class="cls">EventEmitter</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self._listeners = {}
+
+    <span class="kw">def</span> <span class="fn">on</span>(self, event, callback):
+        self._listeners.<span class="fn">setdefault</span>(event, []).<span class="fn">append</span>(callback)
+
+    <span class="kw">def</span> <span class="fn">emit</span>(self, event, *args):
+        <span class="kw">for</span> cb <span class="kw">in</span> self._listeners.<span class="fn">get</span>(event, []):
+            <span class="fn">cb</span>(*args)
+
+<span class="cm"># Strategy Pattern</span>
+<span class="kw">from</span> typing <span class="kw">import</span> Callable
+<span class="kw">def</span> <span class="fn">sort_data</span>(data: list, strategy: <span class="cls">Callable</span>) -> list:
+    <span class="kw">return</span> <span class="fn">sorted</span>(data, key=strategy)
+
+<span class="fn">sort_data</span>(users, strategy=<span class="kw">lambda</span> u: u.age)`}], quiz:{q:"Kur duhet të përdoresh Singleton?",opts:["Gjithmonë","Kur duhet saktësisht një instancë globale (p.sh. DB connection pool)","Kur ke shumë klasa","Kur dëshiron inheritance"],correct:1,explanation:"Singleton është i duhur për burime të ndara: konfigurim, connection pool, logger. Por kujdes — e bën testimin të vështirë."}, resources:[{icon:"📕",name:"Python Patterns",desc:"Refactoring Guru – Patterns Python",url:"https://refactoring.guru/design-patterns/python"},{icon:"🎥",name:"ArjanCodes – Patterns",desc:"Video tutorial design patterns",url:"https://www.youtube.com/@ArjanCodes"}] }
+};
+
+let done = new Set(JSON.parse(localStorage.getItem('pyDone') || '[]'));
+let currentLesson = null;
+let currentQuizIdx = 0;
+
+function init() {
+  done.forEach(id => {
+    const card = document.querySelector(`[data-id="${id}"]`);
+    if (card) card.classList.add('done');
+  });
+  updateProgress();
+}
+
+function toggleDone(e, id) {
+  e.stopPropagation();
+  if (done.has(id)) done.delete(id);
+  else done.add(id);
+  localStorage.setItem('pyDone', JSON.stringify([...done]));
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if (card) card.classList.toggle('done');
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = Math.round((done.size / 12) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('done-count').textContent = `${done.size} / 12`;
+}
+
+function openLesson(id) {
+  currentLesson = id;
+  const L = LESSONS[id];
+  if (!L) return;
+  document.getElementById('panel-title').textContent = L.title;
+  buildLesson(L);
+  buildQuiz(L.quiz);
+  buildResources(L.resources);
+  switchTab('lesson');
+  document.getElementById('lesson-panel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeLesson() {
+  document.getElementById('lesson-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.panel-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['lesson','quiz','resources'][i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function buildLesson(L) {
+  let html = `<p class="lesson-intro">${L.intro}</p>`;
+  L.sections.forEach(s => {
+    html += `<div class="lesson-section"><h3>${s.h3}</h3><p>${s.p}</p>`;
+    if (s.code) html += `<pre><code>${s.code}</code></pre>`;
+    html += `</div>`;
+  });
+  if (L.tip) html += `<div class="tip-box"><strong>💡 Tip:</strong> ${L.tip}</div>`;
+  document.getElementById('tab-lesson').innerHTML = html;
+}
+
+function buildQuiz(quiz) {
+  if (!quiz) { document.getElementById('tab-quiz').innerHTML = '<p style="color:var(--muted);font-size:14px;padding:20px 0">Quiz nuk është disponueshëm për këtë temë.</p>'; return; }
+  const letters = ['A','B','C','D'];
+  let opts = quiz.opts.map((o,i) => `
+    <button class="quiz-option" onclick="answerQuiz(${i}, ${quiz.correct}, '${quiz.explanation.replace(/'/g,"\\'")}')">
+      <span class="quiz-letter">${letters[i]}</span>${o}
+    </button>`).join('');
+  document.getElementById('tab-quiz').innerHTML = `
+    <p class="quiz-question">${quiz.q}</p>
+    <div class="quiz-options" id="quiz-opts">${opts}</div>
+    <div class="quiz-result" id="quiz-result"></div>
+    <button class="quiz-next-btn" id="quiz-next" onclick="closeLesson()">✓ E kuptova, vazhdo</button>`;
+}
+
+function answerQuiz(idx, correct, explanation) {
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+  opts[idx].classList.add(idx === correct ? 'correct' : 'wrong');
+  if (idx !== correct) opts[correct].classList.add('correct');
+  const result = document.getElementById('quiz-result');
+  result.className = 'quiz-result show ' + (idx === correct ? 'ok' : 'fail');
+  result.innerHTML = (idx === correct ? '✓ Saktë! ' : '✗ Jo saktë. ') + explanation;
+  document.getElementById('quiz-next').classList.add('show');
+}
+
+function buildResources(res) {
+  if (!res || !res.length) { document.getElementById('tab-resources').innerHTML = '<p style="color:var(--muted)">Nuk ka resurse.</p>'; return; }
+  let html = res.map(r => `
+    <div class="resource-item">
+      <div class="resource-icon" style="background:rgba(255,255,255,0.05)">${r.icon}</div>
+      <div>
+        <div class="resource-name">${r.name}</div>
+        <div class="resource-desc">${r.desc}</div>
+        <a class="resource-link" href="${r.url}" target="_blank">→ Hap lidhjen</a>
+      </div>
+    </div>`).join('');
+  document.getElementById('tab-resources').innerHTML = html;
+}
+
+init();
+</script>
+</body>
+</html>
