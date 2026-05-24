@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #161d2e;
+    --border: #1e2d45;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    padding: 40px 0 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(56,189,248,0.3);
+  }
+
+  .logo h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .score-badge {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .score-badge .score-num {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 6px;
+  }
+
+  .tab {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .tab:hover { color: var(--text); background: var(--border); }
+  .tab.active { background: var(--accent); color: #000; }
+
+  /* Question card */
+  .question-section { display: none; }
+  .question-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .q-number {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+
+  .q-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .q-desc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #cbd5e1;
+  }
+
+  .q-desc strong { color: var(--accent); }
+
+  /* Example box */
+  .example-box {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .example-box .label {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+
+  /* Code explanation area */
+  .explanation {
+    margin-bottom: 20px;
+  }
+
+  .explanation h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent2);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .explanation h3::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .method-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+  }
+
+  .method-card:hover { border-color: var(--accent2); }
+
+  .method-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--yellow);
+    margin-bottom: 4px;
+  }
+
+  .method-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+
+  /* Code editor area */
+  .editor-wrapper {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .editor-bar {
+    background: #1a2236;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .editor-dots { display: flex; gap: 6px; }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .dot-r { background: #ef4444; }
+  .dot-y { background: #f59e0b; }
+  .dot-g { background: #22c55e; }
+
+  .editor-filename {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  textarea.code-input {
+    width: 100%;
+    background: #0d1117;
+    color: #c9d1d9;
+    border: none;
+    outline: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    padding: 20px;
+    resize: vertical;
+    min-height: 180px;
+    tab-size: 4;
+  }
+
+  /* Output */
+  .output-area {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    min-height: 60px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .output-label {
+    position: absolute;
+    top: -10px; left: 14px;
+    background: #0d1117;
+    padding: 0 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .output-text { white-space: pre-wrap; }
+  .output-text.success { color: var(--green); }
+  .output-text.error   { color: var(--red); }
+  .output-text.waiting { color: var(--muted); font-style: italic; }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-run {
+    background: var(--green);
+    color: #000;
+    box-shadow: 0 0 20px rgba(74,222,128,0.2);
+  }
+  .btn-run:hover { box-shadow: 0 0 28px rgba(74,222,128,0.4); transform: translateY(-1px); }
+
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-reset:hover { border-color: var(--muted); color: var(--text); }
+
+  .btn-hint {
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+  }
+  .btn-hint:hover { background: rgba(129,140,248,0.1); }
+
+  /* Hint box */
+  .hint-box {
+    display: none;
+    background: rgba(129,140,248,0.07);
+    border: 1px solid var(--accent2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #a5b4fc;
+    margin-top: 12px;
+    line-height: 1.6;
+    font-family: var(--mono);
+  }
+  .hint-box.visible { display: block; animation: fadeIn 0.2s; }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 4px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-bar-outer {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 50px;
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 50px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    padding-right: 8px;
+  }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  /* Skulimi (Pyetjet grouped) */
+  .sets-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .set-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+    padding: 24px 0;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">Py</div>
+        <h1>Python <span>Assessment</span></h1>
+      </div>
+      <div class="score-badge">
+        ✓ Solved: <span class="score-num" id="solvedCount">0</span> / <span id="totalCount">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+    </div>
+    <span class="progress-label" id="progressLabel">0%</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabsContainer"></div>
+
+  <!-- Sections -->
+  <div id="sectionsContainer"></div>
+
+  <footer>Python Assessment &nbsp;·&nbsp; Shkruaj kodin &nbsp;·&nbsp; Mëso &nbsp;·&nbsp; Rritu 🚀</footer>
+</div>
+
+<script>
+// ─── QUESTION DATA ─────────────────────────────────────────────────────────
+const questions = [
+  {
+    id: 'q1a',
+    set: 'Set A',
+    title: 'Reverse Words',
+    description: 'Shkruaj një funksion <strong>reverse_words(text)</strong> që rikthen rendin e fjalëve në një fjali dhe heq hapësirat e tepërta.',
+    example: 'reverse_words(" Python is fun ") → "fun is Python"',
+    methods: [
+      { name: '.strip()', desc: 'Heq hapësirat (spaces) nga fillimi dhe fundi i stringut.' },
+      { name: '.split()', desc: 'Ndan tekstin në listë sipas hapësirave (space). split() pa argument ndan nga çdo hapësirë.' },
+      { name: '[::-1]', desc: 'Slicing me hap -1 – kthen listën (ose stringun) mbrapsht.' },
+      { name: '" ".join(list)', desc: 'Bashkon elementet e listës në një string, me space midis tyre.' },
+    ],
+    starter: `def reverse_words(text):
+    # shkruaj kodin këtu
+    pass
+
+print(reverse_words(' Python is fun '))`,
+    hint: 'Provoje: text.strip() pastaj .split()[::-1] dhe bashkoji me " ".join(...)',
+    solved: false,
+  },
+  {
+    id: 'q2a',
+    set: 'Set A',
+    title: 'Longest Word',
+    description: 'Shkruaj funksionin <strong>longest_word(sentence)</strong> që kthen fjalën më të gjatë në fjali. Nëse disa fjalë kanë të njëjtën gjatësi, kthe të parën. Injoro pikësimet.',
+    example: 'longest_word("Python is powerful!") → "powerful"',
+    methods: [
+      { name: '.isalnum()', desc: 'Kthen True nëse karakteri është shkronjë ose numër (jo pikësim).' },
+      { name: '.isspace()', desc: 'Kthen True nëse karakteri është hapësirë/tab/newline.' },
+      { name: 'len(word)', desc: 'Kthen gjatësinë (numrin e karaktereve) të stringut.' },
+      { name: 'for word in words:', desc: 'Kalon nëpër çdo element të listës – loop bazik.' },
+    ],
+    starter: `def longest_word(sentence):
+    # hiq pikësimet dhe gjej fjalën më të gjatë
+    pass
+
+print(longest_word('Python is powerful!'))`,
+    hint: 'Fillo me heqjen e pikësimeve: "".join(ch if ch.isalnum() or ch.isspace() else "" for ch in sentence)',
+    solved: false,
+  },
+  {
+    id: 'q3a',
+    set: 'Set A',
+    title: 'Unique Elements',
+    description: 'Me <strong>një rresht kodi</strong>, largo vlerat e dyfishta nga lista duke ruajtur rendin origjinal.',
+    example: '[1, 2, 2, 3, 1, 4] → [1, 2, 3, 4]',
+    methods: [
+      { name: 'dict.fromkeys(lst)', desc: 'Krijon dict ku çelësat janë elementet e listës – automatikisht heq duplikatet dhe ruan rendin (Python 3.7+).' },
+      { name: 'list(...)', desc: 'Konverton çdo iterable (dict, set, tuple) në listë.' },
+    ],
+    starter: `def unique_elements(lst):
+    # një rresht kodi – largo duplikatet duke ruajtur rendin
+    pass
+
+print(unique_elements([1, 2, 2, 3, 1, 4]))`,
+    hint: 'list(dict.fromkeys(lst)) bën gjithçka në një hap!',
+    solved: false,
+  },
+  {
+    id: 'q4a',
+    set: 'Set A',
+    title: 'Boolean Logic – Can Register',
+    description: 'Shkruaj funksionin <strong>can_register(age, has_id, is_banned)</strong> që kthen True nëse personi mund të regjistrohet.<br><br>Rregullat: mosha ≥ 18, ka ID të vlefshme, dhe <strong>nuk</strong> është i bllokuar.',
+    example: 'can_register(20, True, False) → True<br>can_register(17, True, False) → False',
+    methods: [
+      { name: 'and', desc: 'Operatori logjik AND – të dyja kushtet duhet të jenë True.' },
+      { name: 'not', desc: 'Operatori logjik NOT – kthen të kundërtën e vlerës boolean.' },
+      { name: 'or', desc: 'Operatori logjik OR – mjafton njëri kusht të jetë True.' },
+      { name: 'age >= 18', desc: 'Operatori krahasimi – kontrollon nëse mosha është 18 ose më e madhe.' },
+    ],
+    starter: `def can_register(age, has_id, is_banned):
+    # kthe True ose False bazuar në kushtet
+    pass
+
+print(can_register(20, True, False))   # True
+print(can_register(17, True, False))   # False`,
+    hint: 'return age >= 18 and has_id and not is_banned – e gjitha në një rresht!',
+    solved: false,
+  },
+  {
+    id: 'q5a',
+    set: 'Set A',
+    title: 'Make Counter (Global Scope)',
+    description: 'Shkruaj funksionin <strong>make_counter()</strong> që përdor variablen globale <strong>count</strong> për të gjurmuar sa herë është thirrur funksioni. Duhet të kthejë numrin aktual çdo herë.',
+    example: '1st call → 1, 2nd call → 2, 3rd call → 3',
+    methods: [
+      { name: 'global count', desc: 'I tregon Python-it të përdorë variablen "count" nga scope global, jo një variabël lokale të re.' },
+      { name: 'count += 1', desc: 'Shkurtesë për count = count + 1 – rrit vlerën me 1.' },
+      { name: 'return count', desc: 'Kthen vlerën aktuale të numëruesit pas rritjes.' },
+    ],
+    starter: `count = 0
+
+def make_counter():
+    global count
+    # rrit count me 1 dhe ktheje
+    pass
+
+print('1st call ->', make_counter())
+print('2nd call ->', make_counter())
+print('3rd call ->', make_counter())`,
+    hint: 'Brenda funksionit: count += 1, pastaj return count',
+    solved: false,
+  },
+  {
+    id: 'q1b',
+    set: 'Set B',
+    title: 'Sum Digits',
+    description: 'Shkruaj funksionin <strong>sum_digits(number)</strong> që kthen shumën e të gjitha shifrave të numrit. Nëse numri është negativ, injoro shenjën.',
+    example: 'sum_digits(1234) → 10 &nbsp;|&nbsp; sum_digits(-205) → 7',
+    methods: [
+      { name: 'abs(number)', desc: 'Kthen vlerën absolute – heq shenjën negative: abs(-5) = 5.' },
+      { name: 'str(number)', desc: 'Konverton numrin në string, kështu mund ta iteron shifër pas shifrë.' },
+      { name: 'int(char)', desc: 'Konverton karakterin (p.sh. "3") mbrapsht në numër të plotë.' },
+      { name: 'for digit in str(n):', desc: 'Loop nëpër secilën shifër të numrit si karakter.' },
+    ],
+    starter: `def sum_digits(number):
+    # kthe shumën e shifrave (injoro shenjën negative)
+    pass
+
+print(sum_digits(1234))   # 10
+print(sum_digits(-205))   # 7`,
+    hint: 'number = abs(number), pastaj for digit in str(number): total += int(digit)',
+    solved: false,
+  },
+  {
+    id: 'q2b',
+    set: 'Set B',
+    title: 'Remove Duplicates from String',
+    description: 'Shkruaj funksionin <strong>remove_duplicates(text)</strong> që kthen stringun e ri me karaktere të dyfishta të hequra, duke ruajtur shfaqjen e parë.',
+    example: 'remove_duplicates("banana") → "ban"',
+    methods: [
+      { name: 'dict.fromkeys(text)', desc: 'Funksionon edhe me stringun – krijon dict ku çelësat janë karakteret, automatikisht heq duplikatet.' },
+      { name: '"".join(...)', desc: 'Bashkon karakteret pa asgjë midis tyre (string bosh si separator).' },
+    ],
+    starter: `def remove_duplicates(text):
+    # kthe stringun pa karaktere të dyfishta
+    pass
+
+print(remove_duplicates('banana'))   # ban`,
+    hint: '"".join(dict.fromkeys(text)) – i njëjti truk si me listën!',
+    solved: false,
+  },
+  {
+    id: 'q3b',
+    set: 'Set B',
+    title: 'Numbers Divisible by 4 or 6',
+    description: 'Me <strong>një list comprehension</strong>, krijo listën e numrave nga 1 deri 100 (duke përfshirë 100) që janë të pjesëtueshëm me 4 <strong>ose</strong> me 6.',
+    example: '[4, 6, 8, 12, 16, 18, 20, 24, ...]',
+    methods: [
+      { name: 'range(1, 101)', desc: 'Gjeneron numrat 1 deri 100 – 101 nuk përfshihet.' },
+      { name: 'n % 4 == 0', desc: 'Operatori modulo % – kthen mbetjen. Nëse mbetja = 0, numri është i pjesëtueshëm.' },
+      { name: 'or', desc: 'Kushti with OR – numri duhet të plotësojë të paktën njërin kusht.' },
+      { name: '[n for n in ...]', desc: 'List comprehension – krijon listën me një rresht kodi.' },
+    ],
+    starter: `# shkruaj list comprehension-in këtu
+divisible_numbers = []  # zëvendëso me list comprehension
+
+print(divisible_numbers)`,
+    hint: '[n for n in range(1, 101) if n % 4 == 0 or n % 6 == 0]',
+    solved: false,
+  },
+  {
+    id: 'q4b',
+    set: 'Set B',
+    title: 'Count Positive and Negative',
+    description: 'Shkruaj funksionin <strong>count_numbers(numbers)</strong> që merr listën e numrave dhe kthen dictionary me numërimin e pozitivëve, negativëve, dhe zeros.',
+    example: 'count_numbers([1, -2, 0, 5, -7]) → {\'positive\': 2, \'negative\': 2, \'zero\': 1}',
+    methods: [
+      { name: 'sum(1 for n in lst if ...)', desc: 'Gjeneron 1 për çdo element që plotëson kushtin dhe i mbledh – mënyrë e kompaktë për numërim.' },
+      { name: 'n > 0', desc: 'Kontrollon nëse n është pozitiv (pa zero).' },
+      { name: 'n < 0', desc: 'Kontrollon nëse n është negativ.' },
+      { name: 'n == 0', desc: 'Kontrollon nëse n është zero.' },
+    ],
+    starter: `def count_numbers(numbers):
+    # kthe dictionary me 'positive', 'negative', 'zero'
+    pass
+
+print(count_numbers([1, -2, 0, 5, -7]))`,
+    hint: "return {'positive': sum(1 for n in numbers if n > 0), ...}",
+    solved: false,
+  },
+  {
+    id: 'q5b',
+    set: 'Set B',
+    title: 'Second Highest Score',
+    description: 'Shkruaj funksionin <strong>second_highest(scores)</strong> që kthen rezultatin e dytë më të lartë unik nga lista. Nëse nuk ka rezultat të dytë, kthe <strong>"not enough scores"</strong>.',
+    example: 'second_highest([90, 80, 90, 70]) → 80',
+    methods: [
+      { name: 'set(scores)', desc: 'Konverton listën në bashkësi (set) – automatikisht heq duplikatet.' },
+      { name: 'len(unique)', desc: 'Kontrollo nëse ka të paktën 2 vlera unike.' },
+      { name: '.sort()', desc: 'Rendit listën në vend (ascending). Pas sortimit, i fundit [-1] është maksimumi, i dyta nga fundi [-2] është e dyta.' },
+      { name: 'list[-2]', desc: 'Indeximi negativ: -1 = i fundit, -2 = i dyti nga fundi.' },
+    ],
+    starter: `def second_highest(scores):
+    # gjej rezultatin e dytë më të lartë unik
+    pass
+
+print(second_highest([90, 80, 90, 70]))   # 80`,
+    hint: 'unique = sorted(set(scores)); return unique[-2] nëse len >= 2',
+    solved: false,
+  },
+  {
+    id: 'q1c',
+    set: 'Set C',
+    title: 'Check Palindrome',
+    description: 'Shkruaj funksionin <strong>is_palindrome(text)</strong> që kthen True nëse stringu i dhënë është palindrom. Injoro hapësirat, pikësimet, dhe shkronjat e mëdha.',
+    example: 'is_palindrome("A man a plan a canal Panama") → True',
+    methods: [
+      { name: '.isalnum()', desc: 'Kthen True nëse karakteri është shkronjë ose numër – heq pikësimet dhe hapësirat.' },
+      { name: '.lower()', desc: 'Konverton të gjitha shkronjat në të vogla – bën krahasim case-insensitive.' },
+      { name: '"".join(iterable)', desc: 'Bashkon karakteret nga iterable në string të vetëm.' },
+      { name: 'string[::-1]', desc: 'Kthen stringun mbrapsht. Palindromi == stringu i kthyer mbrapsht.' },
+    ],
+    starter: `def is_palindrome(text):
+    # pastro tekstin dhe kontrollo nëse lexohet njëjtë nga të dyja anët
+    pass
+
+print(is_palindrome('A man a plan a canal Panama'))   # True`,
+    hint: 'cleaned = "".join(c.lower() for c in text if c.isalnum()); return cleaned == cleaned[::-1]',
+    solved: false,
+  },
+  {
+    id: 'q3c',
+    set: 'Set C',
+    title: 'Filter Numbers (Divisible by 3)',
+    description: 'Me <strong>një rresht list comprehension</strong>, krijo listën e numrave nga 1 deri 100 (duke përfshirë 100) që janë të pjesëtueshëm me 3 dhe <strong>jo</strong> me 5.',
+    example: '[3, 6, 9, 12, 18, 21, ...]',
+    methods: [
+      { name: 'n % 3 == 0', desc: 'Kontrollon pjesëtueshmërinë me 3.' },
+      { name: 'n % 5 != 0', desc: 'Sigurohet që numri NUK është i pjesëtueshëm me 5.' },
+      { name: 'and', desc: 'Të dy kushtet duhet të jenë True njëkohësisht.' },
+    ],
+    starter: `# list comprehension: numra nga 1-100, pjesëtueshëm me 3, jo me 5
+numbers = []
+
+print(numbers)`,
+    hint: '[n for n in range(1, 101) if n % 3 == 0 and n % 5 != 0]',
+    solved: false,
+  },
+  {
+    id: 'q4c',
+    set: 'Set C',
+    title: 'Compare Lists',
+    description: 'Shkruaj funksionin <strong>compare_lists(list1, list2)</strong> që kthen dictionary me tre çelësa: elementet e përbashkëta, elementet vetëm në listën e parë, dhe elementet vetëm në listën e dytë.',
+    example: "compare_lists([1,2,3,4], [3,4,5,6]) → {'common': {3,4}, 'unique_to_list1': {1,2}, 'unique_to_list2': {5,6}}",
+    methods: [
+      { name: 'set(list)', desc: 'Konverton listën në set – hap i domosdoshëm për operacionet e bashkësive.' },
+      { name: 'set1 & set2', desc: 'Prerja (intersection) – elementet e përbashkëta për të dy bashkësitë.' },
+      { name: 'set1 - set2', desc: 'Diferenca – elementet që janë vetëm në set1 (jo në set2).' },
+      { name: 'set2 - set1', desc: 'Diferenca e kundërt – elementet vetëm në set2.' },
+    ],
+    starter: `def compare_lists(list1, list2):
+    # përdor operacionet e sets
+    pass
+
+print(compare_lists([1, 2, 3, 4], [3, 4, 5, 6]))`,
+    hint: "set1 = set(list1); set2 = set(list2); return {'common': set1 & set2, ...}",
+    solved: false,
+  },
+  {
+    id: 'q5c',
+    set: 'Set C',
+    title: 'Average with *args',
+    description: 'Shkruaj funksionin <strong>average(*args)</strong> që pranon çdo numër argumentesh numerikë dhe kthen mesataren e tyre të rrumbullakosur në 2 decimale. Nëse nuk ka argumente, kthe <strong>"no values provided"</strong>.',
+    example: 'average(10, 20, 30) → 20.0 &nbsp;|&nbsp; average() → "no values provided"',
+    methods: [
+      { name: '*args', desc: 'Mbledh çdo numër argumentesh pozicionale në tuple – numri i argumenteve nuk është i fiksuar.' },
+      { name: 'if not args:', desc: 'Kontrollon nëse tuple-i args është bosh (nuk u dha asnjë argument).' },
+      { name: 'sum(args)', desc: 'Mbledh të gjitha vlerat e tuple-it.' },
+      { name: 'round(x, 2)', desc: 'Rrumbullakon numrin në 2 vende decimale.' },
+    ],
+    starter: `def average(*args):
+    # trajto rastin e args bosh, pastaj llogarit mesataren
+    pass
+
+print(average(10, 20, 30))   # 20.0
+print(average())              # no values provided`,
+    hint: "if not args: return 'no values provided'; return round(sum(args)/len(args), 2)",
+    solved: false,
+  },
+  {
+    id: 'q1d',
+    set: 'Set D',
+    title: 'Split Bill',
+    description: 'Shkruaj funksionin <strong>split_bill(total, tip_percent, people)</strong> që llogarit shumën e bakshishit, totalin e madh, dhe sa duhet të paguajë secili person. Kthe si dictionary. Nëse <em>people < 1</em> ose ndonjë vlerë negative, kthe <strong>"Invalid Input"</strong>.',
+    example: "split_bill(100, 15, 4) → {'tip': 15.0, 'grand_total': 115.0, 'per_person': 28.75}",
+    methods: [
+      { name: 'round(x, 2)', desc: 'Rrumbullakon në 2 decimale – e rëndësishme për vlerat monetare.' },
+      { name: 'tip_percent / 100', desc: 'Konverton përqindjen në decimal: 15% = 0.15.' },
+      { name: 'total * percent', desc: 'Llogarit bakshishin: shumon totalin me përqindjen si decimal.' },
+      { name: 'if ... or ... or ...:', desc: 'Kontrollon kushte të shumta invaliditeti njëkohësisht.' },
+    ],
+    starter: `def split_bill(total, tip_percent, people):
+    # valido hyrjet, pastaj llogarit
+    pass
+
+print(split_bill(100, 15, 4))`,
+    hint: "tip = round(total * tip_percent/100, 2); grand = round(total + tip, 2); per = round(grand/people, 2)",
+    solved: false,
+  },
+  {
+    id: 'q2d',
+    set: 'Set D',
+    title: 'Unique in Order',
+    description: 'Shkruaj funksionin <strong>unique_in_order(items)</strong> që merr listën dhe kthen listën e re me elementet unike, duke ruajtur rendin e shfaqjes së parë.',
+    example: 'unique_in_order([1, 2, 2, 3, 1, 4]) → [1, 2, 3, 4]',
+    methods: [
+      { name: 'if item not in result:', desc: 'Kontrollon nëse elementi NUK ekziston ende në listën e rezultatit.' },
+      { name: 'result.append(item)', desc: 'Shton elementin në fund të listës.' },
+      { name: 'for item in items:', desc: 'Loop nëpër çdo element të listës hyrëse.' },
+    ],
+    starter: `def unique_in_order(items):
+    result = []
+    # kalon nëpër items dhe shton vetëm ato që nuk janë ende aty
+    pass
+
+print(unique_in_order([1, 2, 2, 3, 1, 4]))   # [1, 2, 3, 4]`,
+    hint: "for item in items: if item not in result: result.append(item); return result",
+    solved: false,
+  },
+  {
+    id: 'q3d',
+    set: 'Set D',
+    title: 'Filter 4-Letter Words',
+    description: 'Me <strong>një list comprehension</strong>, krijo listën e re që përmban të gjitha fjalët nga lista origjinale me saktësisht 4 karaktere.',
+    example: '["cats","dog","book","desk","tree","computer"] → ["cats","book","desk","tree"]',
+    methods: [
+      { name: 'len(word) == 4', desc: 'Kontrollon nëse gjatësia e fjalës është saktësisht 4 karaktere.' },
+      { name: '[w for w in lst if ...]', desc: 'List comprehension me kusht filter.' },
+    ],
+    starter: `original_list = ["cats", "dog", "book", "desk", "tree", "computer"]
+# list comprehension këtu
+word_list = []
+
+print(word_list)`,
+    hint: '[word for word in original_list if len(word) == 4]',
+    solved: false,
+  },
+  {
+    id: 'q1e',
+    set: 'Set E',
+    title: 'Check Anagram',
+    description: 'Shkruaj funksionin <strong>is_anagram(word1, word2)</strong> që kthen True nëse dy fjalët janë anagrama, False ndryshe. Injoro hapësirat dhe shkronjat e mëdha.',
+    example: 'is_anagram("listen", "silent") → True',
+    methods: [
+      { name: '.replace(" ", "")', desc: 'Heq të gjitha hapësirat nga stringu.' },
+      { name: '.lower()', desc: 'Konverton të gjitha shkronjat në të vogla.' },
+      { name: 'sorted(string)', desc: 'Rendit karakteret alfabetikisht – dy anagramat kanë karakteret e njëjta, vetëm të renditura ndryshe.' },
+    ],
+    starter: `def is_anagram(word1, word2):
+    # pastro dhe krahaso fjalët e renditura
+    pass
+
+print(is_anagram('listen', 'silent'))   # True
+print(is_anagram('hello', 'world'))     # False`,
+    hint: "w1 = word1.replace(' ','').lower(); w2 = word2.replace(' ','').lower(); return sorted(w1) == sorted(w2)",
+    solved: false,
+  },
+  {
+    id: 'q2e',
+    set: 'Set E',
+    title: 'Find Missing Number',
+    description: 'Shkruaj funksionin <strong>missing_number(numbers)</strong> që merr listën me numra nga 1 deri n ku mungon një numër dhe e kthen atë.',
+    example: 'missing_number([1, 2, 4, 5]) → 3',
+    methods: [
+      { name: 'n = len(numbers) + 1', desc: 'Numri total i elementeve duhet të ishte n, por mungon 1, prandaj len + 1.' },
+      { name: 'n * (n + 1) // 2', desc: 'Formula e Gaussit për shumën 1+2+...+n – llogaritet pa loop.' },
+      { name: 'sum(numbers)', desc: 'Mbledh të gjithë elementet aktualë – diferenca nga shuma e pritur është numri që mungon.' },
+    ],
+    starter: `def missing_number(numbers):
+    # përdor formulën e Gaussit
+    pass
+
+print(missing_number([1, 2, 4, 5]))   # 3`,
+    hint: "n = len(numbers)+1; return n*(n+1)//2 - sum(numbers)",
+    solved: false,
+  },
+  {
+    id: 'q3e',
+    set: 'Set E',
+    title: 'Odd Cubes',
+    description: 'Me <strong>një list comprehension</strong>, krijo listën e kubeve të të gjitha numrave tek nga 1 deri 30 (duke përfshirë 30).',
+    example: '[1, 27, 125, 343, ...]',
+    methods: [
+      { name: 'x % 2 != 0', desc: 'Kontrollon nëse numri është tek (mbetja me 2 nuk është 0).' },
+      { name: 'x ** 3', desc: 'Llogarit kubin e numrit: x ngritur në fuqinë 3.' },
+      { name: 'range(1, 31)', desc: 'Numrat nga 1 deri 30 – 31 nuk përfshihet.' },
+    ],
+    starter: `# list comprehension: kubet e numrave tek nga 1-30
+odd_cubes = []
+
+print(odd_cubes)`,
+    hint: '[x**3 for x in range(1, 31) if x % 2 != 0]',
+    solved: false,
+  },
+  {
+    id: 'q4e',
+    set: 'Set E',
+    title: 'Group Words by Length',
+    description: 'Shkruaj funksionin <strong>group_by_length(words)</strong> që kthen dictionary ku çelësat janë gjatësia e fjalëve dhe vlerat janë listet e fjalëve me atë gjatësi.',
+    example: "group_by_length(['hi','hello','hey','world']) → {2: ['hi'], 5: ['hello','world'], 3: ['hey']}",
+    methods: [
+      { name: 'if length not in result:', desc: 'Kontrollon nëse çelësi nuk ekziston ende në dictionary – nëse jo, krijo listë të re.' },
+      { name: 'result[length] = []', desc: 'Inicializon listën e re për atë gjatësi.' },
+      { name: 'result[length].append(word)', desc: 'Shton fjalën në listën e gjatësisë përkatëse.' },
+    ],
+    starter: `def group_by_length(words):
+    result = {}
+    for word in words:
+        length = len(word)
+        # shto logjikën e grupimit
+        pass
+    return result
+
+print(group_by_length(['hi', 'hello', 'hey', 'world', 'ok']))`,
+    hint: "if length not in result: result[length] = []; result[length].append(word)",
+    solved: false,
+  },
+  {
+    id: 'q5e',
+    set: 'Set E',
+    title: 'Password Strength',
+    description: 'Shkruaj funksionin <strong>is_strong_password(password)</strong> që kthen True nëse fjalëkalimi ka të paktën 8 karaktere, një shkronjë të madhe, një shkronjë të vogël, dhe një numër.',
+    example: 'is_strong_password("Python3x") → True &nbsp;|&nbsp; is_strong_password("python") → False',
+    methods: [
+      { name: 'len(password) < 8', desc: 'Kontrollon nëse fjalëkalimi është shumë i shkurtër.' },
+      { name: '.isupper()', desc: 'Kthen True nëse karakteri është shkronjë e madhe.' },
+      { name: '.islower()', desc: 'Kthen True nëse karakteri është shkronjë e vogël.' },
+      { name: '.isdigit()', desc: 'Kthen True nëse karakteri është numër (0-9).' },
+      { name: 'any(c.isupper() for c in pw)', desc: 'Alternativë e kompaktë – kthen True nëse të paktën njëri karakter plotëson kushtin.' },
+    ],
+    starter: `def is_strong_password(password):
+    # kontrollo gjatësinë dhe karakteret
+    pass
+
+print(is_strong_password('Python3x'))   # True
+print(is_strong_password('python'))     # False`,
+    hint: "Kontrollo len >= 8, pastaj loop nëpër karaktere: if char.isupper(): has_upper = True ...",
+    solved: false,
+  },
+];
+
+// ─── BUILD UI ───────────────────────────────────────────────────────────────
+const sets = [...new Set(questions.map(q => q.set))];
+const tabsContainer = document.getElementById('tabsContainer');
+const sectionsContainer = document.getElementById('sectionsContainer');
+
+document.getElementById('totalCount').textContent = questions.length;
+
+sets.forEach((set, si) => {
+  // Tab
+  const tab = document.createElement('button');
+  tab.className = 'tab' + (si === 0 ? ' active' : '');
+  tab.textContent = set;
+  tab.dataset.set = set;
+  tab.onclick = () => switchTab(set);
+  tabsContainer.appendChild(tab);
+
+  // Section
+  const sec = document.createElement('div');
+  sec.className = 'question-section' + (si === 0 ? ' active' : '');
+  sec.id = 'section-' + set.replace(' ', '-');
+
+  const setQs = questions.filter(q => q.set === set);
+  setQs.forEach((q, qi) => {
+    sec.appendChild(buildCard(q, qi + 1));
+    if (qi < setQs.length - 1) {
+      const hr = document.createElement('hr');
+      hr.className = 'divider';
+      sec.appendChild(hr);
+    }
+  });
+
+  sectionsContainer.appendChild(sec);
+});
+
+function switchTab(set) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.set === set));
+  document.querySelectorAll('.question-section').forEach(s => {
+    s.classList.toggle('active', s.id === 'section-' + set.replace(' ', '-'));
+  });
+}
+
+function buildCard(q, num) {
+  const div = document.createElement('div');
+
+  const methodCards = q.methods.map(m => `
+    <div class="method-card">
+      <div class="method-name">${m.name}</div>
+      <div class="method-desc">${m.desc}</div>
+    </div>
+  `).join('');
+
+  div.innerHTML = `
+    <div class="q-header">
+      <span class="q-number">Q${num}</span>
+      <h2 class="q-title">${q.title}</h2>
+    </div>
+    <div class="q-desc">${q.description}</div>
+    <div class="example-box">
+      <span class="label">Shembull</span>
+      <span>${q.example}</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="explanation">
+      <h3>🔧 Metodat & Konceptet</h3>
+      <div class="method-grid">${methodCards}</div>
+    </div>
+
+    <div class="editor-wrapper">
+      <div class="editor-bar">
+        <div class="editor-dots">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+        </div>
+        <span class="editor-filename">${q.id}.py</span>
+        <span></span>
+      </div>
+      <textarea class="code-input" id="code-${q.id}" spellcheck="false">${q.starter}</textarea>
+    </div>
+
+    <div class="output-area" id="out-${q.id}">
+      <span class="output-label">OUTPUT</span>
+      <div class="output-text waiting">▶ Shtyp "Run" për të ekzekutuar kodin...</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-run" onclick="runCode('${q.id}')">▶ Run</button>
+      <button class="btn btn-reset" onclick="resetCode('${q.id}')">↺ Reset</button>
+      <button class="btn btn-hint" onclick="toggleHint('${q.id}')">💡 Hint</button>
+    </div>
+    <div class="hint-box" id="hint-${q.id}">${q.hint}</div>
+  `;
+
+  // Tab handler for indentation
+  setTimeout(() => {
+    const ta = document.getElementById('code-' + q.id);
+    if (ta) {
+      ta.addEventListener('keydown', e => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const s = ta.selectionStart, en = ta.selectionEnd;
+          ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(en);
+          ta.selectionStart = ta.selectionEnd = s + 4;
+        }
+      });
+    }
+  }, 0);
+
+  return div;
+}
+
+// ─── PYODIDE RUNTIME ────────────────────────────────────────────────────────
+let pyodide = null;
+let pyodideLoading = false;
+let pyodideReady = false;
+
+async function loadPyodideRuntime() {
+  if (pyodideReady || pyodideLoading) return;
+  pyodideLoading = true;
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
+    document.head.appendChild(script);
+    await new Promise(r => script.onload = r);
+    pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/' });
+    pyodideReady = true;
+  } catch(e) {
+    console.error('Pyodide load failed', e);
+  }
+}
+
+loadPyodideRuntime();
+
+async function runCode(id) {
+  const codeEl = document.getElementById('code-' + id);
+  const outEl  = document.getElementById('out-' + id);
+  const code   = codeEl.value;
+
+  outEl.querySelector('.output-text').className = 'output-text waiting';
+  outEl.querySelector('.output-text').textContent = '⏳ Duke ekzekutuar...';
+
+  if (!pyodideReady) {
+    outEl.querySelector('.output-text').textContent = '⏳ Duke ngarkuar Python... provo sërish pas 3 sekondash.';
+    await loadPyodideRuntime();
+    return;
+  }
+
+  try {
+    let output = [];
+    pyodide.setStdout({ batched: s => output.push(s) });
+    pyodide.setStderr({ batched: s => output.push('ERR: ' + s) });
+    await pyodide.runPythonAsync(code);
+    const result = output.join('\n');
+    const div = outEl.querySelector('.output-text');
+    div.className = 'output-text success';
+    div.textContent = result || '(pa output)';
+
+    // Mark as solved if ran successfully
+    const q = questions.find(q => q.id === id);
+    if (q && !q.solved) {
+      q.solved = true;
+      updateProgress();
+    }
+  } catch(err) {
+    const div = outEl.querySelector('.output-text');
+    div.className = 'output-text error';
+    div.textContent = '❌ ' + err.message;
+  }
+}
+
+function resetCode(id) {
+  const q = questions.find(q => q.id === id);
+  if (!q) return;
+  document.getElementById('code-' + id).value = q.starter;
+  const outEl = document.getElementById('out-' + id);
+  outEl.querySelector('.output-text').className = 'output-text waiting';
+  outEl.querySelector('.output-text').textContent = '▶ Shtyp "Run" për të ekzekutuar kodin...';
+}
+
+function toggleHint(id) {
+  const hint = document.getElementById('hint-' + id);
+  hint.classList.toggle('visible');
+}
+
+function updateProgress() {
+  const solved = questions.filter(q => q.solved).length;
+  const total  = questions.length;
+  const pct    = Math.round(solved / total * 100);
+  document.getElementById('solvedCount').textContent = solved;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = pct + '%';
+}
+</script>
+</body>
+</html>
