@@ -521,8 +521,7 @@ const questions = [
       { name: '" ".join(list)', desc: 'Bashkon elementet e listës në një string, me space midis tyre.' },
     ],
     starter: `def reverse_words(text):
-    # shkruaj kodin këtu
-    pass
+    return " ".join(text.strip().split()[::-1])
 
 print(reverse_words(' Python is fun '))`,
     hint: 'Provoje: text.strip() pastaj .split()[::-1] dhe bashkoji me " ".join(...)',
@@ -541,8 +540,18 @@ print(reverse_words(' Python is fun '))`,
       { name: 'for word in words:', desc: 'Kalon nëpër çdo element të listës – loop bazik.' },
     ],
     starter: `def longest_word(sentence):
-    # hiq pikësimet dhe gjej fjalën më të gjatë
-    pass
+    cleaned = "".join(
+        ch if ch.isalnum() or ch.isspace() else ""
+        for ch in sentence
+    )
+    words = cleaned.split()
+    if not words:
+        return ""
+    longest = words[0]
+    for word in words:
+        if len(word) > len(longest):
+            longest = word
+    return longest
 
 print(longest_word('Python is powerful!'))`,
     hint: 'Fillo me heqjen e pikësimeve: "".join(ch if ch.isalnum() or ch.isspace() else "" for ch in sentence)',
@@ -559,8 +568,7 @@ print(longest_word('Python is powerful!'))`,
       { name: 'list(...)', desc: 'Konverton çdo iterable (dict, set, tuple) në listë.' },
     ],
     starter: `def unique_elements(lst):
-    # një rresht kodi – largo duplikatet duke ruajtur rendin
-    pass
+    return list(dict.fromkeys(lst))
 
 print(unique_elements([1, 2, 2, 3, 1, 4]))`,
     hint: 'list(dict.fromkeys(lst)) bën gjithçka në një hap!',
@@ -579,8 +587,7 @@ print(unique_elements([1, 2, 2, 3, 1, 4]))`,
       { name: 'age >= 18', desc: 'Operatori krahasimi – kontrollon nëse mosha është 18 ose më e madhe.' },
     ],
     starter: `def can_register(age, has_id, is_banned):
-    # kthe True ose False bazuar në kushtet
-    pass
+    return age >= 18 and has_id and not is_banned
 
 print(can_register(20, True, False))   # True
 print(can_register(17, True, False))   # False`,
@@ -602,8 +609,8 @@ print(can_register(17, True, False))   # False`,
 
 def make_counter():
     global count
-    # rrit count me 1 dhe ktheje
-    pass
+    count += 1
+    return count
 
 print('1st call ->', make_counter())
 print('2nd call ->', make_counter())
@@ -624,8 +631,11 @@ print('3rd call ->', make_counter())`,
       { name: 'for digit in str(n):', desc: 'Loop nëpër secilën shifër të numrit si karakter.' },
     ],
     starter: `def sum_digits(number):
-    # kthe shumën e shifrave (injoro shenjën negative)
-    pass
+    number = abs(number)
+    total = 0
+    for digit in str(number):
+        total += int(digit)
+    return total
 
 print(sum_digits(1234))   # 10
 print(sum_digits(-205))   # 7`,
@@ -643,8 +653,7 @@ print(sum_digits(-205))   # 7`,
       { name: '"".join(...)', desc: 'Bashkon karakteret pa asgjë midis tyre (string bosh si separator).' },
     ],
     starter: `def remove_duplicates(text):
-    # kthe stringun pa karaktere të dyfishta
-    pass
+    return "".join(dict.fromkeys(text))
 
 print(remove_duplicates('banana'))   # ban`,
     hint: '"".join(dict.fromkeys(text)) – i njëjti truk si me listën!',
@@ -662,8 +671,7 @@ print(remove_duplicates('banana'))   # ban`,
       { name: 'or', desc: 'Kushti with OR – numri duhet të plotësojë të paktën njërin kusht.' },
       { name: '[n for n in ...]', desc: 'List comprehension – krijon listën me një rresht kodi.' },
     ],
-    starter: `# shkruaj list comprehension-in këtu
-divisible_numbers = []  # zëvendëso me list comprehension
+    starter: `divisible_numbers = [n for n in range(1, 101) if n % 4 == 0 or n % 6 == 0]
 
 print(divisible_numbers)`,
     hint: '[n for n in range(1, 101) if n % 4 == 0 or n % 6 == 0]',
@@ -682,8 +690,11 @@ print(divisible_numbers)`,
       { name: 'n == 0', desc: 'Kontrollon nëse n është zero.' },
     ],
     starter: `def count_numbers(numbers):
-    # kthe dictionary me 'positive', 'negative', 'zero'
-    pass
+    return {
+        'positive': sum(1 for n in numbers if n > 0),
+        'negative': sum(1 for n in numbers if n < 0),
+        'zero': sum(1 for n in numbers if n == 0)
+    }
 
 print(count_numbers([1, -2, 0, 5, -7]))`,
     hint: "return {'positive': sum(1 for n in numbers if n > 0), ...}",
@@ -702,8 +713,12 @@ print(count_numbers([1, -2, 0, 5, -7]))`,
       { name: 'list[-2]', desc: 'Indeximi negativ: -1 = i fundit, -2 = i dyti nga fundi.' },
     ],
     starter: `def second_highest(scores):
-    # gjej rezultatin e dytë më të lartë unik
-    pass
+    unique_scores = set(scores)
+    if len(unique_scores) < 2:
+        return 'not enough scores'
+    unique_list = list(unique_scores)
+    unique_list.sort()
+    return unique_list[-2]
 
 print(second_highest([90, 80, 90, 70]))   # 80`,
     hint: 'unique = sorted(set(scores)); return unique[-2] nëse len >= 2',
@@ -722,8 +737,8 @@ print(second_highest([90, 80, 90, 70]))   # 80`,
       { name: 'string[::-1]', desc: 'Kthen stringun mbrapsht. Palindromi == stringu i kthyer mbrapsht.' },
     ],
     starter: `def is_palindrome(text):
-    # pastro tekstin dhe kontrollo nëse lexohet njëjtë nga të dyja anët
-    pass
+    cleaned = "".join(s.lower() for s in text if s.isalnum())
+    return cleaned == cleaned[::-1]
 
 print(is_palindrome('A man a plan a canal Panama'))   # True`,
     hint: 'cleaned = "".join(c.lower() for c in text if c.isalnum()); return cleaned == cleaned[::-1]',
@@ -740,8 +755,7 @@ print(is_palindrome('A man a plan a canal Panama'))   # True`,
       { name: 'n % 5 != 0', desc: 'Sigurohet që numri NUK është i pjesëtueshëm me 5.' },
       { name: 'and', desc: 'Të dy kushtet duhet të jenë True njëkohësisht.' },
     ],
-    starter: `# list comprehension: numra nga 1-100, pjesëtueshëm me 3, jo me 5
-numbers = []
+    starter: `numbers = [n for n in range(1, 101) if n % 3 == 0 and n % 5 != 0]
 
 print(numbers)`,
     hint: '[n for n in range(1, 101) if n % 3 == 0 and n % 5 != 0]',
@@ -760,8 +774,13 @@ print(numbers)`,
       { name: 'set2 - set1', desc: 'Diferenca e kundërt – elementet vetëm në set2.' },
     ],
     starter: `def compare_lists(list1, list2):
-    # përdor operacionet e sets
-    pass
+    set1 = set(list1)
+    set2 = set(list2)
+    return {
+        'common': set1 & set2,
+        'unique_to_first': set1 - set2,
+        'unique_to_second': set2 - set1
+    }
 
 print(compare_lists([1, 2, 3, 4], [3, 4, 5, 6]))`,
     hint: "set1 = set(list1); set2 = set(list2); return {'common': set1 & set2, ...}",
@@ -780,8 +799,9 @@ print(compare_lists([1, 2, 3, 4], [3, 4, 5, 6]))`,
       { name: 'round(x, 2)', desc: 'Rrumbullakon numrin në 2 vende decimale.' },
     ],
     starter: `def average(*args):
-    # trajto rastin e args bosh, pastaj llogarit mesataren
-    pass
+    if not args:
+        return 'no values provided'
+    return round(sum(args) / len(args), 2)
 
 print(average(10, 20, 30))   # 20.0
 print(average())              # no values provided`,
@@ -801,8 +821,16 @@ print(average())              # no values provided`,
       { name: 'if ... or ... or ...:', desc: 'Kontrollon kushte të shumta invaliditeti njëkohësisht.' },
     ],
     starter: `def split_bill(total, tip_percent, people):
-    # valido hyrjet, pastaj llogarit
-    pass
+    if people < 1 or tip_percent < 0 or total < 0:
+        return "Invalid Input"
+    tip_amount = round(total * (tip_percent / 100), 2)
+    grand_total = round(total + tip_amount, 2)
+    per_person = round(grand_total / people, 2)
+    return {
+        'tip': tip_amount,
+        'grand_total': grand_total,
+        'per_person': per_person
+    }
 
 print(split_bill(100, 15, 4))`,
     hint: "tip = round(total * tip_percent/100, 2); grand = round(total + tip, 2); per = round(grand/people, 2)",
@@ -821,8 +849,10 @@ print(split_bill(100, 15, 4))`,
     ],
     starter: `def unique_in_order(items):
     result = []
-    # kalon nëpër items dhe shton vetëm ato që nuk janë ende aty
-    pass
+    for item in items:
+        if item not in result:
+            result.append(item)
+    return result
 
 print(unique_in_order([1, 2, 2, 3, 1, 4]))   # [1, 2, 3, 4]`,
     hint: "for item in items: if item not in result: result.append(item); return result",
@@ -839,8 +869,7 @@ print(unique_in_order([1, 2, 2, 3, 1, 4]))   # [1, 2, 3, 4]`,
       { name: '[w for w in lst if ...]', desc: 'List comprehension me kusht filter.' },
     ],
     starter: `original_list = ["cats", "dog", "book", "desk", "tree", "computer"]
-# list comprehension këtu
-word_list = []
+word_list = [word for word in original_list if len(word) == 4]
 
 print(word_list)`,
     hint: '[word for word in original_list if len(word) == 4]',
@@ -858,8 +887,9 @@ print(word_list)`,
       { name: 'sorted(string)', desc: 'Rendit karakteret alfabetikisht – dy anagramat kanë karakteret e njëjta, vetëm të renditura ndryshe.' },
     ],
     starter: `def is_anagram(word1, word2):
-    # pastro dhe krahaso fjalët e renditura
-    pass
+    w1 = word1.replace(" ", "").lower()
+    w2 = word2.replace(" ", "").lower()
+    return sorted(w1) == sorted(w2)
 
 print(is_anagram('listen', 'silent'))   # True
 print(is_anagram('hello', 'world'))     # False`,
@@ -878,8 +908,9 @@ print(is_anagram('hello', 'world'))     # False`,
       { name: 'sum(numbers)', desc: 'Mbledh të gjithë elementet aktualë – diferenca nga shuma e pritur është numri që mungon.' },
     ],
     starter: `def missing_number(numbers):
-    # përdor formulën e Gaussit
-    pass
+    n = len(numbers) + 1
+    expected_sum = n * (n + 1) // 2
+    return expected_sum - sum(numbers)
 
 print(missing_number([1, 2, 4, 5]))   # 3`,
     hint: "n = len(numbers)+1; return n*(n+1)//2 - sum(numbers)",
@@ -896,8 +927,7 @@ print(missing_number([1, 2, 4, 5]))   # 3`,
       { name: 'x ** 3', desc: 'Llogarit kubin e numrit: x ngritur në fuqinë 3.' },
       { name: 'range(1, 31)', desc: 'Numrat nga 1 deri 30 – 31 nuk përfshihet.' },
     ],
-    starter: `# list comprehension: kubet e numrave tek nga 1-30
-odd_cubes = []
+    starter: `odd_cubes = [x**3 for x in range(1, 31) if x % 2 != 0]
 
 print(odd_cubes)`,
     hint: '[x**3 for x in range(1, 31) if x % 2 != 0]',
@@ -918,8 +948,9 @@ print(odd_cubes)`,
     result = {}
     for word in words:
         length = len(word)
-        # shto logjikën e grupimit
-        pass
+        if length not in result:
+            result[length] = []
+        result[length].append(word)
     return result
 
 print(group_by_length(['hi', 'hello', 'hey', 'world', 'ok']))`,
@@ -940,8 +971,19 @@ print(group_by_length(['hi', 'hello', 'hey', 'world', 'ok']))`,
       { name: 'any(c.isupper() for c in pw)', desc: 'Alternativë e kompaktë – kthen True nëse të paktën njëri karakter plotëson kushtin.' },
     ],
     starter: `def is_strong_password(password):
-    # kontrollo gjatësinë dhe karakteret
-    pass
+    if len(password) < 8:
+        return False
+    has_upper = False
+    has_lower = False
+    has_digit = False
+    for char in password:
+        if char.isupper():
+            has_upper = True
+        elif char.islower():
+            has_lower = True
+        elif char.isdigit():
+            has_digit = True
+    return has_upper and has_lower and has_digit
 
 print(is_strong_password('Python3x'))   # True
 print(is_strong_password('python'))     # False`,
