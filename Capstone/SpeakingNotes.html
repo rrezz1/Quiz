@@ -1,76 +1,260 @@
-📋 Navigation
-Team Overview
-How We Connect
-Valza — Tech Lead
-Paulina — Backend/Data
-Egzona — Frontend Lead
-Rrezart — Integration
-Lis — DevOps & QA
-Sprint Timeline
-Demo Script (Team)
-Team Q&A
-DeskLite — Team Roles
-Slide tables + speaking notes for each member · Defense presentation
-Slide 1 — Team Overview (1 slide, ~30 sec)
-Person
-Role
-One-line responsibility
-Key files / areas
-Valza Dalipi
-Tech Lead
-Architecture, security rules, backend API design
-permission-matrix.md, ADRs, ticket_state.py, RBAC
-Paulina Delija
-Backend / Data
-Database, migrations, core API implementation
-models/, alembic/, auth.py, tickets.py, storage.py
-Egzona Haskuka
-Frontend Lead
-UI pages, design tokens, user-facing flows
-tailwind.config.ts, login, tickets pages, status controls
-Rrezart Buzuku
-Full-Stack Integration
-Connects UI ↔ API, shared components, cross-stack fixes
-components/ui/, assignment flow, ticket update endpoint
-Lis Pruthi
-DevOps & QA
-Docker, CI/CD, production deploy, quality gates
-docker-compose.yml, ci.yml, DEPLOY.md, seed.py
-Valza
-Rules
-What is allowed
-Paulina
-Engine
-DB + API code
-Egzona
-UI
-What users see
-Rrezart
-Glue
-UI ↔ API wiring
-Lis
-Ship
-Run, test, deploy
-🎤 Opening line (anyone)
-~30 sec
-"DeskLite is an internal support-ticket system built by five of us working in parallel. Valza defined the security architecture, Paulina built the database and API, Egzona and Rrezart built the frontend, and Lis made it runnable and deployable. We connected everything through a shared permission matrix and API contracts."
-Slide 2 — How the Parts Connect (1 slide)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeskLite — Team Roles & Speaking Notes</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --secondary: #3b82f6;
+      --accent: #10b981;
+      --amber: #f59e0b;
+      --purple: #7c3aed;
+      --rose: #e11d48;
+      --dark: #1e293b;
+      --gray: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f8fafc;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 260px;
+      background: white;
+      border-right: 1px solid var(--border);
+      padding: 20px 14px;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+    }
+    .sidebar h2 { font-size: 0.95rem; color: var(--primary); margin-bottom: 12px; }
+    .sidebar a {
+      display: block; padding: 5px 10px; font-size: 0.8rem;
+      color: var(--gray); text-decoration: none; border-radius: 6px;
+    }
+    .sidebar a:hover { background: #eff6ff; color: var(--primary); }
+
+    .main { margin-left: 260px; flex: 1; padding: 36px 44px 60px; max-width: 960px; }
+
+    .hero {
+      background: linear-gradient(135deg, #1e40af, #6366f1);
+      color: white; padding: 36px 32px; border-radius: 14px; margin-bottom: 32px;
+    }
+    .hero h1 { font-size: 2rem; }
+    .hero p { opacity: 0.9; margin-top: 6px; }
+
+    section {
+      background: white; border-radius: 12px; padding: 28px 32px;
+      margin-bottom: 24px; border: 1px solid var(--border);
+      page-break-inside: avoid;
+    }
+    section h2 {
+      font-size: 1.35rem; color: var(--primary);
+      margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 2px solid #eff6ff;
+    }
+    section h3 { font-size: 1rem; margin: 16px 0 8px; color: var(--dark); }
+    p { margin-bottom: 8px; font-size: 0.92rem; }
+
+    /* Slide card */
+    .slide-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .slide-header {
+      padding: 16px 20px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .slide-header h2 { font-size: 1.2rem; border: none; margin: 0; padding: 0; color: white; }
+    .slide-header .role { font-size: 0.85rem; opacity: 0.9; }
+    .slide-body { padding: 20px; }
+
+    .valza .slide-header { background: var(--primary); }
+    .paulina .slide-header { background: #0891b2; }
+    .egzona .slide-header { background: var(--purple); }
+    .rrezart .slide-header { background: var(--amber); color: #1e293b; }
+    .rrezart .slide-header h2 { color: #1e293b; }
+    .rrezart .slide-header .role { color: #78350f; }
+    .lis .slide-header { background: var(--accent); color: #064e3b; }
+    .lis .slide-header h2 { color: #064e3b; }
+    .lis .slide-header .role { color: #065f46; }
+
+    table {
+      width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.86rem;
+    }
+    th { background: #f1f5f9; padding: 9px 12px; text-align: left; font-weight: 600; }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+
+    /* Speaking notes */
+    .notes {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+    .notes h3 {
+      color: #92400e; margin-top: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .notes .time { font-size: 0.75rem; background: #fde68a; padding: 2px 8px; border-radius: 10px; }
+    .notes blockquote {
+      border-left: 3px solid #f59e0b;
+      padding: 8px 14px;
+      margin: 10px 0;
+      font-style: italic;
+      color: #78350f;
+      background: white;
+      border-radius: 0 6px 6px 0;
+    }
+    .notes ul { margin: 8px 0 0 18px; font-size: 0.88rem; }
+    .notes li { margin-bottom: 4px; }
+
+    .diagram { margin: 16px 0; display: flex; justify-content: center; overflow-x: auto; }
+
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .b-valza { background: #dbeafe; color: #1e40af; }
+    .b-paulina { background: #cffafe; color: #0e7490; }
+    .b-egzona { background: #ede9fe; color: #6d28d9; }
+    .b-rrezart { background: #fef3c7; color: #92400e; }
+    .b-lis { background: #d1fae5; color: #065f46; }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .overview-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .overview-card strong { display: block; font-size: 0.9rem; margin-bottom: 4px; }
+    .overview-card span { font-size: 0.78rem; color: var(--gray); }
+
+    .qa-item { margin-bottom: 12px; }
+    .qa-item strong { color: var(--primary); }
+
+    @media print {
+      .sidebar { display: none; }
+      .main { margin-left: 0; max-width: 100%; }
+      .slide-card { page-break-inside: avoid; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+<nav class="sidebar">
+  <h2>📋 Navigation</h2>
+  <a href="#overview">Team Overview</a>
+  <a href="#connection">How We Connect</a>
+  <a href="#valza">Valza — Tech Lead</a>
+  <a href="#paulina">Paulina — Backend/Data</a>
+  <a href="#egzona">Egzona — Frontend Lead</a>
+  <a href="#rrezart">Rrezart — Integration</a>
+  <a href="#lis">Lis — DevOps & QA</a>
+  <a href="#timeline">Sprint Timeline</a>
+  <a href="#demo-script">Demo Script (Team)</a>
+  <a href="#team-qa">Team Q&A</a>
+</nav>
+
+<main class="main">
+
+<div class="hero">
+  <h1>DeskLite — Team Roles</h1>
+  <p>Slide tables + speaking notes for each member · Defense presentation</p>
+</div>
+
+<!-- OVERVIEW SLIDE -->
+<section id="overview">
+  <h2>Slide 1 — Team Overview (1 slide, ~30 sec)</h2>
+  <table>
+    <tr><th>Person</th><th>Role</th><th>One-line responsibility</th><th>Key files / areas</th></tr>
+    <tr>
+      <td><strong>Valza Dalipi</strong></td>
+      <td>Tech Lead</td>
+      <td>Architecture, security rules, backend API design</td>
+      <td>permission-matrix.md, ADRs, ticket_state.py, RBAC</td>
+    </tr>
+    <tr>
+      <td><strong>Paulina Delija</strong></td>
+      <td>Backend / Data</td>
+      <td>Database, migrations, core API implementation</td>
+      <td>models/, alembic/, auth.py, tickets.py, storage.py</td>
+    </tr>
+    <tr>
+      <td><strong>Egzona Haskuka</strong></td>
+      <td>Frontend Lead</td>
+      <td>UI pages, design tokens, user-facing flows</td>
+      <td>tailwind.config.ts, login, tickets pages, status controls</td>
+    </tr>
+    <tr>
+      <td><strong>Rrezart Buzuku</strong></td>
+      <td>Full-Stack Integration</td>
+      <td>Connects UI ↔ API, shared components, cross-stack fixes</td>
+      <td>components/ui/, assignment flow, ticket update endpoint</td>
+    </tr>
+    <tr>
+      <td><strong>Lis Pruthi</strong></td>
+      <td>DevOps & QA</td>
+      <td>Docker, CI/CD, production deploy, quality gates</td>
+      <td>docker-compose.yml, ci.yml, DEPLOY.md, seed.py</td>
+    </tr>
+  </table>
+
+  <div class="overview-grid">
+    <div class="overview-card"><span class="badge b-valza">Valza</span><strong>Rules</strong><span>What is allowed</span></div>
+    <div class="overview-card"><span class="badge b-paulina">Paulina</span><strong>Engine</strong><span>DB + API code</span></div>
+    <div class="overview-card"><span class="badge b-egzona">Egzona</span><strong>UI</strong><span>What users see</span></div>
+    <div class="overview-card"><span class="badge b-rrezart">Rrezart</span><strong>Glue</strong><span>UI ↔ API wiring</span></div>
+    <div class="overview-card"><span class="badge b-lis">Lis</span><strong>Ship</strong><span>Run, test, deploy</span></div>
+  </div>
+
+  <div class="notes">
+    <h3>🎤 Opening line (anyone) <span class="time">~30 sec</span></h3>
+    <blockquote>
+      "DeskLite is an internal support-ticket system built by five of us working in parallel.
+      Valza defined the security architecture, Paulina built the database and API,
+      Egzona and Rrezart built the frontend, and Lis made it runnable and deployable.
+      We connected everything through a shared permission matrix and API contracts."
+    </blockquote>
+  </div>
+</section>
+
+<!-- CONNECTION -->
+<section id="connection">
+  <h2>Slide 2 — How the Parts Connect (1 slide)</h2>
+  <div class="diagram">
+    <pre class="mermaid">
 flowchart TB
-    V["Valza
-permission-matrix + ADRs
-state machine + RBAC design"]
-    P["Paulina
-PostgreSQL + Alembic
-auth + tickets + MinIO API"]
-    E["Egzona
-Next.js pages
-design tokens + UX"]
-    R["Rrezart
-shared components
-assignment + integration"]
-    L["Lis
-Docker + CI + VPS deploy
-tests + seed data"]
+    V["Valza<br/>permission-matrix + ADRs<br/>state machine + RBAC design"]
+    P["Paulina<br/>PostgreSQL + Alembic<br/>auth + tickets + MinIO API"]
+    E["Egzona<br/>Next.js pages<br/>design tokens + UX"]
+    R["Rrezart<br/>shared components<br/>assignment + integration"]
+    L["Lis<br/>Docker + CI + VPS deploy<br/>tests + seed data"]
 
     V -->|"API contract first"| P
     V -->|"security rules"| E
@@ -80,393 +264,442 @@ tests + seed data"]
     L -->|"CI gates"| P
     L -->|"CI gates"| E
     L -->|"docker compose up"| P
-    
-Contract / Glue
-Owner
-Who depends on it
-permission-matrix.md
-Valza
-Paulina (implements), Egzona/Rrezart (UI obeys), Lis (tests verify)
-API request/response shapes
-Valza + Paulina
-Egzona, Rrezart (lib/api.ts, pages)
-Database schema
-Paulina
-All backend routes, dashboard metrics
-Design tokens (tailwind.config.ts)
-Egzona
-Rrezart's components, all pages
-.env.example + Docker
-Lis
-Everyone runs locally the same way
-CI pipeline (80% coverage)
-Lis
-Every PR from all members
-Valza Dalipi
-Tech Lead · Architecture & Security
-Area
-What I built
-Key files
-Security contract
-Permission matrix — single source of truth for RBAC + IDOR
-.github/docs/architecture/permission-matrix.md
-Architecture docs
-7 ADRs — JWT cookies, IDOR, dual validation, Alembic, MinIO, coverage
-.github/docs/architecture/ADR.md
-Auth & RBAC
-Registration design, admin-only routes, role enforcement
-dependencies.py, admin.py
-Ticket schemas
-Pydantic whitelisted fields — anti mass-assignment
-schemas/ticket.py, schemas/user.py
-State machine
-Legal status transitions (open → in_progress → resolved → closed)
-core/ticket_state.py
-Agent queue
-GET /tickets/queue — agents see only assigned tickets
-api/tickets.py
-List API
-Pagination, sorting (recent / priority)
-services/ticket_query.py
-Analytics API
-Metrics aggregation, agent workload, resolution time
-Sprint 3 endpoints
-Production
-HTTPS config, secure response headers
-config.py, Sprint 3
-Connects to teammates
-Teammate
-Connection
-Paulina
-Implements my permission matrix as SQLAlchemy models + API routes
-Egzona
-Builds UI that only exposes actions the matrix allows
-Rrezart
-Wires endpoints I designed into ticket detail / assignment UI
-Lis
-CI tests prove my RBAC rules are enforced (test_permissions.py)
-🎤 Valza — Speaking Notes
-1.5–2 min
-"As Tech Lead, I owned the architecture and security design. I wrote the permission matrix — our single source of truth for what each role can do — and seven Architecture Decision Records that explain why we chose JWT in httpOnly cookies, integer PKs with authorization checks, and dual validation in Pydantic and PostgreSQL. 
+    </pre>
+  </div>
 
-On the backend I designed the ticket lifecycle state machine, RBAC enforcement via require_roles(), and Pydantic schemas that whitelist fields so clients cannot escalate privileges. In Sprint 3 I added pagination, sorting, and dashboard metrics APIs. 
+  <table>
+    <tr><th>Contract / Glue</th><th>Owner</th><th>Who depends on it</th></tr>
+    <tr><td>permission-matrix.md</td><td>Valza</td><td>Paulina (implements), Egzona/Rrezart (UI obeys), Lis (tests verify)</td></tr>
+    <tr><td>API request/response shapes</td><td>Valza + Paulina</td><td>Egzona, Rrezart (lib/api.ts, pages)</td></tr>
+    <tr><td>Database schema</td><td>Paulina</td><td>All backend routes, dashboard metrics</td></tr>
+    <tr><td>Design tokens (tailwind.config.ts)</td><td>Egzona</td><td>Rrezart's components, all pages</td></tr>
+    <tr><td>.env.example + Docker</td><td>Lis</td><td>Everyone runs locally the same way</td></tr>
+    <tr><td>CI pipeline (80% coverage)</td><td>Lis</td><td>Every PR from all members</td></tr>
+  </table>
+</section>
 
-Everything else in the project connects to these rules: Paulina implements them in the database, the frontend team builds UI that respects them, and Lis's CI tests verify them on every PR."
-	•	Demo point: Show permission matrix → then live 403 IDOR demo
-	•	If asked "why httpOnly cookies?": ADR-001 — JS cannot read them, XSS-safe
-	•	If asked "why integer IDs?": ADR-003 — auth is the guard, not ID obscurity
-Paulina Delija
-Backend / Data · Database & Core API
-Area
-What I built
-Key files
-Database gatekeeper
-Own models/ + alembic/ — one migration at a time
-models/, alembic/versions/001_initial.py
-Schema
-5 tables: users, tickets, comments, attachments, audit_logs + CHECK constraints
-001_initial.py
-Auth API
-Logout, token refresh, GET /auth/me — full session lifecycle
-api/auth.py
-Tickets API
-Role-scoped list, create ticket (requester_id from JWT)
-api/tickets.py
-Attachments
-Upload to MinIO, validation (10MB, whitelist), presigned download
-core/storage.py, file_validation.py
-Search & filters
-Parameterized search, status/priority filters, scope
-services/ticket_query.py
-Mass-assignment fix
-Forbid extra fields on user/auth schemas
-schemas/user.py (Sprint 3)
-Frontend integration
-Auto-refresh on 401, agent queue page wiring
-lib/api.ts, tickets/queue/page.tsx
-Tests
-Pytest infrastructure, conftest, tests outside Docker
-tests/conftest.py
-Connects to teammates
-Teammate
-Connection
-Valza
-I implement her permission matrix and state machine in running code
-Egzona
-She calls my API endpoints from pages — I provide the contract
-Rrezart
-He wires my PATCH /admin/tickets/assignee into the UI
-Lis
-His CI runs my pytest suite — 80% coverage gate (ADR-007)
-🎤 Paulina — Speaking Notes
-1.5–2 min
-"I was responsible for the backend engine and data layer. I gatekeep all database changes — models and Alembic migrations — so five developers don't create conflicting schema changes. 
+<!-- VALZA -->
+<div id="valza" class="slide-card valza">
+  <div class="slide-header">
+    <h2>Valza Dalipi</h2>
+    <span class="role">Tech Lead · Architecture & Security</span>
+  </div>
+  <div class="slide-body">
+    <table>
+      <tr><th>Area</th><th>What I built</th><th>Key files</th></tr>
+      <tr><td>Security contract</td><td>Permission matrix — single source of truth for RBAC + IDOR</td><td>.github/docs/architecture/permission-matrix.md</td></tr>
+      <tr><td>Architecture docs</td><td>7 ADRs — JWT cookies, IDOR, dual validation, Alembic, MinIO, coverage</td><td>.github/docs/architecture/ADR.md</td></tr>
+      <tr><td>Auth & RBAC</td><td>Registration design, admin-only routes, role enforcement</td><td>dependencies.py, admin.py</td></tr>
+      <tr><td>Ticket schemas</td><td>Pydantic whitelisted fields — anti mass-assignment</td><td>schemas/ticket.py, schemas/user.py</td></tr>
+      <tr><td>State machine</td><td>Legal status transitions (open → in_progress → resolved → closed)</td><td>core/ticket_state.py</td></tr>
+      <tr><td>Agent queue</td><td>GET /tickets/queue — agents see only assigned tickets</td><td>api/tickets.py</td></tr>
+      <tr><td>List API</td><td>Pagination, sorting (recent / priority)</td><td>services/ticket_query.py</td></tr>
+      <tr><td>Analytics API</td><td>Metrics aggregation, agent workload, resolution time</td><td>Sprint 3 endpoints</td></tr>
+      <tr><td>Production</td><td>HTTPS config, secure response headers</td><td>config.py, Sprint 3</td></tr>
+    </table>
 
-I built the initial PostgreSQL schema with CHECK constraints for status, priority, and role, then implemented the core API: auth with JWT cookies, role-scoped ticket listing, ticket creation where requester_id always comes from the token, and file uploads to MinIO. 
+    <h3>Connects to teammates</h3>
+    <table>
+      <tr><th>Teammate</th><th>Connection</th></tr>
+      <tr><td>Paulina</td><td>Implements my permission matrix as SQLAlchemy models + API routes</td></tr>
+      <tr><td>Egzona</td><td>Builds UI that only exposes actions the matrix allows</td></tr>
+      <tr><td>Rrezart</td><td>Wires endpoints I designed into ticket detail / assignment UI</td></tr>
+      <tr><td>Lis</td><td>CI tests prove my RBAC rules are enforced (test_permissions.py)</td></tr>
+    </table>
 
-In Sprint 3 I added search and filtering with parameterized queries, and fixed mass-assignment vulnerabilities by forbidding extra fields on auth schemas. I also integrated the frontend API client with automatic token refresh on 401. 
+    <div class="notes">
+      <h3>🎤 Valza — Speaking Notes <span class="time">1.5–2 min</span></h3>
+      <blockquote>
+        "As Tech Lead, I owned the architecture and security design. I wrote the permission matrix —
+        our single source of truth for what each role can do — and seven Architecture Decision Records
+        that explain why we chose JWT in httpOnly cookies, integer PKs with authorization checks,
+        and dual validation in Pydantic and PostgreSQL.
+        <br><br>
+        On the backend I designed the ticket lifecycle state machine, RBAC enforcement via
+        require_roles(), and Pydantic schemas that whitelist fields so clients cannot escalate
+        privileges. In Sprint 3 I added pagination, sorting, and dashboard metrics APIs.
+        <br><br>
+        Everything else in the project connects to these rules: Paulina implements them in the database,
+        the frontend team builds UI that respects them, and Lis's CI tests verify them on every PR."
+      </blockquote>
+      <ul>
+        <li><strong>Demo point:</strong> Show permission matrix → then live 403 IDOR demo</li>
+        <li><strong>If asked "why httpOnly cookies?":</strong> ADR-001 — JS cannot read them, XSS-safe</li>
+        <li><strong>If asked "why integer IDs?":</strong> ADR-003 — auth is the guard, not ID obscurity</li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-My work connects to Valza's security design on one side and Egzona's UI on the other — the frontend never touches the database, only my REST API."
-	•	Demo point: Show Swagger /docs → POST /tickets → point out requester_id NOT in body
-	•	If asked about migrations: ADR-005 — Alembic only, one at a time, rollback with downgrade
-	•	If asked about attachments: Metadata in Postgres, binary in MinIO, presigned URL download
-Egzona Haskuka
-Frontend Lead · UI & User Experience
-Area
-What I built
-Key files
-Design tokens
-Brand colors, status/priority colors — no raw hex in components
-tailwind.config.ts
-Auth UI
-Login page, registration, auth flow integration
-app/login/, app/register/
-Ticket list
-/tickets — customer sees own, admin sees all
-app/tickets/page.tsx
-Ticket detail
-/tickets/[ticketId] — full ticket view
-app/tickets/[ticketId]/page.tsx
-New ticket
-/tickets/new — create form
-app/tickets/new/page.tsx
-Status controls
-Role-aware buttons for status transitions
-components/TicketStatusControls.tsx
-Filter & search
-Filter bar + search box on ticket list (Sprint 3)
-app/tickets/page.tsx
-Navigation
-Role-based nav links (customer / agent / admin)
-components/Nav.tsx
-Route protection
-middleware.ts — cookie check before page load
-middleware.ts
-Connects to teammates
-Teammate
-Connection
-Paulina/Valza
-Every page calls their API via lib/api.ts — I consume the contract
-Rrezart
-Uses his shared UI components (Button, Card) inside my pages
-Valza
-Nav links and status controls reflect her permission matrix per role
-Lis
-His CI runs lint + typecheck + build on my frontend code
-🎤 Egzona — Speaking Notes
-1.5–2 min
-"As Frontend Lead, I built what the user actually sees and interacts with. I defined our design system in tailwind.config.ts — brand colors, status colors, priority colors — so the whole team uses consistent styling without raw hex values. 
+<!-- PAULINA -->
+<div id="paulina" class="slide-card paulina">
+  <div class="slide-header">
+    <h2>Paulina Delija</h2>
+    <span class="role">Backend / Data · Database & Core API</span>
+  </div>
+  <div class="slide-body">
+    <table>
+      <tr><th>Area</th><th>What I built</th><th>Key files</th></tr>
+      <tr><td>Database gatekeeper</td><td>Own models/ + alembic/ — one migration at a time</td><td>models/, alembic/versions/001_initial.py</td></tr>
+      <tr><td>Schema</td><td>5 tables: users, tickets, comments, attachments, audit_logs + CHECK constraints</td><td>001_initial.py</td></tr>
+      <tr><td>Auth API</td><td>Logout, token refresh, GET /auth/me — full session lifecycle</td><td>api/auth.py</td></tr>
+      <tr><td>Tickets API</td><td>Role-scoped list, create ticket (requester_id from JWT)</td><td>api/tickets.py</td></tr>
+      <tr><td>Attachments</td><td>Upload to MinIO, validation (10MB, whitelist), presigned download</td><td>core/storage.py, file_validation.py</td></tr>
+      <tr><td>Search & filters</td><td>Parameterized search, status/priority filters, scope</td><td>services/ticket_query.py</td></tr>
+      <tr><td>Mass-assignment fix</td><td>Forbid extra fields on user/auth schemas</td><td>schemas/user.py (Sprint 3)</td></tr>
+      <tr><td>Frontend integration</td><td>Auto-refresh on 401, agent queue page wiring</td><td>lib/api.ts, tickets/queue/page.tsx</td></tr>
+      <tr><td>Tests</td><td>Pytest infrastructure, conftest, tests outside Docker</td><td>tests/conftest.py</td></tr>
+    </table>
 
-I built the main pages: login and registration, the ticket list, ticket detail, and the new-ticket form. I also created TicketStatusControls — buttons that only appear when the user's role is allowed to change status, matching Valza's permission matrix. 
+    <h3>Connects to teammates</h3>
+    <table>
+      <tr><th>Teammate</th><th>Connection</th></tr>
+      <tr><td>Valza</td><td>I implement her permission matrix and state machine in running code</td></tr>
+      <tr><td>Egzona</td><td>She calls my API endpoints from pages — I provide the contract</td></tr>
+      <tr><td>Rrezart</td><td>He wires my PATCH /admin/tickets/assignee into the UI</td></tr>
+      <tr><td>Lis</td><td>His CI runs my pytest suite — 80% coverage gate (ADR-007)</td></tr>
+    </table>
 
-Route protection in middleware.ts checks for the access_token cookie before loading protected pages. All API calls go through lib/api.ts with credentials:include so httpOnly cookies are sent automatically. 
+    <div class="notes">
+      <h3>🎤 Paulina — Speaking Notes <span class="time">1.5–2 min</span></h3>
+      <blockquote>
+        "I was responsible for the backend engine and data layer. I gatekeep all database changes —
+        models and Alembic migrations — so five developers don't create conflicting schema changes.
+        <br><br>
+        I built the initial PostgreSQL schema with CHECK constraints for status, priority, and role,
+        then implemented the core API: auth with JWT cookies, role-scoped ticket listing,
+        ticket creation where requester_id always comes from the token, and file uploads to MinIO.
+        <br><br>
+        In Sprint 3 I added search and filtering with parameterized queries, and fixed mass-assignment
+        vulnerabilities by forbidding extra fields on auth schemas. I also integrated the frontend
+        API client with automatic token refresh on 401.
+        <br><br>
+        My work connects to Valza's security design on one side and Egzona's UI on the other —
+        the frontend never touches the database, only my REST API."
+      </blockquote>
+      <ul>
+        <li><strong>Demo point:</strong> Show Swagger /docs → POST /tickets → point out requester_id NOT in body</li>
+        <li><strong>If asked about migrations:</strong> ADR-005 — Alembic only, one at a time, rollback with downgrade</li>
+        <li><strong>If asked about attachments:</strong> Metadata in Postgres, binary in MinIO, presigned URL download</li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-In Sprint 3 I added the filter bar and search box on the ticket list, connected to Paulina's filtering API."
-	•	Demo point: Login as customer → show Nav links → login as admin → different Nav
-	•	If asked about auth in frontend: We never store JWT in JS — cookies only
-	•	If asked about middleware: Checks cookie presence; full JWT validation is on backend
-Rrezart Buzuku
-Full-Stack Integration · UI ↔ API Glue
-Area
-What I built
-Key files
-Design system
-Shared UI components used across all pages
-components/ui/Button, Card, Modal, Input, BarChart
-Auth integration
-get_current_user dependency, /health/authed endpoint
-dependencies.py, health.py
-Ticket update
-PATCH /tickets/{id} — whitelisted fields only
-api/tickets.py
-Assignment flow
-Admin assigns agent on ticket detail + API wiring
-ticket detail page + admin.py
-Ticket detail extras
-Comments thread, satisfaction rating, assignee dropdown
-CommentThread, ticket detail page
-Cross-stack fixes
-CI errors (ruff, eslint), stale auth, sanitization bugs
-Multiple PRs
-Shared modules
-Restored broken imports between frontend/backend
-Integration PRs
-Environment
-Sprint 3 env template updates
-.env.example
-Connects to teammates
-Teammate
-Connection
-Valza/Paulina
-Backend endpoints exist → I wire them into the UI correctly
-Egzona
-My components live inside her page layouts
-Lis
-His CI catches integration breaks I fix before merge
-🎤 Rrezart — Speaking Notes
-1.5–2 min
-"My role was full-stack integration — making sure the frontend and backend actually work together as one system. I built the shared design system components — Button, Card, Modal, Input, BarChart — that Egzona uses across all pages. 
+<!-- EGZONA -->
+<div id="egzona" class="slide-card egzona">
+  <div class="slide-header">
+    <h2>Egzona Haskuka</h2>
+    <span class="role">Frontend Lead · UI & User Experience</span>
+  </div>
+  <div class="slide-body">
+    <table>
+      <tr><th>Area</th><th>What I built</th><th>Key files</th></tr>
+      <tr><td>Design tokens</td><td>Brand colors, status/priority colors — no raw hex in components</td><td>tailwind.config.ts</td></tr>
+      <tr><td>Auth UI</td><td>Login page, registration, auth flow integration</td><td>app/login/, app/register/</td></tr>
+      <tr><td>Ticket list</td><td>/tickets — customer sees own, admin sees all</td><td>app/tickets/page.tsx</td></tr>
+      <tr><td>Ticket detail</td><td>/tickets/[ticketId] — full ticket view</td><td>app/tickets/[ticketId]/page.tsx</td></tr>
+      <tr><td>New ticket</td><td>/tickets/new — create form</td><td>app/tickets/new/page.tsx</td></tr>
+      <tr><td>Status controls</td><td>Role-aware buttons for status transitions</td><td>components/TicketStatusControls.tsx</td></tr>
+      <tr><td>Filter & search</td><td>Filter bar + search box on ticket list (Sprint 3)</td><td>app/tickets/page.tsx</td></tr>
+      <tr><td>Navigation</td><td>Role-based nav links (customer / agent / admin)</td><td>components/Nav.tsx</td></tr>
+      <tr><td>Route protection</td><td>middleware.ts — cookie check before page load</td><td>middleware.ts</td></tr>
+    </table>
 
-On the backend I added the ticket update endpoint with whitelisted fields, the auth dependency that every protected route uses, and the health/authed smoke test. On the frontend I wired the assignment flow — admin selects an agent from a dropdown, which calls PATCH /admin/tickets/assignee — and the comment thread and satisfaction rating sections on the ticket detail page. 
+    <h3>Connects to teammates</h3>
+    <table>
+      <tr><th>Teammate</th><th>Connection</th></tr>
+      <tr><td>Paulina/Valza</td><td>Every page calls their API via lib/api.ts — I consume the contract</td></tr>
+      <tr><td>Rrezart</td><td>Uses his shared UI components (Button, Card) inside my pages</td></tr>
+      <tr><td>Valza</td><td>Nav links and status controls reflect her permission matrix per role</td></tr>
+      <tr><td>Lis</td><td>His CI runs lint + typecheck + build on my frontend code</td></tr>
+    </table>
 
-A lot of my work was integration fixes: resolving CI failures, fixing stale auth state, ensuring comment sanitization works end-to-end, and restoring shared modules when parallel development caused conflicts. I'm the glue between Paulina's API and Egzona's UI."
-	•	Demo point: Admin opens ticket → assign to agent → agent sees it in queue
-	•	If asked about components: Shared ui/ folder — one Button used everywhere
-	•	If asked about assignment: Only admin, only agents as assignee, audit logged
-Lis Pruthi
-DevOps & QA · Infrastructure & Quality
-Area
-What I built
-Key files
-Docker Compose
-5 services: db, minio, minio-setup, backend, frontend
-docker-compose.yml
-CI pipeline
-Backend pytest 80%, frontend lint/build, security audits
-.github/workflows/ci.yml
-Production deploy
-Contabo VPS, Caddy HTTPS, deploy script
-DEPLOY.md, deploy/deploy.sh, docker-compose.prod.yml
-Audit & metrics
-resolved_at tracking, audit logs, resolution time metrics
-resolution_tracking.py, audit.py
-Attachment pipeline
-Presigned download URLs, AttachmentPanel UI, metadata tests
-storage.py, AttachmentPanel.tsx
-Database indexes
-Performance indexes on ticket status/priority
-Sprint 3 migration
-Seed data
-Demo users + 14 sample tickets for testing/demo
-backend/seed.py
-Production hotfixes
-VPS rollout fixes, test mocks, secure headers
-Multiple PRs
-Branch protection
-Protected main, PR-only workflow script
-.github/scripts/setup_branch_protection.sh
-Connects to teammates
-Teammate
-Connection
-Everyone
-Docker Compose = same local environment for all 5 developers
-Paulina/Valza
-CI runs their pytest suite on every PR — 80% coverage enforced
-Egzona/Rrezart
-CI runs eslint + tsc + build — broken frontend can't merge
-All
-Production deploy makes the project demo-ready on a real VPS with HTTPS
-🎤 Lis — Speaking Notes
-1.5–2 min
-"I owned DevOps and QA — making the project runnable, testable, and deployable. I built the Docker Compose stack so all five of us run identical local environments with one command: docker compose up --build. That includes PostgreSQL, MinIO, the FastAPI backend, and the Next.js frontend. 
+    <div class="notes">
+      <h3>🎤 Egzona — Speaking Notes <span class="time">1.5–2 min</span></h3>
+      <blockquote>
+        "As Frontend Lead, I built what the user actually sees and interacts with.
+        I defined our design system in tailwind.config.ts — brand colors, status colors,
+        priority colors — so the whole team uses consistent styling without raw hex values.
+        <br><br>
+        I built the main pages: login and registration, the ticket list, ticket detail,
+        and the new-ticket form. I also created TicketStatusControls — buttons that only
+        appear when the user's role is allowed to change status, matching Valza's permission matrix.
+        <br><br>
+        Route protection in middleware.ts checks for the access_token cookie before
+        loading protected pages. All API calls go through lib/api.ts with credentials:include
+        so httpOnly cookies are sent automatically.
+        <br><br>
+        In Sprint 3 I added the filter bar and search box on the ticket list,
+        connected to Paulina's filtering API."
+      </blockquote>
+      <ul>
+        <li><strong>Demo point:</strong> Login as customer → show Nav links → login as admin → different Nav</li>
+        <li><strong>If asked about auth in frontend:</strong> We never store JWT in JS — cookies only</li>
+        <li><strong>If asked about middleware:</strong> Checks cookie presence; full JWT validation is on backend</li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-I set up GitHub Actions CI: every pull request runs backend tests with an 80% coverage gate, frontend lint and type-check, and security audits with pip-audit and npm audit. Nothing merges unless CI is green. 
+<!-- RREZART -->
+<div id="rrezart" class="slide-card rrezart">
+  <div class="slide-header">
+    <h2>Rrezart Buzuku</h2>
+    <span class="role">Full-Stack Integration · UI ↔ API Glue</span>
+  </div>
+  <div class="slide-body">
+    <table>
+      <tr><th>Area</th><th>What I built</th><th>Key files</th></tr>
+      <tr><td>Design system</td><td>Shared UI components used across all pages</td><td>components/ui/Button, Card, Modal, Input, BarChart</td></tr>
+      <tr><td>Auth integration</td><td>get_current_user dependency, /health/authed endpoint</td><td>dependencies.py, health.py</td></tr>
+      <tr><td>Ticket update</td><td>PATCH /tickets/{id} — whitelisted fields only</td><td>api/tickets.py</td></tr>
+      <tr><td>Assignment flow</td><td>Admin assigns agent on ticket detail + API wiring</td><td>ticket detail page + admin.py</td></tr>
+      <tr><td>Ticket detail extras</td><td>Comments thread, satisfaction rating, assignee dropdown</td><td>CommentThread, ticket detail page</td></tr>
+      <tr><td>Cross-stack fixes</td><td>CI errors (ruff, eslint), stale auth, sanitization bugs</td><td>Multiple PRs</td></tr>
+      <tr><td>Shared modules</td><td>Restored broken imports between frontend/backend</td><td>Integration PRs</td></tr>
+      <tr><td>Environment</td><td>Sprint 3 env template updates</td><td>.env.example</td></tr>
+    </table>
 
-For production I deployed to a Contabo VPS with Caddy as reverse proxy for HTTPS, wrote the deploy script, and created seed data for demos. I also implemented resolved_at tracking, audit logs, presigned attachment downloads, and database indexes for performance. 
+    <h3>Connects to teammates</h3>
+    <table>
+      <tr><th>Teammate</th><th>Connection</th></tr>
+      <tr><td>Valza/Paulina</td><td>Backend endpoints exist → I wire them into the UI correctly</td></tr>
+      <tr><td>Egzona</td><td>My components live inside her page layouts</td></tr>
+      <tr><td>Lis</td><td>His CI catches integration breaks I fix before merge</td></tr>
+    </table>
 
-Without this infrastructure layer, the team couldn't develop in parallel safely or demo the project live in production."
-	•	Demo point: Show docker compose up → seed.py → live app on VPS
-	•	If asked about CI: 3 jobs — backend, frontend, security — all must pass
-	•	If asked about deploy: Caddy → app.* frontend, api.* backend, files.* MinIO
-Slide — Sprint Timeline (who did what when)
-Sprint
-Focus
-Valza
-Paulina
-Egzona
-Rrezart
-Lis
-Sprint 0
-Foundation
-ADRs, permission matrix, RBAC design
-DB schema, auth endpoints
-—
-Design system start
-Docker, CI pipeline
-Sprint 1
-Core tickets
-Ticket schemas, admin routes
-Tickets API, role-scoped list
-Login + tickets UI
-Auth dependency, health
-CI tests, branch protection
-Sprint 2
-Lifecycle + files
-State machine, agent queue
-Attachment upload API
-Status controls, ticket detail
-Assignment flow, ticket update
-Audit logs, presigned URLs, attachment UI
-Sprint 3
-Scale + deploy
-Pagination, metrics API, HTTPS
-Search/filters, mass-assignment fix
-Filter bar + search UI
-Integration fixes, env template
-Production VPS, indexes, seed
-Team Demo Script (~5 min — each person speaks their part)
-Step
-Who speaks
-Action
-What to say
-1
-Lis
-docker compose up
-"One command starts all 5 services — DB, MinIO, backend, frontend."
-2
-Egzona
-Login as customer, create ticket
-"Customer fills the form — my UI sends POST /tickets. Notice requester_id is NOT in the body."
-3
-Paulina
-Show Swagger or explain backend
-"Backend sets requester_id from JWT and status=open. Stored in my PostgreSQL schema."
-4
-Rrezart
-Admin assigns agent on ticket detail
-"Admin picks agent from dropdown — calls my wired PATCH /admin/tickets/assignee."
-5
-Valza
-Agent changes status through lifecycle
-"Agent advances status — my state machine validates each transition. Illegal moves return 400."
-6
-Egzona
-Customer gives satisfaction rating
-"Only requester on closed ticket can rate — UI shows rating form only when allowed."
-7
-Valza
-Demo IDOR: customer tries another's ticket
-"403 — my permission matrix blocks access. Security by authorization, not hidden IDs."
-8
-Lis
-Show CI green / production URL
-"Every change passed CI with 80% test coverage. Production runs on VPS with HTTPS."
-Team Q&A — Who Answers What
-Architecture & Security → Valza
-Why httpOnly cookies? ADR-001 — XSS cannot steal tokens.
-How do you prevent IDOR? can_access_ticket() on every by-ID endpoint.
-Why integer PKs? ADR-003 — authorization is the guard.
-What is the state machine? ticket_state.py — directed graph of allowed transitions.
-Database & API → Paulina
-How does create ticket work? requester_id from JWT, status=open, assignee null.
-Why CHECK constraints? Dual validation with Pydantic — ADR-004.
-How do attachments work? Metadata in Postgres, binary in MinIO, presigned download.
-How do migrations work? Alembic, one at a time, I gatekeep schema changes.
-Frontend & UX → Egzona
-How is auth handled in frontend? Cookies via credentials:include — no JWT in JS.
-How do pages differ by role? Nav.tsx + middleware + API scope.
-What is the design system? tailwind.config.ts tokens — brand, status, priority colors.
-Integration → Rrezart
-How does assignment work end-to-end? Admin UI → PATCH assignee → agent queue updates.
-What are shared components? ui/ folder — Button, Card, Modal used everywhere.
-How do comments work? CommentThread → POST /comments → sanitize.py strips HTML.
-DevOps & QA → Lis
-How do you run locally? docker compose up --build — 5 services.
-What does CI check? pytest 80%, eslint, tsc, build, pip-audit, npm audit.
-How is production deployed? Contabo VPS, Caddy HTTPS, deploy.sh.
-What is seed.py? Demo users + 14 tickets for testing and defense demo.
-Anyone can answer
-What problem does DeskLite solve? Internal helpdesk with 3 roles, ticket lifecycle, RBAC.
-How did you collaborate? API contract first, permission matrix, small PRs, CI gates.
-Good luck with the defense! 🎓
-Ctrl+P → Save as PDF · Each person: ~1.5–2 min speaking time
+    <div class="notes">
+      <h3>🎤 Rrezart — Speaking Notes <span class="time">1.5–2 min</span></h3>
+      <blockquote>
+        "My role was full-stack integration — making sure the frontend and backend actually
+        work together as one system. I built the shared design system components —
+        Button, Card, Modal, Input, BarChart — that Egzona uses across all pages.
+        <br><br>
+        On the backend I added the ticket update endpoint with whitelisted fields,
+        the auth dependency that every protected route uses, and the health/authed smoke test.
+        On the frontend I wired the assignment flow — admin selects an agent from a dropdown,
+        which calls PATCH /admin/tickets/assignee — and the comment thread and satisfaction
+        rating sections on the ticket detail page.
+        <br><br>
+        A lot of my work was integration fixes: resolving CI failures, fixing stale auth state,
+        ensuring comment sanitization works end-to-end, and restoring shared modules when
+        parallel development caused conflicts. I'm the glue between Paulina's API and Egzona's UI."
+      </blockquote>
+      <ul>
+        <li><strong>Demo point:</strong> Admin opens ticket → assign to agent → agent sees it in queue</li>
+        <li><strong>If asked about components:</strong> Shared ui/ folder — one Button used everywhere</li>
+        <li><strong>If asked about assignment:</strong> Only admin, only agents as assignee, audit logged</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- LIS -->
+<div id="lis" class="slide-card lis">
+  <div class="slide-header">
+    <h2>Lis Pruthi</h2>
+    <span class="role">DevOps & QA · Infrastructure & Quality</span>
+  </div>
+  <div class="slide-body">
+    <table>
+      <tr><th>Area</th><th>What I built</th><th>Key files</th></tr>
+      <tr><td>Docker Compose</td><td>5 services: db, minio, minio-setup, backend, frontend</td><td>docker-compose.yml</td></tr>
+      <tr><td>CI pipeline</td><td>Backend pytest 80%, frontend lint/build, security audits</td><td>.github/workflows/ci.yml</td></tr>
+      <tr><td>Production deploy</td><td>Contabo VPS, Caddy HTTPS, deploy script</td><td>DEPLOY.md, deploy/deploy.sh, docker-compose.prod.yml</td></tr>
+      <tr><td>Audit & metrics</td><td>resolved_at tracking, audit logs, resolution time metrics</td><td>resolution_tracking.py, audit.py</td></tr>
+      <tr><td>Attachment pipeline</td><td>Presigned download URLs, AttachmentPanel UI, metadata tests</td><td>storage.py, AttachmentPanel.tsx</td></tr>
+      <tr><td>Database indexes</td><td>Performance indexes on ticket status/priority</td><td>Sprint 3 migration</td></tr>
+      <tr><td>Seed data</td><td>Demo users + 14 sample tickets for testing/demo</td><td>backend/seed.py</td></tr>
+      <tr><td>Production hotfixes</td><td>VPS rollout fixes, test mocks, secure headers</td><td>Multiple PRs</td></tr>
+      <tr><td>Branch protection</td><td>Protected main, PR-only workflow script</td><td>.github/scripts/setup_branch_protection.sh</td></tr>
+    </table>
+
+    <h3>Connects to teammates</h3>
+    <table>
+      <tr><th>Teammate</th><th>Connection</th></tr>
+      <tr><td>Everyone</td><td>Docker Compose = same local environment for all 5 developers</td></tr>
+      <tr><td>Paulina/Valza</td><td>CI runs their pytest suite on every PR — 80% coverage enforced</td></tr>
+      <tr><td>Egzona/Rrezart</td><td>CI runs eslint + tsc + build — broken frontend can't merge</td></tr>
+      <tr><td>All</td><td>Production deploy makes the project demo-ready on a real VPS with HTTPS</td></tr>
+    </table>
+
+    <div class="notes">
+      <h3>🎤 Lis — Speaking Notes <span class="time">1.5–2 min</span></h3>
+      <blockquote>
+        "I owned DevOps and QA — making the project runnable, testable, and deployable.
+        I built the Docker Compose stack so all five of us run identical local environments
+        with one command: docker compose up --build. That includes PostgreSQL, MinIO,
+        the FastAPI backend, and the Next.js frontend.
+        <br><br>
+        I set up GitHub Actions CI: every pull request runs backend tests with an 80%
+        coverage gate, frontend lint and type-check, and security audits with pip-audit
+        and npm audit. Nothing merges unless CI is green.
+        <br><br>
+        For production I deployed to a Contabo VPS with Caddy as reverse proxy for HTTPS,
+        wrote the deploy script, and created seed data for demos. I also implemented
+        resolved_at tracking, audit logs, presigned attachment downloads, and database
+        indexes for performance.
+        <br><br>
+        Without this infrastructure layer, the team couldn't develop in parallel safely
+        or demo the project live in production."
+      </blockquote>
+      <ul>
+        <li><strong>Demo point:</strong> Show docker compose up → seed.py → live app on VPS</li>
+        <li><strong>If asked about CI:</strong> 3 jobs — backend, frontend, security — all must pass</li>
+        <li><strong>If asked about deploy:</strong> Caddy → app.* frontend, api.* backend, files.* MinIO</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <h2>Slide — Sprint Timeline (who did what when)</h2>
+  <table>
+    <tr><th>Sprint</th><th>Focus</th><th>Valza</th><th>Paulina</th><th>Egzona</th><th>Rrezart</th><th>Lis</th></tr>
+    <tr>
+      <td><strong>Sprint 0</strong></td>
+      <td>Foundation</td>
+      <td>ADRs, permission matrix, RBAC design</td>
+      <td>DB schema, auth endpoints</td>
+      <td>—</td>
+      <td>Design system start</td>
+      <td>Docker, CI pipeline</td>
+    </tr>
+    <tr>
+      <td><strong>Sprint 1</strong></td>
+      <td>Core tickets</td>
+      <td>Ticket schemas, admin routes</td>
+      <td>Tickets API, role-scoped list</td>
+      <td>Login + tickets UI</td>
+      <td>Auth dependency, health</td>
+      <td>CI tests, branch protection</td>
+    </tr>
+    <tr>
+      <td><strong>Sprint 2</strong></td>
+      <td>Lifecycle + files</td>
+      <td>State machine, agent queue</td>
+      <td>Attachment upload API</td>
+      <td>Status controls, ticket detail</td>
+      <td>Assignment flow, ticket update</td>
+      <td>Audit logs, presigned URLs, attachment UI</td>
+    </tr>
+    <tr>
+      <td><strong>Sprint 3</strong></td>
+      <td>Scale + deploy</td>
+      <td>Pagination, metrics API, HTTPS</td>
+      <td>Search/filters, mass-assignment fix</td>
+      <td>Filter bar + search UI</td>
+      <td>Integration fixes, env template</td>
+      <td>Production VPS, indexes, seed</td>
+    </tr>
+  </table>
+</section>
+
+<!-- DEMO SCRIPT -->
+<section id="demo-script">
+  <h2>Team Demo Script (~5 min — each person speaks their part)</h2>
+  <table>
+    <tr><th>Step</th><th>Who speaks</th><th>Action</th><th>What to say</th></tr>
+    <tr>
+      <td>1</td>
+      <td><span class="badge b-lis">Lis</span></td>
+      <td><code>docker compose up</code></td>
+      <td>"One command starts all 5 services — DB, MinIO, backend, frontend."</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><span class="badge b-egzona">Egzona</span></td>
+      <td>Login as customer, create ticket</td>
+      <td>"Customer fills the form — my UI sends POST /tickets. Notice requester_id is NOT in the body."</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><span class="badge b-paulina">Paulina</span></td>
+      <td>Show Swagger or explain backend</td>
+      <td>"Backend sets requester_id from JWT and status=open. Stored in my PostgreSQL schema."</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><span class="badge b-rrezart">Rrezart</span></td>
+      <td>Admin assigns agent on ticket detail</td>
+      <td>"Admin picks agent from dropdown — calls my wired PATCH /admin/tickets/assignee."</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><span class="badge b-valza">Valza</span></td>
+      <td>Agent changes status through lifecycle</td>
+      <td>"Agent advances status — my state machine validates each transition. Illegal moves return 400."</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><span class="badge b-egzona">Egzona</span></td>
+      <td>Customer gives satisfaction rating</td>
+      <td>"Only requester on closed ticket can rate — UI shows rating form only when allowed."</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><span class="badge b-valza">Valza</span></td>
+      <td>Demo IDOR: customer tries another's ticket</td>
+      <td>"403 — my permission matrix blocks access. Security by authorization, not hidden IDs."</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><span class="badge b-lis">Lis</span></td>
+      <td>Show CI green / production URL</td>
+      <td>"Every change passed CI with 80% test coverage. Production runs on VPS with HTTPS."</td>
+    </tr>
+  </table>
+</section>
+
+<!-- TEAM Q&A -->
+<section id="team-qa">
+  <h2>Team Q&A — Who Answers What</h2>
+
+  <h3>Architecture & Security → Valza</h3>
+  <div class="qa-item"><strong>Why httpOnly cookies?</strong> ADR-001 — XSS cannot steal tokens.</div>
+  <div class="qa-item"><strong>How do you prevent IDOR?</strong> can_access_ticket() on every by-ID endpoint.</div>
+  <div class="qa-item"><strong>Why integer PKs?</strong> ADR-003 — authorization is the guard.</div>
+  <div class="qa-item"><strong>What is the state machine?</strong> ticket_state.py — directed graph of allowed transitions.</div>
+
+  <h3>Database & API → Paulina</h3>
+  <div class="qa-item"><strong>How does create ticket work?</strong> requester_id from JWT, status=open, assignee null.</div>
+  <div class="qa-item"><strong>Why CHECK constraints?</strong> Dual validation with Pydantic — ADR-004.</div>
+  <div class="qa-item"><strong>How do attachments work?</strong> Metadata in Postgres, binary in MinIO, presigned download.</div>
+  <div class="qa-item"><strong>How do migrations work?</strong> Alembic, one at a time, I gatekeep schema changes.</div>
+
+  <h3>Frontend & UX → Egzona</h3>
+  <div class="qa-item"><strong>How is auth handled in frontend?</strong> Cookies via credentials:include — no JWT in JS.</div>
+  <div class="qa-item"><strong>How do pages differ by role?</strong> Nav.tsx + middleware + API scope.</div>
+  <div class="qa-item"><strong>What is the design system?</strong> tailwind.config.ts tokens — brand, status, priority colors.</div>
+
+  <h3>Integration → Rrezart</h3>
+  <div class="qa-item"><strong>How does assignment work end-to-end?</strong> Admin UI → PATCH assignee → agent queue updates.</div>
+  <div class="qa-item"><strong>What are shared components?</strong> ui/ folder — Button, Card, Modal used everywhere.</div>
+  <div class="qa-item"><strong>How do comments work?</strong> CommentThread → POST /comments → sanitize.py strips HTML.</div>
+
+  <h3>DevOps & QA → Lis</h3>
+  <div class="qa-item"><strong>How do you run locally?</strong> docker compose up --build — 5 services.</div>
+  <div class="qa-item"><strong>What does CI check?</strong> pytest 80%, eslint, tsc, build, pip-audit, npm audit.</div>
+  <div class="qa-item"><strong>How is production deployed?</strong> Contabo VPS, Caddy HTTPS, deploy.sh.</div>
+  <div class="qa-item"><strong>What is seed.py?</strong> Demo users + 14 tickets for testing and defense demo.</div>
+
+  <h3>Anyone can answer</h3>
+  <div class="qa-item"><strong>What problem does DeskLite solve?</strong> Internal helpdesk with 3 roles, ticket lifecycle, RBAC.</div>
+  <div class="qa-item"><strong>How did you collaborate?</strong> API contract first, permission matrix, small PRs, CI gates.</div>
+</section>
+
+<div style="text-align:center; padding:32px; background:linear-gradient(135deg,#1e40af,#6366f1); border-radius:12px; color:white; margin-top:20px;">
+  <h2 style="color:white;">Good luck with the defense! 🎓</h2>
+  <p style="opacity:0.9; margin-top:8px;">Ctrl+P → Save as PDF · Each person: ~1.5–2 min speaking time</p>
+</div>
+
+</main>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
+</script>
+</body>
+</html>
